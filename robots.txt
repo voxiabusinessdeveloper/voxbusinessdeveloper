@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /assets/
+Disallow: /admin/
+Disallow: /private/
+
+Sitemap https://vox-business-developer.vercel.app/sitemap.xml

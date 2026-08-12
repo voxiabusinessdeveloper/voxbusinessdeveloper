@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#1E2328" />
+    <meta name="description" content="VOX Business Developer — Servicios profesionales de estrategia, diseño y tecnología." />
+    <title>VOX Business Developer — Servicios</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/images/logos/vox_fox.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/images/logos/vox_fox.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/images/logos/vox_fox.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="servicio.css" />
+</head>
+<body>
+    <!-- PRELOADER -->
+    <div class="preloader" id="preloader">
+        <div class="preloader-content">
+            <div class="puzzle-container">
+                <div class="puzzle-piece piece-1"></div>
+                <div class="puzzle-piece piece-2"></div>
+                <div class="puzzle-piece piece-3"></div>
+                <div class="puzzle-piece piece-4"></div>
+                <div class="puzzle-piece piece-5"></div>
+                <div class="puzzle-piece piece-6"></div>
+                <div class="puzzle-piece piece-7"></div>
+                <div class="puzzle-piece piece-8"></div>
+                <div class="puzzle-piece piece-9"></div>
+            </div>
+            <div class="preloader-text">
+                <span class="loading-text">Construyendo tu marca...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- NAVBAR -->
+    <header class="nav-wrap" id="navbar">
+        <nav class="nav">
+            <a href="index.html" class="brand">
+                <img src="assets/images/logos/vox_fox.png" alt="VOX" class="brand-icon" />
+                <span class="brand-text">
+                    <strong>VOX</strong>
+                    <small>BUSINESS DEVELOPER</small>
+                </span>
+            </a>
+            <div class="nav-links" id="navLinks">
+                <a href="index.html#nosotros" data-scroll>Nosotros</a>
+                <a href="index.html#servicios" data-scroll>Servicios</a>
+                <a href="index.html#metodologia" data-scroll>Metodología</a>
+                <a href="index.html#proyectos" data-scroll>Proyectos</a>
+                <a href="index.html#contacto" data-scroll>Contacto</a>
+            </div>
+            <div class="nav-actions">
+                <a href="index.html#contacto" class="btn btn-primary btn-sm hide-mobile" data-scroll>
+                    Agenda una reunión <i data-lucide="arrow-up-right"></i>
+                </a>
+                <button class="menu-toggle" id="menuToggle" aria-label="Menú">
+                    <i data-lucide="menu"></i>
+                </button>
+            </div>
+        </nav>
+        <div class="mobile-menu" id="mobileMenu">
+            <a href="index.html#nosotros" data-scroll>Nosotros</a>
+            <a href="index.html#servicios" data-scroll>Servicios</a>
+            <a href="index.html#metodologia" data-scroll>Metodología</a>
+            <a href="index.html#proyectos" data-scroll>Proyectos</a>
+            <a href="index.html#contacto" data-scroll>Contacto</a>
+        </div>
+    </header>
+
+    <!-- HERO SECTION -->
+    <section class="service-hero" id="serviceHero">
+        <div class="hero-bg" id="heroBg"></div>
+        <div class="hero-overlay"></div>
+        <div class="container">
+            <div class="hero-content">
+                <span class="overline reveal" id="serviceCategory">Servicio</span>
+                <h1 class="h1 light-text reveal" style="--d:.05s" id="serviceTitle">Título del Servicio</h1>
+                <p class="lead muted reveal" style="--d:.1s" id="serviceDescription">Descripción del servicio</p>
+                <div class="hero-cta reveal" style="--d:.15s">
+                    <a href="index.html#contacto" class="btn btn-primary">Solicitar Cotización</a>
+                    <a href="index.html#servicios" class="btn btn-secondary">Ver Todos los Servicios</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FEATURE IMAGE SECTION -->
+    <section class="feature-image-section" id="featureImage">
+        <div class="feature-image-container">
+            <img src="assets/images/hero/hero_abstract.jpg" alt="Feature" id="featureImage1" class="feature-image reveal">
+        </div>
+    </section>
+
+    <!-- OVERVIEW SECTION -->
+    <section class="section dark" id="overview">
+        <div class="container">
+            <div class="overview-grid">
+                <div class="overview-text reveal">
+                    <span class="overline">Descripción</span>
+                    <h2 class="h2 light-text">¿Qué ofrecemos?</h2>
+                    <div id="overviewContent">
+                        <!-- Dynamic content -->
+                    </div>
+                </div>
+                <div class="overview-image reveal">
+                    <img src="assets/svg/arquitectura.svg" alt="Service" id="overviewImage">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FULL WIDTH IMAGE -->
+    <section class="full-width-image" id="fullWidthImage1">
+        <img src="assets/svg/architecture-render.svg" alt="Full width" id="fullWidthImg1" class="reveal">
+    </section>
+
+    <!-- SERVICES SECTION -->
+    <section class="section dark" id="benefits">
+        <div class="container">
+            <div class="section-head center">
+                <span class="overline reveal">Servicios</span>
+                <h2 class="h2 light-text reveal" style="--d:.05s" id="benefitsTitle">Servicios del Servicio</h2>
+            </div>
+            <div class="benefits-grid" id="benefitsGrid">
+                <!-- Dynamic content -->
+            </div>
+        </div>
+    </section>
+
+    <!-- PROCESS SECTION -->
+    <section class="section dark" id="process">
+        <div class="container">
+            <div class="section-head center">
+                <span class="overline reveal">Proceso</span>
+                <h2 class="h2 light-text reveal" style="--d:.05s; color: #fff !important;">Cómo trabajamos</h2>
+            </div>
+            <div class="process-timeline" id="processTimeline">
+                <!-- Dynamic content -->
+            </div>
+        </div>
+    </section>
+
+    <!-- LARGE FEATURE IMAGE -->
+    <section class="large-feature" id="largeFeature">
+        <div class="large-feature-container">
+            <img src="assets/images/services/solutions-portfolio.jpeg" alt="Large feature" id="largeFeatureImg" class="reveal">
+            <div class="large-feature-content reveal">
+                <h2 class="h2 light-text">Excelencia en cada detalle</h2>
+                <p class="lead muted">Nos comprometemos a superar tus expectativas con resultados que hablan por sí mismos.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- GALLERY SECTION -->
+    <section class="section dark" id="gallery">
+        <div class="container">
+            <div class="section-head center">
+                <span class="overline reveal">Portafolio</span>
+                <h2 class="h2 light-text reveal" style="--d:.05s">Proyectos destacados</h2>
+            </div>
+            <div class="gallery-grid" id="galleryGrid">
+                <!-- Dynamic content -->
+            </div>
+        </div>
+    </section>
+
+    <!-- STATS SECTION -->
+    <section class="section dark stats-section" id="stats">
+        <div class="container">
+            <div class="stats-grid">
+                <div class="stat-item reveal">
+                    <div class="stat-number">120+</div>
+                    <div class="stat-label">Proyectos Completados</div>
+                </div>
+                <div class="stat-item reveal">
+                    <div class="stat-number">98%</div>
+                    <div class="stat-label">Satisfacción del Cliente</div>
+                </div>
+                <div class="stat-item reveal">
+                    <div class="stat-number">15+</div>
+                    <div class="stat-label">Años de Experiencia</div>
+                </div>
+                <div class="stat-item reveal">
+                    <div class="stat-number">24/7</div>
+                    <div class="stat-label">Soporte Dedicado</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA SECTION -->
+    <section class="section dark cta-section" id="cta">
+        <div class="container">
+            <div class="cta-card reveal">
+                <div class="cta-content">
+                    <h2 class="h2 light-text">¿Listo para comenzar?</h2>
+                    <p class="lead muted">Contáctanos hoy y descubre cómo podemos ayudarte a alcanzar tus objetivos.</p>
+                    <div class="cta-buttons">
+                        <a href="index.html#contacto" class="btn btn-primary">Contactar Ahora</a>
+                        <a href="https://wa.me/5215554077643" target="blank" class="btn btn-secondary">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                            WhatsApp
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="container footer-grid">
+            <div class="footer-brand">
+                <a href="index.html#top" class="brand" data-scroll>
+                    <img src="assets/images/logos/vox_fox.png" alt="VOX" class="brand-fox lg" />
+                    <span class="brand-text"><strong>VOX</strong><small>BUSINESS DEVELOPER</small></span>
+                </a>
+                <p>Marcas que inspiran. Negocios que crecen. Proyectos que generan valor.</p>
+                <div class="socials">
+                        <a href="#" aria-label="TikTok"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"></path></svg></a>
+                        <a href="https://www.youtube.com/@VOXBUSINESSDEVELOPER" aria-label="YouTube" target="_blank" rel="noopener noreferrer"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 17a24.12 24.12 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.56 49.56 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.12 24.12 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.55 49.55 0 0 1-16.2 0A2 2 0 0 1 2.5 17"></path><path d="m10 15 5-3-5-3z"></path></svg></a>
+                        <a href="https://www.instagram.com/vox.businessdeveloper/" aria-label="Instagram" target="_blank" rel="noopener noreferrer"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"></line></svg></a>
+                        <a href="https://www.facebook.com/VOXbusinessdeveloper" aria-label="Facebook" target="_blank" rel="noopener noreferrer"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg></a>
+                        <a href="#" aria-label="LinkedIn"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect width="4" height="12" x="2" y="9"></rect><circle cx="4" cy="4" r="2"></circle></svg></a>
+                    </div>
+                </div>
+                <div class="footer-col">
+                    <h4>Navegación</h4>
+                    <a href="index.html#nosotros" data-scroll>Nosotros</a>
+                    <a href="index.html#servicios" data-scroll>Servicios</a>
+                    <a href="index.html#metodologia" data-scroll>Metodología</a>
+                    <a href="index.html#proyectos" data-scroll>Proyectos</a>
+                    <a href="index.html#contacto" data-scroll>Contacto</a>
+                </div>
+                <div class="footer-col">
+                    <h4>Servicios</h4>
+                    <a href="servicio.html?id=arquitectura">Arquitectura</a>
+                    <a href="servicio.html?id=marketing">Marketing</a>
+                    <a href="servicio.html?id=juridico">Legal Corporativo</a>
+                    <a href="servicio.html?id=branding">Branding</a>
+                    <a href="servicio.html?id=desarrollo">Desarrollo Web</a>
+                </div>
+                <div class="footer-col">
+                    <h4>Contacto</h4>
+                    <a href="mailto:contacto@vox.com">contacto@vox.com</a>
+                    <a href="tel:+5215554077643">+52 1 55 5407 7643</a>
+                    <p>Puebla, México</p>
+                </div>
+            </div>
+            <div class="footer-bottom"> 
+                <p>&copy; 2024 VOX Business Developer. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="script.js"></script>
+    <script src="servicio.js"></script>
+</body>
+</html>
