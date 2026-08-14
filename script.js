@@ -53,7 +53,6 @@ const initHeroCarousel = () => {
     const slides = document.querySelectorAll('.hero-slide');
     const dots = document.querySelectorAll('.hero-dot');
     let currentIndex = 0;
-    let autoPlayInterval;
 
     const goToSlide = (index) => {
         slides[currentIndex].classList.remove('active');
@@ -73,30 +72,56 @@ const initHeroCarousel = () => {
         goToSlide(prevIndex);
     };
 
+    // Start autoplay - inicia solo cuando la sección es visible
+    let autoPlayInterval = null;
+    let isCarouselVisible = false;
+
     const startAutoPlay = () => {
+        if (autoPlayInterval) clearInterval(autoPlayInterval);
         autoPlayInterval = setInterval(nextSlide, 6000);
     };
 
     const stopAutoPlay = () => {
-        clearInterval(autoPlayInterval);
+        if (autoPlayInterval) {
+            clearInterval(autoPlayInterval);
+            autoPlayInterval = null;
+        }
     };
 
     // Event listeners
     if (prevBtn) prevBtn.addEventListener('click', () => {
         stopAutoPlay();
         prevSlide();
-        startAutoPlay();
+        if (isCarouselVisible) startAutoPlay();
     });
 
     if (nextBtn) nextBtn.addEventListener('click', () => {
         stopAutoPlay();
         nextSlide();
-        startAutoPlay();
+        if (isCarouselVisible) startAutoPlay();
     });
 
-    // Start autoplay
-    if (slides.length > 1) {
-        startAutoPlay();
+    // IntersectionObserver para detectar cuando la sección es visible
+    const heroSection = document.querySelector('.hero');
+    if (heroSection) {
+        const sectionObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting && !isCarouselVisible) {
+                    isCarouselVisible = true;
+                    if (slides.length > 1) {
+                        startAutoPlay();
+                    }
+                } else if (!entry.isIntersecting && isCarouselVisible) {
+                    isCarouselVisible = false;
+                    if (autoPlayInterval) {
+                        stopAutoPlay();
+                        autoPlayInterval = null;
+                    }
+                }
+            });
+        }, { threshold: 0.3 });
+
+        sectionObserver.observe(heroSection);
     }
 };
 
@@ -145,25 +170,56 @@ const aboutCarousel = () => {
         showPoint(nextIndex);
     };
 
-    // Auto-rotate
-    let carouselInterval = setInterval(nextPoint, intervalTime);
+    // Auto-rotate - inicia solo cuando la sección es visible
+    let carouselInterval = null;
+    let isCarouselVisible = false;
+
+    const startAutoPlay = () => {
+        if (carouselInterval) clearInterval(carouselInterval);
+        carouselInterval = setInterval(nextPoint, intervalTime);
+    };
+
+    const stopAutoPlay = () => {
+        if (carouselInterval) {
+            clearInterval(carouselInterval);
+            carouselInterval = null;
+        }
+    };
+
+    // IntersectionObserver para detectar cuando la sección es visible
+    const aboutSection = document.getElementById('nosotros');
+    if (aboutSection) {
+        const sectionObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting && !isCarouselVisible) {
+                    isCarouselVisible = true;
+                    startAutoPlay();
+                } else if (!entry.isIntersecting && isCarouselVisible) {
+                    isCarouselVisible = false;
+                    stopAutoPlay();
+                }
+            });
+        }, { threshold: 0.3 });
+
+        sectionObserver.observe(aboutSection);
+    }
 
     // Click on dots
     dots.forEach((dot, index) => {
         dot.addEventListener('click', () => {
-            clearInterval(carouselInterval);
+            stopAutoPlay();
             showPoint(index);
-            carouselInterval = setInterval(nextPoint, intervalTime);
+            if (isCarouselVisible) startAutoPlay();
         });
     });
 
     // Pause on hover
     track.addEventListener('mouseenter', () => {
-        clearInterval(carouselInterval);
+        stopAutoPlay();
     });
 
     track.addEventListener('mouseleave', () => {
-        carouselInterval = setInterval(nextPoint, intervalTime);
+        if (isCarouselVisible) startAutoPlay();
     });
 
     // Recalcular al cambiar tamaño de ventana
@@ -300,7 +356,7 @@ SERVICES.forEach((s,i)=>{
     const serviceEl=el(`
     <div class="service reveal" style="--d:${(i%3)*.07}s">
         <div class="service-image">
-            <img src="${s.image}" alt="${s.title}" />
+            <img src="${s.image}" alt="${s.title}" loading="lazy" />
             <div class="service-overlay">
                 <div class="service-content">
                     <div class="service-ico"><i data-lucide="${s.icon}"></i></div>
@@ -518,7 +574,7 @@ const initProjectsCarousel = () => {
         const slideEl = document.createElement('div');
         slideEl.className = `project-slide ${index === 0 ? 'active' : ''}`;
         slideEl.innerHTML = `
-            <img src="${project.image}" alt="${project.title}" />
+            <img src="${project.image}" alt="${project.title}" loading="lazy" />
             <div class="project-slide-overlay"></div>
             <div class="project-content">
                 <span class="project-tag">${project.tag}</span>
@@ -537,7 +593,6 @@ const initProjectsCarousel = () => {
     const slides = document.querySelectorAll('.project-slide');
     const dots = document.querySelectorAll('.project-dot');
     let currentIndex = 0;
-    let autoPlayInterval;
 
     const goToSlide = (index) => {
         slides[currentIndex].classList.remove('active');
@@ -558,25 +613,53 @@ const initProjectsCarousel = () => {
         goToSlide(prevIndex);
     };
 
+    // Start autoplay - inicia solo cuando la sección es visible
+    let autoPlayInterval = null;
+    let isCarouselVisible = false;
+
     const startAutoPlay = () => {
+        if (autoPlayInterval) clearInterval(autoPlayInterval);
         autoPlayInterval = setInterval(nextSlide, 3000);
     };
 
     const stopAutoPlay = () => {
-        clearInterval(autoPlayInterval);
+        if (autoPlayInterval) {
+            clearInterval(autoPlayInterval);
+            autoPlayInterval = null;
+        }
     };
+
+    // IntersectionObserver para detectar cuando la sección es visible
+    const projectsSection = document.getElementById('proyectos');
+    if (projectsSection) {
+        const sectionObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting && !isCarouselVisible) {
+                    isCarouselVisible = true;
+                    if (slides.length > 1) {
+                        startAutoPlay();
+                    }
+                } else if (!entry.isIntersecting && isCarouselVisible) {
+                    isCarouselVisible = false;
+                    stopAutoPlay();
+                }
+            });
+        }, { threshold: 0.3 });
+
+        sectionObserver.observe(projectsSection);
+    }
 
     // Event listeners
     if (prevBtn) prevBtn.addEventListener('click', () => {
         stopAutoPlay();
         prevSlide();
-        startAutoPlay();
+        if (isCarouselVisible) startAutoPlay();
     });
 
     if (nextBtn) nextBtn.addEventListener('click', () => {
         stopAutoPlay();
         nextSlide();
-        startAutoPlay();
+        if (isCarouselVisible) startAutoPlay();
     });
 
     // Touch/Swipe support
@@ -592,7 +675,7 @@ const initProjectsCarousel = () => {
     track.addEventListener('touchend', (e) => {
         touchEndX = e.changedTouches[0].screenX;
         handleSwipe();
-        startAutoPlay();
+        if (isCarouselVisible) startAutoPlay();
     }, { passive: true });
 
     const handleSwipe = () => {
@@ -605,11 +688,6 @@ const initProjectsCarousel = () => {
             }
         }
     };
-
-    // Start autoplay
-    if (slides.length > 1) {
-        startAutoPlay();
-    }
 };
 
 // Initialize projects carousel when DOM is ready
@@ -634,20 +712,20 @@ const initTestimonialsCarousel = () => {
         slide.innerHTML = `
             <div class="testimonial-card reveal">
                 <div class="testimonial-image">
-                    <img src="${testimonial.image}" alt="${testimonial.name}">
+                    <img src="${testimonial.image}" alt="${testimonial.name}" loading="lazy">
                 </div>
                 <div class="testimonial-content">
                     <div class="testimonial-quote">"</div>
                     <p class="testimonial-text">${testimonial.text}</p>
                     <div class="testimonial-stars">${starsHTML}</div>
                     <div class="testimonial-author">
-                        <img src="${testimonial.image}" alt="${testimonial.name}">
+                        <img src="${testimonial.image}" alt="${testimonial.name}" loading="lazy">
                         <div class="testimonial-author-info">
                             <h4>${testimonial.name}</h4>
                             <p>${testimonial.company}</p>
                             ${testimonial.companyLogo ? `
                             <div class="testimonial-company">
-                                <img src="${testimonial.companyLogo}" alt="Company">
+                                <img src="${testimonial.companyLogo}" alt="Company" loading="lazy">
                                 <span>Empresa</span>
                             </div>
                             ` : ''}
@@ -662,7 +740,6 @@ const initTestimonialsCarousel = () => {
     const cards = document.querySelectorAll('.testimonial-card');
     const dots = [];
     let currentIndex = 0;
-    let autoPlayInterval;
 
     // Generate dots
     TESTIMONIALS.forEach((_, index) => {
@@ -687,17 +764,44 @@ const initTestimonialsCarousel = () => {
         goToSlide(nextIndex);
     };
 
+    // Start autoplay - inicia solo cuando la sección es visible
+    let autoPlayInterval = null;
+    let isCarouselVisible = false;
+
     const startAutoPlay = () => {
+        if (autoPlayInterval) clearInterval(autoPlayInterval);
         autoPlayInterval = setInterval(nextSlide, 5000);
     };
+
+    const stopAutoPlay = () => {
+        if (autoPlayInterval) {
+            clearInterval(autoPlayInterval);
+            autoPlayInterval = null;
+        }
+    };
+
+    // IntersectionObserver para detectar cuando la sección es visible
+    const testimonialsSection = document.querySelector('.testimonials');
+    if (testimonialsSection) {
+        const sectionObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting && !isCarouselVisible) {
+                    isCarouselVisible = true;
+                    startAutoPlay();
+                } else if (!entry.isIntersecting && isCarouselVisible) {
+                    isCarouselVisible = false;
+                    stopAutoPlay();
+                }
+            });
+        }, { threshold: 0.3 });
+
+        sectionObserver.observe(testimonialsSection);
+    }
 
     // Initialize first slide
     setTimeout(() => {
         cards[0].classList.add('in');
     }, 100);
-
-    // Start autoplay
-    startAutoPlay();
 
     // Observe testimonial cards for scroll animation
     cards.forEach(card => {
