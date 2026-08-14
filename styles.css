@@ -1493,6 +1493,10 @@ img {
     padding: 40px 0;
 }
 
+.methodology-header .lead {
+    text-align: center !important;
+}
+
 .methodology-carousel-container {
     position: relative;
     width: 100%;
