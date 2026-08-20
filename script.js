@@ -1101,7 +1101,7 @@ form.addEventListener("submit",(e)=>{
     const mensaje = formData.get('mensaje');
     
     // Create mailto link with pre-filled data
-    const mailtoLink = `mailto:clientes.voxbd@gmail.com?subject=Contacto desde VOX Business Developer&body=Nombre: ${encodeURIComponent(nombre)}%0ACorreo: ${encodeURIComponent(correo)}%0ATeléfono: ${encodeURIComponent(telefono)}%0AMensaje: ${encodeURIComponent(mensaje)}`;
+    const mailtoLink = `mailto:HOLA@VOXBUSINESSDEVELOPER.COM?subject=Contacto desde VOX Business Developer&body=Nombre: ${encodeURIComponent(nombre)}%0ACorreo: ${encodeURIComponent(correo)}%0ATeléfono: ${encodeURIComponent(telefono)}%0AMensaje: ${encodeURIComponent(mensaje)}`;
     
     // Open email client
     window.location.href = mailtoLink;
