@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<browserconfig>
+    <msapplication>
+        <tile>
+            <square70x70logo src="/assets/icons/favicon.png"/>
+            <square150x150logo src="/assets/images/logos/vox_fox.png"/>
+            <square310x310logo src="/assets/images/logos/vox_fox.png"/>
+            <wide310x150logo src="/assets/images/logos/vox_fox.png"/>
+            <TileColor>#1E2328</TileColor>
+        </tile>
+    </msapplication>
+</browserconfig>

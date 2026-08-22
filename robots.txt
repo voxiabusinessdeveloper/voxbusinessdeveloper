@@ -2,9 +2,14 @@ User-agent: *
 Allow: /
 Disallow: /admin/
 Disallow: /private/
-Disallow: /assets/
 Disallow: /temp/
+Disallow: /assets/temp/
 
 Crawl-delay: 1
+
+Allow: /assets/icons/
+Allow: /assets/images/
+Allow: /manifest.json
+Allow: /browserconfig.xml
 
 Sitemap https://voxbusinessdeveloper.com/sitemap.xml

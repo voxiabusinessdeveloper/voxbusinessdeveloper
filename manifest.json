@@ -1,0 +1,44 @@
+{
+  "name": "VOX Business Developer",
+  "short_name": "VOX",
+  "description": "Agencia líder en mkt inmobiliario, legal inmobiliario, arquitectura, branding, desarrollo web y consultoría estratégica en México",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1E2328",
+  "theme_color": "#1E2328",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/assets/icons/favicon.png",
+      "sizes": "16x16",
+      "type": "image/png"
+    },
+    {
+      "src": "/assets/icons/favicon.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "/assets/icons/favicon.png",
+      "sizes": "48x48",
+      "type": "image/png"
+    },
+    {
+      "src": "/assets/icons/favicon.png",
+      "sizes": "96x96",
+      "type": "image/png"
+    },
+    {
+      "src": "/assets/images/logos/vox_fox.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/assets/images/logos/vox_fox.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "categories": ["business", "marketing", "consulting"],
+  "lang": "es"
+}
