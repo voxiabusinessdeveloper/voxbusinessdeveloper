@@ -255,8 +255,13 @@ function loadServiceContent() {
     const urlParams = new URLSearchParams(window.location.search);
     const serviceId = urlParams.get('id');
     
-    if (!serviceId || !SERVICE_DETAILS[serviceId]) {
-        // Default to first service if no valid ID
+    if (!serviceId) {
+        // If we are on a static service page, content is already pre-rendered in HTML.
+        return;
+    }
+    
+    if (!SERVICE_DETAILS[serviceId]) {
+        // Default to first service if invalid ID on dynamic page
         loadServiceData('arquitectura');
         return;
     }
@@ -379,7 +384,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     loadServiceContent();
-    
+
+    // If we are on a static page (no query id param), initialize scroll animations now
+    const urlParams = new URLSearchParams(window.location.search);
+    if (!urlParams.get('id')) {
+        initScrollAnimations();
+    }
     // ===== MOBILE MENU =====
     const menuToggle = document.getElementById('menuToggle');
     const mobileMenu = document.getElementById('mobileMenu');

@@ -370,7 +370,7 @@ SERVICES.forEach((s,i)=>{
     serviceEl.style.cursor="pointer";
     serviceEl.addEventListener("click",()=>{
         const serviceId = SERVICE_IDS[i] || 'arquitectura';
-        window.location.href = `servicio.html?id=${serviceId}`;
+        window.location.href = `servicios/${serviceId}.html`;
     });
     sg.appendChild(serviceEl);
 });
