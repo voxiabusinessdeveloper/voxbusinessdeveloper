@@ -138,8 +138,8 @@ const SERVICE_DETAILS = {
     },
     branding: {
         category: "IDENTITY",
-        title: "Branding y Desarrollo de Marca",
-        description: "Construimos marcas sólidas que generan confianza y posicionamiento en el mercado.",
+        title: "Agencia de Branding e Identidad Corporativa en Puebla",
+        description: "Construimos marcas que se ven, se entienden y se recuerdan. Auditamos tu marca y escalamos tu firma.",
         heroImage: "assets/images/services/arquitectura/Residential_architecture_complex.avif",
         featureImage: "assets/images/services/arquitectura/Sculptural_residential_building.avif",
         overviewImage: "assets/images/services/arquitectura/Residential_architecture_complex.avif",
@@ -147,21 +147,23 @@ const SERVICE_DETAILS = {
         stripImages: ["assets/svg/arquitectura.svg", "assets/svg/marketing-strategy.svg", "assets/svg/branding-design.svg"],
         largeFeatureImage: "assets/images/hero/hero_abstract.jpg",
         overview: `
-            <p>Una marca fuerte es el activo más valioso de cualquier empresa. En VOX, creamos identidades de marca que no solo se ven, sino que se sienten y generan conexiones emocionales duraderas con tu audiencia.</p>
-            <p>Desde el naming hasta la implementación completa, cada elemento de tu marca es diseñado estratégicamente para comunicar tus valores y diferenciarte en un mercado saturado.</p>
+            <p><strong>Construimos marcas que se ven, se entienden y se recuerdan.</strong> Auditamos tu marca actual y diseñamos una identidad estratégica integral para escalar tu firma inmobiliaria, arquitectónica o empresarial.</p>
+            <p>En VOX Business Developer no solo diseñamos logotipos: desarrollamos sistemas visuales completos, estrategias de posicionamiento, presencia digital y manuales de identidad que generan confianza, autoridad y aceleran el crecimiento de tu negocio.</p>
         `,
         benefits: [
-            { icon: "star", title: "Identidad Única", text: "Marcas memorables que destacan en el mercado.", image: "assets/images/services/arquitectura/Contemporary_urban_waterfront.avif" },
-            { icon: "heart", title: "Conexión Emocional", text: "Narrativas que resuenan con tu audiencia.", image: "assets/images/services/arquitectura/Residential_architecture_complex.avif" },
-            { icon: "layers", title: "Cohesión Visual", text: "Sistema de diseño consistente en todos los touchpoints.", image: "assets/images/services/arquitectura/Sculptural_residential_building.avif" },
-            { icon: "arrow-up", title: "Valor de Marca", text: "Incremento del valor percibido de tu empresa.", image: "assets/images/services/arquitectura/Sustainable_urban_waterfront_dev.avif" }
+            { icon: "award", title: "Diferenciarte", text: "Destacas con autoridad frente a toda tu competencia en el mercado.", image: "assets/images/services/arquitectura/Contemporary_urban_waterfront.avif" },
+            { icon: "shield-check", title: "Generar Confianza", text: "Una marca profesional transmite seguridad, solidez y alta credibilidad.", image: "assets/images/services/arquitectura/Residential_architecture_complex.avif" },
+            { icon: "users", title: "Atraer Clientes Ideales", text: "Comunicas claramente el valor de tu negocio y conectas con tu audiencia ideal.", image: "assets/images/services/arquitectura/Sculptural_residential_building.avif" },
+            { icon: "trending-up", title: "Aumentar Percepción de Valor", text: "Una marca sólida te permite cobrar mejor y posicionarte en el segmento premium.", image: "assets/images/services/arquitectura/Sustainable_urban_waterfront_dev.avif" },
+            { icon: "sparkles", title: "Crear Reconocimiento", text: "Te vuelves memorable en la mente del consumidor y construyes relaciones duraderas.", image: "assets/images/cards/Urban_waterfront_master_plan_design.avif" }
         ],
         process: [
-            { step: "01", title: "Investigación", text: "Análisis de mercado, competencia y audiencia." },
-            { step: "02", title: "Estrategia", text: "Definición de posicionamiento y personalidad de marca." },
-            { step: "03", title: "Diseño", text: "Creación de identidad visual y verbal." },
-            { step: "04", title: "Implementación", text: "Desarrollo de assets y guías de marca." },
-            { step: "05", title: "Lanzamiento", text: "Rollout estratégico de la nueva marca." }
+            { step: "01", title: "Estrategia de Marca", text: "Analizamos tu negocio, tu mercado y tu competencia para definir una estrategia de marca sólida y diferenciadora." },
+            { step: "02", title: "Identidad Visual", text: "Creamos una identidad visual única y profesional que comunica la esencia y valores de tu marca." },
+            { step: "03", title: "Sistema de Marca", text: "Desarrollamos un sistema visual completo para asegurar consistencia en todos tus puntos de contacto." },
+            { step: "04", title: "Aplicaciones de Marca", text: "Aplicamos tu identidad en todos los materiales necesarios para tu operación y comunicación diaria." },
+            { step: "05", title: "Presencia Digital", text: "Integramos tu marca en tus canales digitales para que tengas una presencia profesional, coherente y competitiva." },
+            { step: "06", title: "Guía de Marca (Manual)", text: "Entregamos un manual de identidad completo para asegurar el uso correcto de tu marca en el tiempo." }
         ]
     },
     desarrollo: {
