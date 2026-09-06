@@ -145,10 +145,9 @@ document.addEventListener('DOMContentLoaded', () => {
         togglePasswordBtn.addEventListener('click', () => {
             const isPassword = adminPasswordInput.type === 'password';
             adminPasswordInput.type = isPassword ? 'text' : 'password';
-            if (togglePwdIcon) {
-                togglePwdIcon.setAttribute('data-lucide', isPassword ? 'eye-off' : 'eye');
-                if (window.lucide) window.lucide.createIcons();
-            }
+            const newIconName = isPassword ? 'eye-off' : 'eye';
+            togglePasswordBtn.innerHTML = `<i data-lucide="${newIconName}" id="togglePwdIcon"></i>`;
+            if (window.lucide) window.lucide.createIcons();
         });
     }
 

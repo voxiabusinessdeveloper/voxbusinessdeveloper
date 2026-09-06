@@ -215,14 +215,26 @@ h1, h2, h3, h4 {
     position: relative;
     display: flex;
     align-items: center;
+    width: 100%;
 }
 
+.input-icon-wrap svg,
 .input-icon-wrap i {
     position: absolute;
     left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
     width: 16px;
     height: 16px;
     color: var(--text-tertiary);
+    pointer-events: none;
+    z-index: 2;
+    transition: color 0.2s ease;
+}
+
+.input-icon-wrap:focus-within svg,
+.input-icon-wrap:focus-within i {
+    color: var(--gold-primary);
 }
 
 .input-icon-wrap input {
@@ -432,6 +444,7 @@ input:focus,
     cursor: pointer;
     display: flex;
     align-items: center;
+    justify-content: center;
     padding: 2px;
     transition: color 0.15s;
 }
@@ -440,6 +453,7 @@ input:focus,
     color: var(--gold-primary);
 }
 
+.btn-toggle-pwd svg,
 .btn-toggle-pwd i {
     width: 14px;
     height: 14px;
@@ -776,6 +790,7 @@ input:focus,
     min-width: 240px;
 }
 
+.search-box svg,
 .search-box i {
     position: absolute;
     left: 12px;
@@ -784,10 +799,18 @@ input:focus,
     width: 15px;
     height: 15px;
     color: var(--text-tertiary);
+    pointer-events: none;
+    z-index: 2;
+    transition: color 0.2s ease;
+}
+
+.search-box:focus-within svg,
+.search-box:focus-within i {
+    color: var(--gold-primary);
 }
 
 .search-box input {
-    padding-left: 36px;
+    padding-left: 36px !important;
     background: var(--bg-base);
 }
 
