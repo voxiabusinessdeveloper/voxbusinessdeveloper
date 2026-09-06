@@ -1008,35 +1008,91 @@ document.addEventListener('DOMContentLoaded', () => {
 
     refreshBtn.addEventListener('click', () => fetchLeads());
 
-    // Exportar CSV
+    // Exportar Excel (.xlsx) con Formato Profesional
     exportCsvBtn.addEventListener('click', () => {
-        if (state.filteredLeads.length === 0) {
-            alert('No hay datos para exportar.');
+        if (!state.filteredLeads || state.filteredLeads.length === 0) {
+            alert('No hay prospectos en la vista actual para exportar.');
             return;
         }
 
-        const headers = ['ID', 'Fecha', 'Nombre', 'Correo', 'Telefono', 'Empresa', 'Servicio', 'Financiamiento', 'Estado', 'Notas'];
-        const rows = state.filteredLeads.map(l => [
-            `"${l.id}"`,
-            `"${l.created_at}"`,
-            `"${(l.nombre || '').replace(/"/g, '""')}"`,
-            `"${l.correo || ''}"`,
-            `"${l.telefono || ''}"`,
-            `"${(l.empresa || '').replace(/"/g, '""')}"`,
-            `"${l.servicio || ''}"`,
-            `"${window.LeadService.formatFinanciamiento(l.tipo_financiamiento)}"`,
-            `"${l.estado || 'nuevo'}"`,
-            `"${(l.notas || '').replace(/"/g, '""')}"`
-        ]);
+        const formattedData = state.filteredLeads.map((l, index) => {
+            const fecha = l.created_at ? new Date(l.created_at).toLocaleString('es-ES', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+            }) : 'N/A';
 
-        const csvContent = 'data:text/csv;charset=utf-8,\uFEFF' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
-        const encodedUri = encodeURI(csvContent);
+            return {
+                'N°': index + 1,
+                'Fecha Registro': fecha,
+                'Nombre del Cliente': l.nombre || 'Sin nombre',
+                'Empresa / Proyecto': l.empresa || 'Particular',
+                'Correo Electrónico': l.correo || 'N/A',
+                'Teléfono / WhatsApp': l.telefono || 'N/A',
+                'Servicio de Interés': l.servicio || 'General',
+                'Perfil Financiero': window.LeadService ? window.LeadService.formatFinanciamiento(l.tipo_financiamiento) : (l.tipo_financiamiento || 'N/A'),
+                'Estado Comercial': formatEstadoLabel(l.estado),
+                'Mensaje Inicial': l.mensaje || '',
+                'Notas del Asesor': l.notas || '',
+                'Página Origen': l.origen_url || ''
+            };
+        });
+
+        const fileName = `Reporte_Leads_VOX_CRM_${new Date().toISOString().slice(0, 10)}.xlsx`;
+
+        // Si SheetJS (XLSX) está disponible, exportamos un archivo nativo .xlsx con anchos de columna óptimos
+        if (window.XLSX) {
+            try {
+                const worksheet = window.XLSX.utils.json_to_sheet(formattedData);
+
+                // Configurar anchos de columna automáticos basados en el contenido
+                const columnWidths = [
+                    { wch: 5 },   // N°
+                    { wch: 18 },  // Fecha
+                    { wch: 26 },  // Nombre
+                    { wch: 24 },  // Empresa
+                    { wch: 28 },  // Correo
+                    { wch: 18 },  // Teléfono
+                    { wch: 22 },  // Servicio
+                    { wch: 28 },  // Financiamiento
+                    { wch: 18 },  // Estado
+                    { wch: 35 },  // Mensaje
+                    { wch: 35 },  // Notas
+                    { wch: 30 }   // Origen
+                ];
+                worksheet['!cols'] = columnWidths;
+
+                const workbook = window.XLSX.utils.book_new();
+                window.XLSX.utils.book_append_sheet(workbook, worksheet, 'Prospectos VOX CRM');
+
+                window.XLSX.writeFile(workbook, fileName);
+                return;
+            } catch (err) {
+                console.error('Error al generar XLSX, usando fallback CSV:', err);
+            }
+        }
+
+        // Fallback a CSV estructurado con BOM UTF-8 y delimitador estándar
+        const headers = Object.keys(formattedData[0]);
+        const csvRows = [
+            headers.join(';'),
+            ...formattedData.map(row => 
+                headers.map(field => `"${String(row[field] || '').replace(/"/g, '""')}"`).join(';')
+            )
+        ];
+
+        const csvContent = '\uFEFF' + csvRows.join('\r\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
-        link.setAttribute('href', encodedUri);
-        link.setAttribute('download', `leads_vox_${new Date().toISOString().slice(0,10)}.csv`);
+        link.setAttribute('href', url);
+        link.setAttribute('download', `Reporte_Leads_VOX_CRM_${new Date().toISOString().slice(0, 10)}.csv`);
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+        URL.revokeObjectURL(url);
     });
 
     // Helpers

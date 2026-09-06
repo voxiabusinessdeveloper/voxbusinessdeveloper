@@ -23,6 +23,9 @@
     <!-- Supabase JS Client via CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+    <!-- SheetJS (XLSX) para exportación nativa a Excel -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
     <!-- Styles -->
     <link rel="stylesheet" href="/admin/dashboard.css" />
 </head>
@@ -187,9 +190,9 @@
                             <i data-lucide="bar-chart-2"></i>
                         </button>
                     </div>
-                    <button class="btn btn-outline btn-sm" id="exportCsvBtn">
-                        <i data-lucide="download"></i>
-                        <span>CSV</span>
+                    <button class="btn btn-outline btn-sm" id="exportCsvBtn" title="Descargar reporte en Excel (.xlsx)">
+                        <i data-lucide="file-spreadsheet"></i>
+                        <span>Exportar Excel</span>
                     </button>
                     <button class="btn btn-primary btn-sm" id="refreshBtn">
                         <i data-lucide="refresh-cw"></i>
