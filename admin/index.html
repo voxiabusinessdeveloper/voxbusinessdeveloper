@@ -244,57 +244,14 @@
                 </div>
             </section>
 
-            <!-- FILTERS & SEARCH -->
+            <!-- FILTERS & SEARCH (Solo Search-Box) -->
             <section class="filter-bar glass-panel">
                 <div class="search-box">
                     <i data-lucide="search"></i>
                     <input type="text" id="searchInput"
-                        placeholder="Buscar por nombre, correo, empresa, teléfono o notas..." />
+                        placeholder="Buscar por cliente, correo, empresa, teléfono, servicio o notas..." />
                     <button type="button" class="btn-clear-search" id="clearSearchBtn" title="Limpiar búsqueda" style="display: none;">
                         <i data-lucide="x"></i>
-                    </button>
-                </div>
-
-                <div class="filter-group">
-                    <select id="dateFilter" class="select-control" title="Filtrar por Período">
-                        <option value="all">📅 Todo el tiempo</option>
-                        <option value="today">Hoy</option>
-                        <option value="yesterday">Ayer</option>
-                        <option value="week">Esta semana (7d)</option>
-                        <option value="month">Este mes (30d)</option>
-                        <option value="quarter">Último trimestre (90d)</option>
-                    </select>
-
-                    <select id="serviceFilter" class="select-control" title="Filtrar por Servicio">
-                        <option value="all">💼 Todos los Servicios</option>
-                        <option value="General">Contacto General</option>
-                        <option value="Branding">Branding Corporativo</option>
-                        <option value="Arquitectura">Arquitectura & Renders</option>
-                        <option value="Marketing">Marketing Inmobiliario</option>
-                        <option value="Juridico">Legal & Jurídico</option>
-                        <option value="Contable">Contable & Fiscal</option>
-                        <option value="Desarrollo">Desarrollo Web & Software</option>
-                        <option value="Interiorismo">Interiorismo & Diseño</option>
-                        <option value="Auditorias">Auditorías de Negocio</option>
-                    </select>
-
-                    <select id="financingFilter" class="select-control" title="Filtrar por Financiamiento">
-                        <option value="all">💳 Todo Financiamiento</option>
-                        <option value="recurso_propio">Recurso Propio / Capital</option>
-                        <option value="credito_financiamiento">Crédito / Financiamiento</option>
-                        <option value="requiere_asesoria">Requiere Asesoría</option>
-                    </select>
-
-                    <select id="sortFilter" class="select-control" title="Ordenar prospectos">
-                        <option value="date_desc">⏱️ Más recientes primero</option>
-                        <option value="date_asc">⏱️ Más antiguos primero</option>
-                        <option value="name_asc">🔤 Nombre (A - Z)</option>
-                        <option value="name_desc">🔤 Nombre (Z - A)</option>
-                    </select>
-
-                    <button class="btn btn-outline btn-sm btn-reset-filters" id="resetFiltersBtn" title="Restablecer todos los filtros">
-                        <i data-lucide="rotate-ccw"></i>
-                        <span>Limpiar</span>
                     </button>
                 </div>
             </section>

@@ -848,37 +848,6 @@ input:focus,
     transform: none !important;
 }
 
-.filter-group {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
-}
-
-.filter-group .select-control {
-    min-width: 150px;
-    background: var(--bg-base);
-    cursor: pointer;
-}
-
-.btn-reset-filters {
-    padding: 7px 12px;
-    gap: 6px;
-    color: var(--text-secondary);
-    white-space: nowrap;
-}
-
-.btn-reset-filters:hover {
-    color: var(--gold-primary);
-    border-color: var(--gold-primary);
-}
-
-.btn-reset-filters svg,
-.btn-reset-filters i {
-    width: 13px;
-    height: 13px;
-}
-
 /* ========================================== */
 /* KANBAN BOARD */
 /* ========================================== */
@@ -1583,16 +1552,6 @@ input:focus,
     .search-box {
         width: 100%;
         min-width: 100%;
-    }
-
-    .filter-group {
-        width: 100%;
-        flex-direction: column;
-        gap: 8px;
-    }
-
-    .filter-group .select-control {
-        width: 100%;
     }
 
     .modal-overlay {

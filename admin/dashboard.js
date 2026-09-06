@@ -13,10 +13,6 @@ document.addEventListener('DOMContentLoaded', () => {
         activeLead: null,
         currentView: 'pipeline', // 'pipeline', 'table', 'analytics'
         statusFilter: 'all',
-        serviceFilter: 'all',
-        financingFilter: 'all',
-        dateFilter: 'all',
-        sortFilter: 'date_desc',
         searchTerm: '',
         charts: {}
     };
@@ -41,14 +37,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnViewTable = document.getElementById('btnViewTable');
     const btnViewCharts = document.getElementById('btnViewCharts');
 
-    // Filters & Search
+    // Filters & Search (Search-Box)
     const searchInput = document.getElementById('searchInput');
     const clearSearchBtn = document.getElementById('clearSearchBtn');
-    const serviceFilter = document.getElementById('serviceFilter');
-    const financingFilter = document.getElementById('financingFilter');
-    const dateFilter = document.getElementById('dateFilter');
-    const sortFilter = document.getElementById('sortFilter');
-    const resetFiltersBtn = document.getElementById('resetFiltersBtn');
     const refreshBtn = document.getElementById('refreshBtn');
     const exportCsvBtn = document.getElementById('exportCsvBtn');
 
@@ -133,7 +124,7 @@ document.addEventListener('DOMContentLoaded', () => {
         state.user = user;
         userDisplayEmail.textContent = user.email || 'Admin';
         userAvatar.textContent = (user.email ? user.email.charAt(0) : 'A').toUpperCase();
-        
+
         loginWrapper.style.display = 'none';
         dashboardLayout.style.display = 'flex';
 
@@ -252,7 +243,7 @@ document.addEventListener('DOMContentLoaded', () => {
             } catch (err) {
                 // Registrar intento fallido
                 const failResult = recordFailedAttempt();
-                
+
                 if (failResult.lockedNow) {
                     loginAlert.textContent = `🚫 Has superado el límite de 3 intentos. Cuenta bloqueada temporalmente por ${failResult.remainingSecs} segundos.`;
                 } else {
@@ -477,57 +468,10 @@ document.addEventListener('DOMContentLoaded', () => {
             list = list.filter(l => l.estado === state.statusFilter);
         }
 
-        // 2. Filtro por Servicio (Matching inteligente y normalizado)
-        if (state.serviceFilter !== 'all') {
-            const filterVal = state.serviceFilter.toLowerCase();
-            list = list.filter(l => {
-                const leadServ = (l.servicio || '').toLowerCase();
-                if (filterVal === 'general') return leadServ.includes('general') || leadServ === '' || leadServ === 'contacto';
-                if (filterVal === 'branding') return leadServ.includes('brand') || leadServ.includes('identidad');
-                if (filterVal === 'arquitectura') return leadServ.includes('arqui') || leadServ.includes('render');
-                if (filterVal === 'marketing') return leadServ.includes('market') || leadServ.includes('inmobiliario');
-                if (filterVal === 'juridico') return leadServ.includes('jurid') || leadServ.includes('legal');
-                if (filterVal === 'contable') return leadServ.includes('contab') || leadServ.includes('fiscal');
-                if (filterVal === 'desarrollo') return leadServ.includes('desarroll') || leadServ.includes('web') || leadServ.includes('software');
-                if (filterVal === 'interiorismo') return leadServ.includes('interior');
-                if (filterVal === 'auditorias') return leadServ.includes('auditor');
-                return leadServ.includes(filterVal);
-            });
-        }
-
-        // 3. Filtro por Financiamiento
-        if (state.financingFilter !== 'all') {
-            list = list.filter(l => l.tipo_financiamiento === state.financingFilter);
-        }
-
-        // 4. Filtro por Fecha (Hoy, Ayer, 7 días, 30 días, 90 días)
-        if (state.dateFilter !== 'all') {
-            const now = new Date();
-            const leadTime = (l) => new Date(l.created_at || Date.now()).getTime();
-
-            if (state.dateFilter === 'today') {
-                const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
-                list = list.filter(l => leadTime(l) >= startOfDay);
-            } else if (state.dateFilter === 'yesterday') {
-                const startOfYesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1).getTime();
-                const endOfYesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
-                list = list.filter(l => leadTime(l) >= startOfYesterday && leadTime(l) < endOfYesterday);
-            } else if (state.dateFilter === 'week') {
-                const oneWeekAgo = now.getTime() - (7 * 24 * 60 * 60 * 1000);
-                list = list.filter(l => leadTime(l) >= oneWeekAgo);
-            } else if (state.dateFilter === 'month') {
-                const oneMonthAgo = now.getTime() - (30 * 24 * 60 * 60 * 1000);
-                list = list.filter(l => leadTime(l) >= oneMonthAgo);
-            } else if (state.dateFilter === 'quarter') {
-                const ninetyDaysAgo = now.getTime() - (90 * 24 * 60 * 60 * 1000);
-                list = list.filter(l => leadTime(l) >= ninetyDaysAgo);
-            }
-        }
-
-        // 5. Filtro por Búsqueda de Texto (Multi-campo con coincidencia insensible)
+        // 2. Filtro por Búsqueda de Texto (Multi-campo con coincidencia insensible)
         if (state.searchTerm) {
             const term = state.searchTerm.toLowerCase();
-            list = list.filter(l => 
+            list = list.filter(l =>
                 (l.nombre && l.nombre.toLowerCase().includes(term)) ||
                 (l.correo && l.correo.toLowerCase().includes(term)) ||
                 (l.empresa && l.empresa.toLowerCase().includes(term)) ||
@@ -538,25 +482,8 @@ document.addEventListener('DOMContentLoaded', () => {
             );
         }
 
-        // 6. Ordenamiento Dinámico
-        list.sort((a, b) => {
-            const timeA = new Date(a.created_at || 0).getTime();
-            const timeB = new Date(b.created_at || 0).getTime();
-            const nameA = (a.nombre || '').toLowerCase();
-            const nameB = (b.nombre || '').toLowerCase();
-
-            switch (state.sortFilter) {
-                case 'date_asc':
-                    return timeA - timeB;
-                case 'name_asc':
-                    return nameA.localeCompare(nameB);
-                case 'name_desc':
-                    return nameB.localeCompare(nameA);
-                case 'date_desc':
-                default:
-                    return timeB - timeA;
-            }
-        });
+        // Ordenamiento por defecto: más recientes primero
+        list.sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime());
 
         state.filteredLeads = list;
 
@@ -593,7 +520,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // -------------------------------------------------------------
     function renderKanban() {
         const columns = ['nuevo', 'en_revision', 'contactado', 'cotizado', 'cerrado'];
-        
+
         columns.forEach(col => {
             const container = document.getElementById(`cards-${col}`);
             const counter = document.getElementById(`count-${col}`);
@@ -734,11 +661,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         state.filteredLeads.forEach(lead => {
             const tr = document.createElement('tr');
-            const dateFormatted = new Date(lead.created_at).toLocaleDateString('es-MX', { 
-                day: '2-digit', 
-                month: 'short', 
-                hour: '2-digit', 
-                minute: '2-digit' 
+            const dateFormatted = new Date(lead.created_at).toLocaleDateString('es-MX', {
+                day: '2-digit',
+                month: 'short',
+                hour: '2-digit',
+                minute: '2-digit'
             });
             const finFormatted = window.LeadService.formatFinanciamiento(lead.tipo_financiamiento);
 
@@ -807,7 +734,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     datasets: [{
                         data: Object.values(serviceCounts),
                         backgroundColor: [
-                            '#c5a059', '#388bfd', '#a371f7', '#2ea043', 
+                            '#c5a059', '#388bfd', '#a371f7', '#2ea043',
                             '#d29922', '#f85149', '#58a6ff', '#e3b341'
                         ],
                         borderWidth: 2,
@@ -906,24 +833,24 @@ document.addEventListener('DOMContentLoaded', () => {
         state.activeLead = lead;
 
         const dateObj = new Date(lead.created_at);
-        modalLeadDate.textContent = dateObj.toLocaleDateString('es-MX', { 
-            day: '2-digit', 
-            month: 'long', 
+        modalLeadDate.textContent = dateObj.toLocaleDateString('es-MX', {
+            day: '2-digit',
+            month: 'long',
             year: 'numeric',
-            hour: '2-digit', 
-            minute: '2-digit' 
+            hour: '2-digit',
+            minute: '2-digit'
         });
 
         modalServiceBadge.textContent = lead.servicio;
         modalStatusBadge.textContent = formatEstadoLabel(lead.estado);
         modalStatusBadge.className = `status-badge status-${lead.estado || 'nuevo'}`;
-        
+
         modalLeadName.textContent = lead.nombre;
         modalEmpresa.textContent = lead.empresa || 'No especificada';
         modalEmail.textContent = lead.correo;
         modalTelefono.textContent = lead.telefono || 'No especificado';
         modalFinanciamiento.textContent = window.LeadService.formatFinanciamiento(lead.tipo_financiamiento);
-        
+
         modalOrigenUrl.href = lead.origen_url || '#';
         modalOrigenUrl.textContent = lead.origen_url ? 'Abrir enlace de servicio' : 'Directo';
 
@@ -1028,7 +955,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // -------------------------------------------------------------
-    // 9. EVENTOS DE BÚSQUEDA Y FILTROS
+    // 9. EVENTOS DE BÚSQUEDA Y NAVEGACIÓN
     // -------------------------------------------------------------
     if (searchInput) {
         searchInput.addEventListener('input', (e) => {
@@ -1043,59 +970,6 @@ document.addEventListener('DOMContentLoaded', () => {
             state.searchTerm = '';
             applyFilters();
             searchInput.focus();
-        });
-    }
-
-    if (serviceFilter) {
-        serviceFilter.addEventListener('change', (e) => {
-            state.serviceFilter = e.target.value;
-            applyFilters();
-        });
-    }
-
-    if (financingFilter) {
-        financingFilter.addEventListener('change', (e) => {
-            state.financingFilter = e.target.value;
-            applyFilters();
-        });
-    }
-
-    if (dateFilter) {
-        dateFilter.addEventListener('change', (e) => {
-            state.dateFilter = e.target.value;
-            applyFilters();
-        });
-    }
-
-    if (sortFilter) {
-        sortFilter.addEventListener('change', (e) => {
-            state.sortFilter = e.target.value;
-            applyFilters();
-        });
-    }
-
-    if (resetFiltersBtn) {
-        resetFiltersBtn.addEventListener('click', () => {
-            // Restablecer valores en DOM
-            if (searchInput) searchInput.value = '';
-            if (serviceFilter) serviceFilter.value = 'all';
-            if (financingFilter) financingFilter.value = 'all';
-            if (dateFilter) dateFilter.value = 'all';
-            if (sortFilter) sortFilter.value = 'date_desc';
-
-            // Restablecer estado del sidebar a 'all'
-            document.querySelectorAll('.status-nav .nav-subitem').forEach(i => i.classList.remove('active'));
-            document.querySelector('.status-nav .nav-subitem[data-status="all"]')?.classList.add('active');
-
-            // Restablecer state
-            state.searchTerm = '';
-            state.serviceFilter = 'all';
-            state.financingFilter = 'all';
-            state.dateFilter = 'all';
-            state.sortFilter = 'date_desc';
-            state.statusFilter = 'all';
-
-            applyFilters();
         });
     }
 
@@ -1180,7 +1054,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const headers = Object.keys(formattedData[0]);
         const csvRows = [
             headers.join(';'),
-            ...formattedData.map(row => 
+            ...formattedData.map(row =>
                 headers.map(field => `"${String(row[field] || '').replace(/"/g, '""')}"`).join(';')
             )
         ];
