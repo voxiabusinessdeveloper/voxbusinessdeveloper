@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
         serviceFilter: 'all',
         financingFilter: 'all',
         dateFilter: 'all',
+        sortFilter: 'date_desc',
         searchTerm: '',
         charts: {}
     };
@@ -42,9 +43,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Filters & Search
     const searchInput = document.getElementById('searchInput');
+    const clearSearchBtn = document.getElementById('clearSearchBtn');
     const serviceFilter = document.getElementById('serviceFilter');
     const financingFilter = document.getElementById('financingFilter');
     const dateFilter = document.getElementById('dateFilter');
+    const sortFilter = document.getElementById('sortFilter');
+    const resetFiltersBtn = document.getElementById('resetFiltersBtn');
     const refreshBtn = document.getElementById('refreshBtn');
     const exportCsvBtn = document.getElementById('exportCsvBtn');
 
@@ -468,37 +472,59 @@ document.addEventListener('DOMContentLoaded', () => {
     function applyFilters() {
         let list = [...state.leads];
 
-        // Filtro por Estado (Sidebar sub-items)
+        // 1. Filtro por Estado (Sidebar sub-items)
         if (state.statusFilter !== 'all') {
             list = list.filter(l => l.estado === state.statusFilter);
         }
 
-        // Filtro por Servicio
+        // 2. Filtro por Servicio (Matching inteligente y normalizado)
         if (state.serviceFilter !== 'all') {
-            list = list.filter(l => (l.servicio || '').toLowerCase().includes(state.serviceFilter.toLowerCase()));
+            const filterVal = state.serviceFilter.toLowerCase();
+            list = list.filter(l => {
+                const leadServ = (l.servicio || '').toLowerCase();
+                if (filterVal === 'general') return leadServ.includes('general') || leadServ === '' || leadServ === 'contacto';
+                if (filterVal === 'branding') return leadServ.includes('brand') || leadServ.includes('identidad');
+                if (filterVal === 'arquitectura') return leadServ.includes('arqui') || leadServ.includes('render');
+                if (filterVal === 'marketing') return leadServ.includes('market') || leadServ.includes('inmobiliario');
+                if (filterVal === 'juridico') return leadServ.includes('jurid') || leadServ.includes('legal');
+                if (filterVal === 'contable') return leadServ.includes('contab') || leadServ.includes('fiscal');
+                if (filterVal === 'desarrollo') return leadServ.includes('desarroll') || leadServ.includes('web') || leadServ.includes('software');
+                if (filterVal === 'interiorismo') return leadServ.includes('interior');
+                if (filterVal === 'auditorias') return leadServ.includes('auditor');
+                return leadServ.includes(filterVal);
+            });
         }
 
-        // Filtro por Financiamiento
+        // 3. Filtro por Financiamiento
         if (state.financingFilter !== 'all') {
             list = list.filter(l => l.tipo_financiamiento === state.financingFilter);
         }
 
-        // Filtro por Fecha
+        // 4. Filtro por Fecha (Hoy, Ayer, 7 días, 30 días, 90 días)
         if (state.dateFilter !== 'all') {
             const now = new Date();
+            const leadTime = (l) => new Date(l.created_at || Date.now()).getTime();
+
             if (state.dateFilter === 'today') {
                 const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
-                list = list.filter(l => new Date(l.created_at).getTime() >= startOfDay);
+                list = list.filter(l => leadTime(l) >= startOfDay);
+            } else if (state.dateFilter === 'yesterday') {
+                const startOfYesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1).getTime();
+                const endOfYesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+                list = list.filter(l => leadTime(l) >= startOfYesterday && leadTime(l) < endOfYesterday);
             } else if (state.dateFilter === 'week') {
                 const oneWeekAgo = now.getTime() - (7 * 24 * 60 * 60 * 1000);
-                list = list.filter(l => new Date(l.created_at).getTime() >= oneWeekAgo);
+                list = list.filter(l => leadTime(l) >= oneWeekAgo);
             } else if (state.dateFilter === 'month') {
                 const oneMonthAgo = now.getTime() - (30 * 24 * 60 * 60 * 1000);
-                list = list.filter(l => new Date(l.created_at).getTime() >= oneMonthAgo);
+                list = list.filter(l => leadTime(l) >= oneMonthAgo);
+            } else if (state.dateFilter === 'quarter') {
+                const ninetyDaysAgo = now.getTime() - (90 * 24 * 60 * 60 * 1000);
+                list = list.filter(l => leadTime(l) >= ninetyDaysAgo);
             }
         }
 
-        // Filtro por Búsqueda de Texto
+        // 5. Filtro por Búsqueda de Texto (Multi-campo con coincidencia insensible)
         if (state.searchTerm) {
             const term = state.searchTerm.toLowerCase();
             list = list.filter(l => 
@@ -506,11 +532,38 @@ document.addEventListener('DOMContentLoaded', () => {
                 (l.correo && l.correo.toLowerCase().includes(term)) ||
                 (l.empresa && l.empresa.toLowerCase().includes(term)) ||
                 (l.telefono && l.telefono.toLowerCase().includes(term)) ||
+                (l.servicio && l.servicio.toLowerCase().includes(term)) ||
+                (l.mensaje && l.mensaje.toLowerCase().includes(term)) ||
                 (l.notas && l.notas.toLowerCase().includes(term))
             );
         }
 
+        // 6. Ordenamiento Dinámico
+        list.sort((a, b) => {
+            const timeA = new Date(a.created_at || 0).getTime();
+            const timeB = new Date(b.created_at || 0).getTime();
+            const nameA = (a.nombre || '').toLowerCase();
+            const nameB = (b.nombre || '').toLowerCase();
+
+            switch (state.sortFilter) {
+                case 'date_asc':
+                    return timeA - timeB;
+                case 'name_asc':
+                    return nameA.localeCompare(nameB);
+                case 'name_desc':
+                    return nameB.localeCompare(nameA);
+                case 'date_desc':
+                default:
+                    return timeB - timeA;
+            }
+        });
+
         state.filteredLeads = list;
+
+        // Mostrar / Ocultar botón de limpiar búsqueda rápida
+        if (clearSearchBtn) {
+            clearSearchBtn.style.display = state.searchTerm ? 'flex' : 'none';
+        }
 
         updateKPIs();
 
@@ -977,25 +1030,74 @@ document.addEventListener('DOMContentLoaded', () => {
     // -------------------------------------------------------------
     // 9. EVENTOS DE BÚSQUEDA Y FILTROS
     // -------------------------------------------------------------
-    searchInput.addEventListener('input', (e) => {
-        state.searchTerm = e.target.value.trim();
-        applyFilters();
-    });
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            state.searchTerm = e.target.value.trim();
+            applyFilters();
+        });
+    }
 
-    serviceFilter.addEventListener('change', (e) => {
-        state.serviceFilter = e.target.value;
-        applyFilters();
-    });
+    if (clearSearchBtn) {
+        clearSearchBtn.addEventListener('click', () => {
+            searchInput.value = '';
+            state.searchTerm = '';
+            applyFilters();
+            searchInput.focus();
+        });
+    }
 
-    financingFilter.addEventListener('change', (e) => {
-        state.financingFilter = e.target.value;
-        applyFilters();
-    });
+    if (serviceFilter) {
+        serviceFilter.addEventListener('change', (e) => {
+            state.serviceFilter = e.target.value;
+            applyFilters();
+        });
+    }
 
-    dateFilter.addEventListener('change', (e) => {
-        state.dateFilter = e.target.value;
-        applyFilters();
-    });
+    if (financingFilter) {
+        financingFilter.addEventListener('change', (e) => {
+            state.financingFilter = e.target.value;
+            applyFilters();
+        });
+    }
+
+    if (dateFilter) {
+        dateFilter.addEventListener('change', (e) => {
+            state.dateFilter = e.target.value;
+            applyFilters();
+        });
+    }
+
+    if (sortFilter) {
+        sortFilter.addEventListener('change', (e) => {
+            state.sortFilter = e.target.value;
+            applyFilters();
+        });
+    }
+
+    if (resetFiltersBtn) {
+        resetFiltersBtn.addEventListener('click', () => {
+            // Restablecer valores en DOM
+            if (searchInput) searchInput.value = '';
+            if (serviceFilter) serviceFilter.value = 'all';
+            if (financingFilter) financingFilter.value = 'all';
+            if (dateFilter) dateFilter.value = 'all';
+            if (sortFilter) sortFilter.value = 'date_desc';
+
+            // Restablecer estado del sidebar a 'all'
+            document.querySelectorAll('.status-nav .nav-subitem').forEach(i => i.classList.remove('active'));
+            document.querySelector('.status-nav .nav-subitem[data-status="all"]')?.classList.add('active');
+
+            // Restablecer state
+            state.searchTerm = '';
+            state.serviceFilter = 'all';
+            state.financingFilter = 'all';
+            state.dateFilter = 'all';
+            state.sortFilter = 'date_desc';
+            state.statusFilter = 'all';
+
+            applyFilters();
+        });
+    }
 
     document.querySelectorAll('.status-nav .nav-subitem').forEach(item => {
         item.addEventListener('click', () => {
