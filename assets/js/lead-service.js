@@ -34,13 +34,14 @@ const LeadService = {
             try {
                 const { data, error } = await window.VOX_SUPABASE.client
                     .from('leads')
-                    .insert([payload])
-                    .select();
+                    .insert([payload]);
 
-                if (error) throw error;
+                if (error) {
+                    console.error('❌ Error de respuesta en Supabase:', error);
+                    throw error;
+                }
                 dbSuccess = true;
-                if (data && data[0]) leadId = data[0].id;
-                console.log('✅ Lead registrado en Supabase:', data);
+                console.log('✅ Lead registrado con éxito en Supabase Cloud');
             } catch (err) {
                 console.error('❌ Error guardando en Supabase:', err);
             }
