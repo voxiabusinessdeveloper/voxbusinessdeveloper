@@ -33,16 +33,24 @@
     <!-- VIEW 1: LOGIN CARD (Si no está autenticado) -->
     <!-- ========================================== -->
     <div class="login-wrapper" id="loginWrapper">
+        <div class="login-backdrop-glow"></div>
         <div class="login-card glass-panel">
+            <div class="login-header-badge">
+                <i data-lucide="shield-check"></i>
+                <span>Acceso Seguro Encriptado</span>
+            </div>
+
             <div class="login-brand">
-                <img src="/assets/images/logos/vox_fox.png" alt="VOX" class="login-logo" />
-                <h2>VOX <span>CRM</span></h2>
-                <p>Centro de Administración, Analítica y Pipeline de Leads</p>
+                <div class="login-logo-container">
+                    <img src="/assets/images/logos/vox_fox.png" alt="VOX" class="login-logo" />
+                </div>
+                <h2>VOX <span>CRM PRO</span></h2>
+                <p>Centro de Administración & Pipeline de Clientes</p>
             </div>
 
             <form id="loginForm" class="login-form">
                 <div class="form-group">
-                    <label for="adminEmail">Correo Electrónico</label>
+                    <label for="adminEmail">Correo Corporativo</label>
                     <div class="input-icon-wrap">
                         <i data-lucide="mail"></i>
                         <input type="email" id="adminEmail" placeholder="admin@voxbusinessdeveloper.com" required
@@ -51,7 +59,13 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="adminPassword">Contraseña</label>
+                    <div class="label-row">
+                        <label for="adminPassword">Contraseña</label>
+                        <button type="button" class="btn-toggle-pwd" id="togglePasswordBtn"
+                            title="Mostrar/Ocultar contraseña">
+                            <i data-lucide="eye" id="togglePwdIcon"></i>
+                        </button>
+                    </div>
                     <div class="input-icon-wrap">
                         <i data-lucide="lock"></i>
                         <input type="password" id="adminPassword" placeholder="••••••••" required
@@ -61,11 +75,15 @@
 
                 <div id="loginAlert" class="alert-box" style="display: none;"></div>
 
-                <button type="submit" class="btn btn-primary btn-block" id="loginBtn">
-                    <span>Iniciar Sesión</span>
+                <button type="submit" class="btn btn-primary btn-block btn-login-submit" id="loginBtn">
+                    <span>Ingresar al Panel</span>
                     <i data-lucide="arrow-right"></i>
                 </button>
 
+                <div class="login-footer-security">
+                    <small><i data-lucide="lock" style="width:12px;height:12px;"></i> Protegido con Supabase Auth & Rate
+                        Limit</small>
+                </div>
             </form>
         </div>
     </div>

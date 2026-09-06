@@ -134,7 +134,22 @@ document.addEventListener('DOMContentLoaded', () => {
         dashboardLayout.style.display = 'flex';
 
         fetchLeads();
-        setupRealtimeSubscription();
+    }
+
+    // Toggle Mostrar/Ocultar Contraseña
+    const togglePasswordBtn = document.getElementById('togglePasswordBtn');
+    const adminPasswordInput = document.getElementById('adminPassword');
+    const togglePwdIcon = document.getElementById('togglePwdIcon');
+
+    if (togglePasswordBtn && adminPasswordInput) {
+        togglePasswordBtn.addEventListener('click', () => {
+            const isPassword = adminPasswordInput.type === 'password';
+            adminPasswordInput.type = isPassword ? 'text' : 'password';
+            if (togglePwdIcon) {
+                togglePwdIcon.setAttribute('data-lucide', isPassword ? 'eye-off' : 'eye');
+                if (window.lucide) window.lucide.createIcons();
+            }
+        });
     }
 
     // Rate Limiting Config: Máximo 3 intentos por minuto
