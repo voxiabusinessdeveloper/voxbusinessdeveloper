@@ -148,14 +148,22 @@
             </div>
         </aside>
 
+        <!-- SIDEBAR BACKDROP PARA MÓVIL -->
+        <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
         <!-- MAIN CONTENT AREA -->
         <main class="main-content">
 
             <!-- TOP BAR -->
             <header class="topbar">
                 <div class="topbar-left">
-                    <h1 class="page-title" id="currentViewTitle">Pipeline de Prospectos</h1>
-                    <p class="page-subtitle">Gestiona el avance comercial y seguimiento en tiempo real.</p>
+                    <button class="btn-mobile-sidebar" id="sidebarToggleBtn" aria-label="Abrir menú">
+                        <i data-lucide="menu"></i>
+                    </button>
+                    <div>
+                        <h1 class="page-title" id="currentViewTitle">Pipeline de Prospectos</h1>
+                        <p class="page-subtitle">Gestiona el avance comercial y seguimiento en tiempo real.</p>
+                    </div>
                 </div>
                 <div class="topbar-actions">
                     <div class="view-switch-btns">

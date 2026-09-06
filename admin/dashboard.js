@@ -416,7 +416,26 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (window.lucide) window.lucide.createIcons();
+        closeMobileSidebar();
     }
+
+    // Control de Sidebar Móvil (Drawer)
+    const sidebarToggleBtn = document.getElementById('sidebarToggleBtn');
+    const sidebarBackdrop = document.getElementById('sidebarBackdrop');
+    const sidebar = document.querySelector('.sidebar');
+
+    function openMobileSidebar() {
+        if (sidebar) sidebar.classList.add('mobile-open');
+        if (sidebarBackdrop) sidebarBackdrop.classList.add('active');
+    }
+
+    function closeMobileSidebar() {
+        if (sidebar) sidebar.classList.remove('mobile-open');
+        if (sidebarBackdrop) sidebarBackdrop.classList.remove('active');
+    }
+
+    if (sidebarToggleBtn) sidebarToggleBtn.addEventListener('click', openMobileSidebar);
+    if (sidebarBackdrop) sidebarBackdrop.addEventListener('click', closeMobileSidebar);
 
     btnViewKanban.addEventListener('click', () => switchView('pipeline'));
     btnViewTable.addEventListener('click', () => switchView('table'));
