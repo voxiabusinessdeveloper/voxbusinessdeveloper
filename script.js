@@ -1041,7 +1041,11 @@ function updateReviewValues(){
         const fieldName=el.dataset.field;
         const input=form.querySelector(`[name="${fieldName}"]`);
         if(input){
-            el.textContent=input.value || 'No proporcionado';
+            let val = input.value;
+            if (fieldName === 'tipo_financiamiento' && window.LeadService) {
+                val = window.LeadService.formatFinanciamiento(val);
+            }
+            el.textContent=val || 'No proporcionado';
         }
     });
 }
@@ -1090,7 +1094,7 @@ function validateField(input){
     return isValid;
 }
 
-form.addEventListener("submit",(e)=>{
+form.addEventListener("submit", async (e)=>{
     e.preventDefault();
     
     // Get form data
@@ -1098,26 +1102,53 @@ form.addEventListener("submit",(e)=>{
     const nombre = formData.get('nombre');
     const correo = formData.get('correo');
     const telefono = formData.get('telefono');
-    const mensaje = formData.get('mensaje');
+    const servicio = formData.get('servicio') || 'Contacto General';
+    const tipo_financiamiento = formData.get('tipo_financiamiento') || 'recurso_propio';
+    const mensaje = formData.get('mensaje') || '';
+
+    if (submitBtn) {
+        submitBtn.classList.add('loading');
+        submitBtn.disabled = true;
+    }
+
+    try {
+        if (window.LeadService) {
+            await window.LeadService.submitLead({
+                nombre,
+                correo,
+                telefono,
+                servicio,
+                tipo_financiamiento,
+                mensaje
+            });
+        }
+    } catch (err) {
+        console.error('Error al registrar lead:', err);
+    } finally {
+        if (submitBtn) {
+            submitBtn.classList.remove('loading');
+            submitBtn.disabled = false;
+        }
+    }
     
-    // Create mailto link with pre-filled data
-    const mailtoLink = `mailto:HOLA@VOXBUSINESSDEVELOPER.COM?subject=Contacto desde VOX Business Developer&body=Nombre: ${encodeURIComponent(nombre)}%0ACorreo: ${encodeURIComponent(correo)}%0ATeléfono: ${encodeURIComponent(telefono)}%0AMensaje: ${encodeURIComponent(mensaje)}`;
-    
-    // Open email client
-    window.location.href = mailtoLink;
+    // Configurar enlace directo de WhatsApp en tarjeta de éxito
+    const waSuccessBtn = document.getElementById('waSuccessBtn');
+    if (waSuccessBtn) {
+        const cleanTel = (telefono || '').replace(/[^0-9]/g, '');
+        waSuccessBtn.href = `https://wa.me/5215554077643?text=${encodeURIComponent('Hola VOX, mi nombre es ' + nombre + ' y me interesa información sobre ' + servicio + '.')}`;
+    }
     
     // Show success message
-    submitBtn.classList.remove('loading');
     form.setAttribute("hidden","");
     success.removeAttribute("hidden");
     
     // Add extra pulse elements for better animation
     const ring=success.querySelector('.success-ring');
-    if(ring.children.length===1){
+    if(ring && ring.children.length<=1){
         ring.innerHTML='<span class="pulse"></span><span class="pulse"></span><span class="pulse"></span><span class="check-big"><i data-lucide="check"></i></span>';
     }
     
-    lucide.createIcons();
+    if (window.lucide) lucide.createIcons();
 });
 document.getElementById("resetBtn").addEventListener("click",()=>{
     form.reset();

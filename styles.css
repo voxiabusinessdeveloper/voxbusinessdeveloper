@@ -3142,6 +3142,7 @@ img {
 }
 
 .field input,
+.field select,
 .field textarea {
     width: 100%;
     border-radius: 16px;
@@ -3156,6 +3157,11 @@ img {
     resize: none;
 }
 
+.field select option {
+    background-color: #1a1e23;
+    color: #fff;
+}
+
 .field input::placeholder,
 .field textarea::placeholder {
     color: rgba(167, 167, 172, .5);
@@ -3168,6 +3174,7 @@ img {
 }
 
 .field input:focus,
+.field select:focus,
 .field textarea:focus {
     border-color: var(--accent);
     background: rgba(255, 106, 0, .03);

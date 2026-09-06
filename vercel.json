@@ -70,6 +70,10 @@
     {
       "source": "/browserconfig.xml",
       "destination": "/browserconfig.xml"
+    },
+    {
+      "source": "/admin",
+      "destination": "/admin/index.html"
     }
   ]
 }

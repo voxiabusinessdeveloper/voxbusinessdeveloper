@@ -916,3 +916,180 @@ body::before, body::after {
         justify-content: center;
     }
 }
+
+/* ===== MODAL DE CONTACTO PARA SERVICIOS ===== */
+.service-lead-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(10, 13, 16, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 99999;
+    padding: 20px;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.service-lead-modal-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.service-lead-modal-card {
+    background: rgba(22, 27, 33, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    width: 100%;
+    max-width: 580px;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 36px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6), 0 0 40px rgba(196, 162, 101, 0.1);
+    position: relative;
+    transform: translateY(30px) scale(0.96);
+    transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.service-lead-modal-overlay.active .service-lead-modal-card {
+    transform: translateY(0) scale(1);
+}
+
+.service-lead-modal-close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: rgba(255, 255, 255, 0.06);
+    border: none;
+    color: #8b949e;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.service-lead-modal-close:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.15);
+    transform: rotate(90deg);
+}
+
+.service-lead-modal-header {
+    margin-bottom: 24px;
+}
+
+.service-lead-modal-header .badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    background: rgba(196, 162, 101, 0.15);
+    color: #c4a265;
+    margin-bottom: 8px;
+}
+
+.service-lead-modal-header h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 6px;
+}
+
+.service-lead-modal-header p {
+    color: #8b949e;
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.service-lead-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+}
+
+@media (max-width: 560px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+.service-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.service-field label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #c9d1d9;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.service-field input,
+.service-field select,
+.service-field textarea {
+    width: 100%;
+    background: rgba(13, 16, 19, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-family: inherit;
+    font-size: 0.92rem;
+    color: #fff;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.service-field input:focus,
+.service-field select:focus,
+.service-field textarea:focus {
+    border-color: #c4a265;
+    box-shadow: 0 0 0 3px rgba(196, 162, 101, 0.2);
+}
+
+.service-lead-modal-success {
+    text-align: center;
+    padding: 30px 10px;
+    display: none;
+}
+
+.service-lead-modal-success i {
+    width: 60px;
+    height: 60px;
+    color: #3fb950;
+    margin-bottom: 16px;
+}
+
+.service-lead-modal-success h3 {
+    font-size: 1.4rem;
+    color: #fff;
+    margin-bottom: 8px;
+}
+
+.service-lead-modal-success p {
+    color: #8b949e;
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+

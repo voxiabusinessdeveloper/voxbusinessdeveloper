@@ -434,3 +434,172 @@ function initScrollAnimations() {
     
     document.querySelectorAll('.reveal').forEach(el => io.observe(el));
 }
+
+// ===== SISTEMA DE CAPTACIÓN DE LEADS POR SERVICIO =====
+function initServiceLeadModal() {
+    // Determinar el nombre del servicio actual
+    let currentServiceName = 'General';
+    const path = window.location.pathname.toLowerCase();
+    
+    if (path.includes('branding')) currentServiceName = 'Branding';
+    else if (path.includes('arquitectura')) currentServiceName = 'Arquitectura';
+    else if (path.includes('marketing')) currentServiceName = 'Marketing';
+    else if (path.includes('juridico') || path.includes('legal')) currentServiceName = 'Legal Corporativo';
+    else if (path.includes('contable') || path.includes('fiscal')) currentServiceName = 'Contable y Fiscal';
+    else if (path.includes('desarrollo') || path.includes('web')) currentServiceName = 'Desarrollo Web';
+    else if (path.includes('interiorismo')) currentServiceName = 'Interiorismo';
+    else if (path.includes('auditorias')) currentServiceName = 'Auditorías';
+
+    // Inyectar HTML del Modal si no existe
+    if (!document.getElementById('serviceLeadModal')) {
+        const modalHtml = `
+        <div class="service-lead-modal-overlay" id="serviceLeadModal">
+            <div class="service-lead-modal-card">
+                <button class="service-lead-modal-close" id="closeServiceLeadModal" aria-label="Cerrar modal">
+                    <i data-lucide="x"></i>
+                </button>
+                
+                <div id="serviceModalFormContainer">
+                    <div class="service-lead-modal-header">
+                        <span class="badge" id="modalServiceLabel">${currentServiceName}</span>
+                        <h3>Hablemos de tu proyecto</h3>
+                        <p>Completa este breve formulario y nuestro equipo comercial te contactará a la brevedad.</p>
+                    </div>
+
+                    <form class="service-lead-form" id="serviceLeadForm">
+                        <div class="form-row">
+                            <div class="service-field">
+                                <label for="leadNombre">Nombre completo *</label>
+                                <input type="text" id="leadNombre" required placeholder="Ej. Carlos Mendoza" />
+                            </div>
+                            <div class="service-field">
+                                <label for="leadEmpresa">Empresa / Negocio</label>
+                                <input type="text" id="leadEmpresa" placeholder="Ej. Mendoza Desarrollos" />
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="service-field">
+                                <label for="leadCorreo">Correo electrónico *</label>
+                                <input type="email" id="leadCorreo" required placeholder="carlos@empresa.com" />
+                            </div>
+                            <div class="service-field">
+                                <label for="leadTelefono">Teléfono / WhatsApp *</label>
+                                <input type="tel" id="leadTelefono" required placeholder="+52 55 1234 5678" />
+                            </div>
+                        </div>
+
+                        <div class="service-field">
+                            <label for="leadFinanciamiento">Tipo de financiamiento previsto *</label>
+                            <select id="leadFinanciamiento" required>
+                                <option value="recurso_propio">Recurso propio / Capital directo</option>
+                                <option value="credito_financiamiento">Crédito bancario / Financiamiento comercial</option>
+                                <option value="requiere_asesoria">Buscando asesoría para financiamiento</option>
+                            </select>
+                        </div>
+
+                        <div class="service-field">
+                            <label for="leadMensaje">Detalles de tu proyecto / Requerimiento</label>
+                            <textarea id="leadMensaje" rows="3" placeholder="Cuéntanos sobre tu desarrollo o necesidades específicas..."></textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-block" id="leadSubmitBtn">
+                            <span>Solicitar Asesoría para ${currentServiceName}</span>
+                            <i data-lucide="send"></i>
+                        </button>
+                    </form>
+                </div>
+
+                <div class="service-lead-modal-success" id="serviceModalSuccess">
+                    <i data-lucide="check-circle-2"></i>
+                    <h3>¡Solicitud Recibida con Éxito!</h3>
+                    <p>Hemos registrado tu información. Un especialista de VOX se pondrá en contacto contigo muy pronto para revisar tu proyecto.</p>
+                    <button class="btn btn-primary" id="successCloseBtn" style="margin-top: 20px;">Aceptar</button>
+                </div>
+            </div>
+        </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    const modal = document.getElementById('serviceLeadModal');
+    const closeBtn = document.getElementById('closeServiceLeadModal');
+    const successCloseBtn = document.getElementById('successCloseBtn');
+    const form = document.getElementById('serviceLeadForm');
+    const formContainer = document.getElementById('serviceModalFormContainer');
+    const successContainer = document.getElementById('serviceModalSuccess');
+    const submitBtn = document.getElementById('leadSubmitBtn');
+
+    function openModal() {
+        formContainer.style.display = 'block';
+        successContainer.style.display = 'none';
+        modal.classList.add('active');
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function closeModal() {
+        modal.classList.remove('active');
+    }
+
+    if (closeBtn) closeBtn.addEventListener('click', closeModal);
+    if (successCloseBtn) successCloseBtn.addEventListener('click', closeModal);
+    if (modal) {
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) closeModal();
+        });
+    }
+
+    // Conectar todos los botones de "Contactar Ahora" y "Agenda una reunión" en la página de servicio
+    document.querySelectorAll('a[href="/#contacto"], a[href="#contacto"], .btn-contact-service').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            openModal();
+        });
+    });
+
+    // Manejar envío del formulario
+    if (form) {
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const leadData = {
+                nombre: document.getElementById('leadNombre').value,
+                empresa: document.getElementById('leadEmpresa').value,
+                correo: document.getElementById('leadCorreo').value,
+                telefono: document.getElementById('leadTelefono').value,
+                tipo_financiamiento: document.getElementById('leadFinanciamiento').value,
+                mensaje: document.getElementById('leadMensaje').value,
+                servicio: currentServiceName
+            };
+
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span>Enviando información...</span>';
+
+            try {
+                if (window.LeadService) {
+                    await window.LeadService.submitLead(leadData);
+                } else {
+                    console.log('Lead recibido:', leadData);
+                }
+
+                formContainer.style.display = 'none';
+                successContainer.style.display = 'block';
+                form.reset();
+            } catch (err) {
+                alert('Ocurrió un error al procesar tu solicitud. Por favor intenta de nuevo.');
+                console.error(err);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = `<span>Solicitar Asesoría para ${currentServiceName}</span> <i data-lucide="send"></i>`;
+                if (typeof lucide !== 'undefined') lucide.createIcons();
+            }
+        });
+    }
+}
+
+// Ejecutar inicialización del modal de leads
+document.addEventListener('DOMContentLoaded', () => {
+    initServiceLeadModal();
+});
+

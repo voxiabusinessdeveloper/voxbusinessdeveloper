@@ -552,7 +552,7 @@
                     </div>
 
                     <form id="contactForm" class="form-grid"
-                        action="https://formsubmit.co/HOLA@VOXBUSINESSDEVELOPER.COM" method="POST">
+                        action="https://formsubmit.co/vox.iabusinessdeveloper@gmail.com" method="POST">
                         <!-- Configuración FormSubmit -->
                         <input type="hidden" name="_subject" value="Nuevo contacto desde VOX Business Developer">
                         <input type="hidden" name="_captcha" value="false">
@@ -584,12 +584,35 @@
                             </div>
                         </div>
 
-                        <!-- Step 2: Message -->
+                        <!-- Step 2: Service, Financing & Message -->
                         <div class="form-step" data-step="2">
+                            <div class="field">
+                                <label>Servicio de Interés</label>
+                                <select name="servicio" id="homeFormServicio" class="select-field">
+                                    <option value="Contacto General">Contacto General / Asesoría Global</option>
+                                    <option value="Branding">Branding y Naming</option>
+                                    <option value="Arquitectura">Arquitectura y Renders 3D</option>
+                                    <option value="Marketing">Marketing Inmobiliario</option>
+                                    <option value="Juridico">Legal Corporativo</option>
+                                    <option value="Contable">Contable y Fiscal</option>
+                                    <option value="Desarrollo">Desarrollo Web y Apps</option>
+                                    <option value="Interiorismo">Interiorismo</option>
+                                    <option value="Auditorias">Auditorías</option>
+                                </select>
+                            </div>
+                            <div class="field">
+                                <label>Tipo de Financiamiento</label>
+                                <select name="tipo_financiamiento" id="homeFormFinanciamiento" class="select-field">
+                                    <option value="recurso_propio">Recurso propio / Capital directo</option>
+                                    <option value="credito_financiamiento">Crédito bancario / Financiamiento comercial
+                                    </option>
+                                    <option value="requiere_asesoria">Buscando asesoría para financiamiento</option>
+                                </select>
+                            </div>
                             <div class="field full">
                                 <label>Mensaje</label>
-                                <textarea name="mensaje" rows="4"
-                                    placeholder="Cuéntanos brevemente sobre tu proyecto…"></textarea>
+                                <textarea name="mensaje" rows="3"
+                                    placeholder="Cuéntanos brevemente sobre tu proyecto o empresa…"></textarea>
                                 <i data-lucide="check" class="field-icon success" style="display:none"></i>
                                 <i data-lucide="x" class="field-icon error" style="display:none"></i>
                             </div>
@@ -615,6 +638,14 @@
                                 <div class="review-item">
                                     <span>Teléfono:</span>
                                     <span class="review-value" data-field="telefono"></span>
+                                </div>
+                                <div class="review-item">
+                                    <span>Servicio:</span>
+                                    <span class="review-value" data-field="servicio"></span>
+                                </div>
+                                <div class="review-item">
+                                    <span>Financiamiento:</span>
+                                    <span class="review-value" data-field="tipo_financiamiento"></span>
                                 </div>
                                 <div class="review-item">
                                     <span>Mensaje:</span>
@@ -745,6 +776,9 @@
 
     <script src="assets/js/lucide.min.js"></script>
     <script src="assets/js/lenis.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="assets/js/supabase-config.js"></script>
+    <script src="assets/js/lead-service.js"></script>
     <script src="script.js"></script>
 </body>
 
