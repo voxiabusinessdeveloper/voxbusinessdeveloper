@@ -913,33 +913,54 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.target === leadModal) closeLeadModal();
     });
 
+    // Actualizar badge del modal en tiempo real cuando el usuario cambia el selector
+    modalStatusSelect.addEventListener('change', (e) => {
+        const val = e.target.value;
+        modalStatusBadge.textContent = formatEstadoLabel(val);
+        modalStatusBadge.className = `status-badge status-${val}`;
+    });
+
     saveLeadChangesBtn.addEventListener('click', async () => {
         if (!state.activeLead) return;
 
         const newStatus = modalStatusSelect.value;
         const newNotas = modalNotas.value.trim();
+        const leadId = state.activeLead.id;
 
         saveLeadChangesBtn.disabled = true;
         saveLeadChangesBtn.innerHTML = '<span>Guardando...</span>';
 
-        const isConfigured = window.VOX_SUPABASE && window.VOX_SUPABASE.isConfigured();
-
-        if (isConfigured) {
-            try {
-                await window.VOX_SUPABASE.client
-                    .from('leads')
-                    .update({ estado: newStatus, notas: newNotas })
-                    .eq('id', state.activeLead.id);
-            } catch (err) {
-                console.error('Error al actualizar lead en Supabase:', err);
-            }
+        // 1. Actualizar el lead en state.leads
+        const leadInState = state.leads.find(l => String(l.id) === String(leadId));
+        if (leadInState) {
+            leadInState.estado = newStatus;
+            leadInState.notas = newNotas;
         }
-
         state.activeLead.estado = newStatus;
         state.activeLead.notas = newNotas;
 
+        // 2. Actualizar en Supabase Cloud si está configurado
+        const isConfigured = window.VOX_SUPABASE && window.VOX_SUPABASE.isConfigured();
+        if (isConfigured) {
+            try {
+                const { error } = await window.VOX_SUPABASE.client
+                    .from('leads')
+                    .update({ estado: newStatus, notas: newNotas })
+                    .eq('id', leadId);
+
+                if (error) {
+                    console.error('Error al actualizar lead en Supabase:', error);
+                } else {
+                    console.log('✅ Lead actualizado con éxito en Supabase Cloud:', leadId);
+                }
+            } catch (err) {
+                console.error('Error en petición a Supabase:', err);
+            }
+        }
+
+        // 3. Actualizar en caché local
         const localLeads = window.LeadService.getLocalLeads();
-        const index = localLeads.findIndex(l => String(l.id) === String(state.activeLead.id));
+        const index = localLeads.findIndex(l => String(l.id) === String(leadId));
         if (index !== -1) {
             localLeads[index].estado = newStatus;
             localLeads[index].notas = newNotas;
@@ -950,6 +971,7 @@ document.addEventListener('DOMContentLoaded', () => {
         saveLeadChangesBtn.innerHTML = '<i data-lucide="save"></i> <span>Guardar Cambios</span>';
         if (window.lucide) window.lucide.createIcons();
 
+        // 4. Refrescar filtros y re-renderizar todas las vistas
         applyFilters();
         closeLeadModal();
     });
