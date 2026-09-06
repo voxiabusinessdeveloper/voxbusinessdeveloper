@@ -75,6 +75,69 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalWaBtn = document.getElementById('modalWaBtn');
     const modalMailBtn = document.getElementById('modalMailBtn');
 
+    // Inactividad máxima permitida: 15 minutos (en milisegundos)
+    const INACTIVITY_TIMEOUT_MS = 15 * 60 * 1000;
+    const LAST_ACTIVITY_KEY = 'vox_crm_last_activity';
+    let inactivityTimer = null;
+
+    function updateLastActivity() {
+        if (!state.user) return;
+        const now = Date.now();
+        localStorage.setItem(LAST_ACTIVITY_KEY, now.toString());
+        resetInactivityTimer();
+    }
+
+    function checkInactivityOnLoad() {
+        const lastActivity = localStorage.getItem(LAST_ACTIVITY_KEY);
+        if (lastActivity) {
+            const timeSinceLastActivity = Date.now() - parseInt(lastActivity, 10);
+            if (timeSinceLastActivity > INACTIVITY_TIMEOUT_MS) {
+                return true; // Expiró
+            }
+        }
+        return false;
+    }
+
+    function resetInactivityTimer() {
+        if (inactivityTimer) clearTimeout(inactivityTimer);
+        if (!state.user) return;
+
+        inactivityTimer = setTimeout(() => {
+            handleAutoLogout();
+        }, INACTIVITY_TIMEOUT_MS);
+    }
+
+    async function handleAutoLogout() {
+        if (!state.user) return;
+        if (inactivityTimer) clearTimeout(inactivityTimer);
+        localStorage.removeItem(LAST_ACTIVITY_KEY);
+
+        const isConfigured = window.VOX_SUPABASE && window.VOX_SUPABASE.isConfigured();
+        if (isConfigured) {
+            await window.VOX_SUPABASE.client.auth.signOut();
+        } else {
+            localStorage.removeItem('vox_crm_demo_user');
+        }
+
+        showLogin('⏱️ Tu sesión ha expirado tras 15 minutos de inactividad por seguridad.');
+    }
+
+    // Escuchadores de eventos de interacción del usuario para renovar actividad
+    const userActivityEvents = ['mousemove', 'mousedown', 'keydown', 'touchstart', 'scroll', 'click'];
+    let throttledActivityUpdate = null;
+    userActivityEvents.forEach(eventName => {
+        window.addEventListener(eventName, () => {
+            if (!state.user) return;
+            // Throttle para no saturar localStorage en cada milímetro de mousemove
+            if (!throttledActivityUpdate) {
+                throttledActivityUpdate = setTimeout(() => {
+                    updateLastActivity();
+                    throttledActivityUpdate = null;
+                }, 1000);
+            }
+        }, { passive: true });
+    });
+
     // -------------------------------------------------------------
     // 1. INICIALIZACIÓN Y SESIÓN
     // -------------------------------------------------------------
@@ -89,6 +152,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const { data: { session } } = await window.VOX_SUPABASE.client.auth.getSession();
             if (session && session.user) {
+                if (checkInactivityOnLoad()) {
+                    await window.VOX_SUPABASE.client.auth.signOut();
+                    localStorage.removeItem(LAST_ACTIVITY_KEY);
+                    showLogin('⏱️ Tu sesión ha expirado tras 15 minutos de inactividad.');
+                    return;
+                }
                 setAuthenticatedUser(session.user);
             } else {
                 showLogin();
@@ -107,6 +176,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const localUser = localStorage.getItem('vox_crm_demo_user');
             if (localUser) {
+                if (checkInactivityOnLoad()) {
+                    localStorage.removeItem('vox_crm_demo_user');
+                    localStorage.removeItem(LAST_ACTIVITY_KEY);
+                    showLogin('⏱️ Tu sesión ha expirado tras 15 minutos de inactividad.');
+                    return;
+                }
                 setAuthenticatedUser({ email: localUser });
             } else {
                 showLogin();
@@ -114,10 +189,21 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function showLogin() {
+    function showLogin(msg = null) {
         state.user = null;
+        if (inactivityTimer) clearTimeout(inactivityTimer);
+        localStorage.removeItem(LAST_ACTIVITY_KEY);
+
         loginWrapper.style.display = 'flex';
         dashboardLayout.style.display = 'none';
+
+        if (msg) {
+            loginAlert.textContent = msg;
+            loginAlert.style.display = 'block';
+            loginAlert.style.backgroundColor = 'rgba(234, 179, 8, 0.15)';
+            loginAlert.style.borderColor = 'rgba(234, 179, 8, 0.4)';
+            loginAlert.style.color = '#fde047';
+        }
     }
 
     function setAuthenticatedUser(user) {
@@ -128,6 +214,7 @@ document.addEventListener('DOMContentLoaded', () => {
         loginWrapper.style.display = 'none';
         dashboardLayout.style.display = 'flex';
 
+        updateLastActivity();
         fetchLeads();
     }
 
