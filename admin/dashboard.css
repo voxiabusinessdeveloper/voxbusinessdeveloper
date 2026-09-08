@@ -1728,3 +1728,593 @@ input:focus,
         padding-top: 14px;
     }
 }
+
+/* ==============================================================================
+   MÓDULO DE CRÉDITOS, COBRANZA & CONTROL DE SITIOS (VOX KILLSWITCH)
+   ============================================================================== */
+
+.creditos-view {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    animation: fadeIn 0.3s var(--ease-out);
+}
+
+.creditos-top-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.creditos-filters-pill {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.pill-btn {
+    background: var(--bg-surface-elevated);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-secondary);
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 0.82rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.pill-btn:hover {
+    background: var(--bg-surface-hover);
+    color: var(--text-primary);
+    border-color: var(--border-medium);
+}
+
+.pill-btn.active {
+    background: var(--gold-subtle);
+    color: var(--gold-primary);
+    border-color: var(--gold-primary);
+}
+
+.pill-btn.warning.active {
+    background: var(--orange-bg);
+    color: var(--orange-tag);
+    border-color: var(--orange-tag);
+}
+
+.pill-btn.danger.active {
+    background: var(--red-bg);
+    color: var(--red-tag);
+    border-color: var(--red-tag);
+}
+
+.pill-btn.success.active {
+    background: var(--green-bg);
+    color: var(--green-tag);
+    border-color: var(--green-tag);
+}
+
+.creditos-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+}
+
+.creditos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+    gap: 20px;
+}
+
+/* Tarjeta de Crédito de Sitio */
+.credito-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    transition: all 0.25s var(--ease-out);
+    position: relative;
+    overflow: hidden;
+}
+
+.credito-card:hover {
+    border-color: var(--border-medium);
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px -8px rgba(0, 0, 0, 0.45);
+}
+
+.credito-card.status-suspendido {
+    border-color: rgba(231, 76, 60, 0.35);
+    background: linear-gradient(180deg, rgba(231, 76, 60, 0.04) 0%, var(--bg-surface) 100%);
+}
+
+.credito-card.status-liquidado {
+    border-color: rgba(46, 204, 113, 0.35);
+}
+
+.credito-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.credito-cliente-info h3 {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+
+.credito-dominio-link {
+    font-size: 0.8rem;
+    color: var(--gold-primary);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.credito-dominio-link:hover {
+    text-decoration: underline;
+}
+
+.credito-status-badge {
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+}
+
+.credito-status-badge.activo {
+    background: var(--green-bg);
+    color: var(--green-tag);
+    border: 1px solid rgba(46, 204, 113, 0.25);
+}
+
+.credito-status-badge.en_gracia {
+    background: var(--orange-bg);
+    color: var(--orange-tag);
+    border: 1px solid rgba(243, 156, 18, 0.25);
+}
+
+.credito-status-badge.suspendido {
+    background: var(--red-bg);
+    color: var(--red-tag);
+    border: 1px solid rgba(231, 76, 60, 0.25);
+}
+
+.credito-status-badge.liquidado {
+    background: rgba(201, 168, 106, 0.15);
+    color: var(--gold-primary);
+    border: 1px solid rgba(201, 168, 106, 0.3);
+}
+
+/* Barra de Progreso de Pagos */
+.credito-progress-box {
+    background: var(--bg-surface-elevated);
+    border-radius: var(--radius-sm);
+    padding: 12px;
+    border: 1px solid var(--border-subtle);
+}
+
+.credito-progress-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+}
+
+.credito-progress-header strong {
+    color: var(--text-primary);
+}
+
+.credito-progress-bar {
+    height: 8px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+}
+
+.credito-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--gold-primary) 0%, #e0c588 100%);
+    border-radius: 4px;
+    transition: width 0.4s ease;
+}
+
+.credito-progress-fill.full {
+    background: linear-gradient(90deg, #2ecc71 0%, #27ae60 100%);
+}
+
+.credito-progress-segments {
+    display: flex;
+    gap: 4px;
+    margin-top: 8px;
+}
+
+.credito-segment {
+    flex: 1;
+    height: 4px;
+    border-radius: 2px;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.credito-segment.paid {
+    background: var(--gold-primary);
+}
+
+.credito-segment.paid.full {
+    background: var(--green-tag);
+}
+
+/* Detalles del Plan */
+.credito-details-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    font-size: 0.82rem;
+}
+
+.credito-detail-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.credito-detail-label {
+    color: var(--text-tertiary);
+    font-size: 0.74rem;
+}
+
+.credito-detail-val {
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+/* Acciones Rápidas de la Tarjeta */
+.credito-actions-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 4px;
+}
+
+.btn-card-action {
+    padding: 8px 12px;
+    border-radius: var(--radius-sm);
+    font-size: 0.78rem;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid var(--border-subtle);
+    background: var(--bg-surface-elevated);
+    color: var(--text-primary);
+    text-decoration: none;
+}
+
+.btn-card-action:hover {
+    background: var(--bg-surface-hover);
+    border-color: var(--border-medium);
+}
+
+.btn-card-action.btn-pay {
+    background: rgba(46, 204, 113, 0.12);
+    color: var(--green-tag);
+    border-color: rgba(46, 204, 113, 0.25);
+}
+
+.btn-card-action.btn-pay:hover {
+    background: rgba(46, 204, 113, 0.22);
+}
+
+.btn-card-action.btn-killswitch-suspend {
+    background: rgba(231, 76, 60, 0.12);
+    color: var(--red-tag);
+    border-color: rgba(231, 76, 60, 0.25);
+}
+
+.btn-card-action.btn-killswitch-suspend:hover {
+    background: rgba(231, 76, 60, 0.22);
+}
+
+.btn-card-action.btn-killswitch-reactivate {
+    background: rgba(76, 130, 247, 0.12);
+    color: var(--blue-tag);
+    border-color: rgba(76, 130, 247, 0.25);
+}
+
+.btn-card-action.btn-killswitch-reactivate:hover {
+    background: rgba(76, 130, 247, 0.22);
+}
+
+.btn-card-action.btn-wa-remind {
+    background: rgba(37, 211, 102, 0.12);
+    color: #25D366;
+    border-color: rgba(37, 211, 102, 0.25);
+}
+
+.btn-card-action.btn-wa-remind:hover {
+    background: rgba(37, 211, 102, 0.22);
+}
+
+/* Snippet Code Box */
+.snippet-code-box {
+    background: #090B0E;
+    border: 1px solid var(--border-medium);
+    border-radius: var(--radius-sm);
+    padding: 16px;
+    overflow-x: auto;
+}
+
+.snippet-code-box pre {
+    margin: 0;
+    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+    font-size: 0.85rem;
+    color: #E2E8F0;
+    white-space: pre-wrap;
+    word-break: break-all;
+}
+
+.form-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+}
+
+.form-grid-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+}
+
+@media (max-width: 600px) {
+    .form-grid-2, .form-grid-3 {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    .creditos-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ==============================================================================
+   NUEVO MODAL PREMIUM DE CRÉDITOS Y FINANCIAMIENTO
+   ============================================================================== */
+
+.modal-credito-premium {
+    max-width: 680px;
+    padding: 0;
+    overflow: hidden;
+    background: #111418;
+    border: 1px solid rgba(201, 168, 106, 0.25);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.85), 0 0 40px rgba(201, 168, 106, 0.1);
+}
+
+.modal-header-premium {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 24px 28px 20px 28px;
+    background: linear-gradient(180deg, rgba(201, 168, 106, 0.08) 0%, rgba(17, 20, 24, 0.4) 100%);
+    border-bottom: 1px solid var(--border-subtle);
+    position: relative;
+}
+
+.modal-header-icon-box {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-sm);
+    background: rgba(201, 168, 106, 0.12);
+    border: 1px solid rgba(201, 168, 106, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--gold-primary);
+    flex-shrink: 0;
+    box-shadow: 0 0 16px rgba(201, 168, 106, 0.15);
+}
+
+.modal-header-icon-box svg,
+.modal-header-icon-box i {
+    width: 24px;
+    height: 24px;
+}
+
+.modal-header-desc {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-top: 4px;
+    line-height: 1.4;
+}
+
+.modal-body-premium {
+    padding: 24px 28px;
+    max-height: 72vh;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.modal-form-section {
+    background: rgba(255, 255, 255, 0.015);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: 18px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.modal-section-title {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--gold-primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+}
+
+.modal-section-title svg,
+.modal-section-title i {
+    width: 15px;
+    height: 15px;
+}
+
+.form-group-premium {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.form-group-premium label {
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.input-with-icon {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-with-icon svg,
+.input-with-icon i {
+    position: absolute;
+    left: 14px;
+    width: 16px;
+    height: 16px;
+    color: var(--text-tertiary);
+    pointer-events: none;
+    transition: color 0.2s ease;
+}
+
+.input-with-icon input {
+    width: 100%;
+    background: var(--bg-surface-elevated);
+    border: 1px solid var(--border-medium);
+    border-radius: var(--radius-sm);
+    padding: 10px 14px 10px 40px;
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 0.85rem;
+    transition: all 0.2s ease;
+}
+
+.input-with-icon input:focus {
+    outline: none;
+    border-color: var(--gold-primary);
+    background: var(--bg-surface-hover);
+    box-shadow: 0 0 0 3px rgba(201, 168, 106, 0.15);
+}
+
+.input-with-icon input:focus + svg,
+.input-with-icon:focus-within svg {
+    color: var(--gold-primary);
+}
+
+/* Card de Resumen en Vivo */
+.credito-live-summary-card {
+    background: linear-gradient(135deg, rgba(201, 168, 106, 0.08) 0%, rgba(18, 22, 28, 0.8) 100%);
+    border: 1px solid rgba(201, 168, 106, 0.25);
+    border-radius: var(--radius-sm);
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 4px;
+}
+
+.summary-item {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    flex: 1;
+}
+
+.summary-lbl {
+    font-size: 0.7rem;
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.summary-val {
+    font-size: 0.95rem;
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.summary-val.highlight {
+    color: var(--gold-primary);
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.summary-divider {
+    width: 1px;
+    height: 32px;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.modal-footer-premium {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 16px 28px 20px 28px;
+    background: var(--bg-surface-elevated);
+    border-top: 1px solid var(--border-subtle);
+}
+
+.btn-save-credito {
+    padding: 10px 22px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    box-shadow: 0 4px 16px rgba(201, 168, 106, 0.25);
+}
+
+@media (max-width: 640px) {
+    .credito-live-summary-card {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    .summary-divider {
+        display: none;
+    }
+    .modal-header-premium {
+        padding: 18px 20px;
+    }
+    .modal-body-premium {
+        padding: 16px 20px;
+    }
+    .modal-footer-premium {
+        padding: 14px 20px;
+    }
+}
+
+

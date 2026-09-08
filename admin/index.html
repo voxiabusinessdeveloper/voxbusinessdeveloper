@@ -110,6 +110,11 @@
                     <span>Tabla de Leads</span>
                     <span class="badge badge-accent" id="badgeAll">0</span>
                 </button>
+                <button class="nav-item" data-view="creditos">
+                    <i data-lucide="credit-card"></i>
+                    <span>Créditos & Sitios</span>
+                    <span class="badge badge-warning" id="badgeCreditosAlert" style="display: none;">0</span>
+                </button>
                 <button class="nav-item" data-view="analytics">
                     <i data-lucide="pie-chart"></i>
                     <span>Analíticas & Gráficos</span>
@@ -183,6 +188,9 @@
                         </button>
                         <button class="btn btn-icon-view" id="btnViewTable" title="Vista Tabla">
                             <i data-lucide="table"></i>
+                        </button>
+                        <button class="btn btn-icon-view" id="btnViewCreditos" title="Vista Créditos & Sitios">
+                            <i data-lucide="credit-card"></i>
                         </button>
                         <button class="btn btn-icon-view" id="btnViewCharts" title="Vista Gráficos">
                             <i data-lucide="bar-chart-2"></i>
@@ -375,7 +383,402 @@
                 </div>
             </section>
 
+            <!-- ========================================== -->
+            <!-- VISTA 4: CRÉDITOS, COBRANZA & CONTROL DE SITIOS -->
+            <!-- ========================================== -->
+            <section class="creditos-view" id="creditosViewContainer" style="display: none;">
+                <!-- Header de Créditos con botón de alta -->
+                <div class="creditos-top-actions">
+                    <div class="creditos-filters-pill">
+                        <button class="pill-btn active" data-credito-filter="all">Todos (<span
+                                id="countCreditosAll">0</span>)</button>
+                        <button class="pill-btn" data-credito-filter="activo">Al corriente (<span
+                                id="countCreditosActivos">0</span>)</button>
+                        <button class="pill-btn warning" data-credito-filter="en_gracia">Por Vencer (<span
+                                id="countCreditosGracia">0</span>)</button>
+                        <button class="pill-btn danger" data-credito-filter="suspendido">Suspendidos (<span
+                                id="countCreditosSuspendidos">0</span>)</button>
+                        <button class="pill-btn success" data-credito-filter="liquidado">Liquidados (<span
+                                id="countCreditosLiquidados">0</span>)</button>
+                    </div>
+                    <button class="btn btn-primary" id="btnOpenNuevoCreditoModal">
+                        <i data-lucide="plus-circle"></i>
+                        <span>Nuevo Crédito de Sitio</span>
+                    </button>
+                </div>
+
+                <!-- Tarjetas KPI de Créditos -->
+                <div class="creditos-kpi-grid">
+                    <div class="kpi-card glass-panel">
+                        <div class="kpi-icon gold">
+                            <i data-lucide="credit-card"></i>
+                        </div>
+                        <div class="kpi-data">
+                            <span class="kpi-label">Cartera Total</span>
+                            <h3 class="kpi-value" id="kpiCarteraTotal">$0</h3>
+                        </div>
+                    </div>
+                    <div class="kpi-card glass-panel">
+                        <div class="kpi-icon green">
+                            <i data-lucide="dollar-sign"></i>
+                        </div>
+                        <div class="kpi-data">
+                            <span class="kpi-label">Total Cobrado</span>
+                            <h3 class="kpi-value" id="kpiCobradoTotal">$0</h3>
+                        </div>
+                    </div>
+                    <div class="kpi-card glass-panel">
+                        <div class="kpi-icon blue">
+                            <i data-lucide="layers"></i>
+                        </div>
+                        <div class="kpi-data">
+                            <span class="kpi-label">Por Cobrar</span>
+                            <h3 class="kpi-value" id="kpiPorCobrar">$0</h3>
+                        </div>
+                    </div>
+                    <div class="kpi-card glass-panel">
+                        <div class="kpi-icon red">
+                            <i data-lucide="shield-alert"></i>
+                        </div>
+                        <div class="kpi-data">
+                            <span class="kpi-label">Sitios Suspendidos</span>
+                            <h3 class="kpi-value" id="kpiSuspendidos">0</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Grid de Tarjetas de Créditos -->
+                <div class="creditos-grid" id="creditosGrid">
+                    <!-- Inyectado dinámicamente -->
+                </div>
+
+                <!-- Empty State Créditos -->
+                <div class="empty-state" id="emptyStateCreditos" style="display: none;">
+                    <i data-lucide="credit-card"></i>
+                    <h3>No hay sitios a crédito registrados</h3>
+                    <p>Registra un nuevo plan financiado (ej. 8 meses de $1,000 MXN) para monitorear sus pagos y activar
+                        su killswitch.</p>
+                </div>
+            </section>
+
         </main>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- MODAL: NUEVO CRÉDITO DE SITIO WEB (PREMIUM REDESIGN) -->
+    <!-- ========================================== -->
+    <div class="modal-overlay" id="nuevoCreditoModal" style="display: none;">
+        <div class="modal-card glass-panel modal-credito-premium">
+            <!-- Header con Icono de Escudo y Badge -->
+            <div class="modal-header-premium">
+                <div class="modal-header-icon-box">
+                    <i data-lucide="shield-check"></i>
+                </div>
+                <div class="modal-title-wrap">
+                    <div class="modal-badge-row">
+                        <span class="badge badge-accent">FINANCIAMIENTO VOX</span>
+                        <span class="badge"
+                            style="background: rgba(46, 204, 113, 0.12); color: #2ecc71; border: 1px solid rgba(46, 204, 113, 0.25);">Protección
+                            Killswitch</span>
+                    </div>
+                    <h2>Registrar Nuevo Sitio a Crédito</h2>
+                    <p class="modal-header-desc">Configura el plan financiado, calendario de cobranza y genera el script
+                        seguro para el cliente.</p>
+                </div>
+                <button class="btn-close" id="closeNuevoCreditoModalBtn" aria-label="Cerrar modal">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+
+            <form id="nuevoCreditoForm" class="modal-body-premium">
+
+                <!-- SECCIÓN 1: DATOS DEL CLIENTE Y SITIO -->
+                <div class="modal-form-section">
+                    <div class="modal-section-title">
+                        <i data-lucide="building-2"></i>
+                        <span>Información del Negocio & Sitio Web</span>
+                    </div>
+
+                    <div class="form-grid-2">
+                        <div class="form-group-premium">
+                            <label for="credClienteNombre">
+                                <span>Titular o Nombre del Negocio *</span>
+                            </label>
+                            <div class="input-with-icon">
+                                <i data-lucide="user"></i>
+                                <input type="text" id="credClienteNombre"
+                                    placeholder="Ej. Dr. García / Grupo Inmobiliario" required />
+                            </div>
+                        </div>
+
+                        <div class="form-group-premium">
+                            <label for="credDominioUrl">
+                                <span>Dominio o URL del Sitio Web *</span>
+                            </label>
+                            <div class="input-with-icon">
+                                <i data-lucide="globe"></i>
+                                <input type="text" id="credDominioUrl" placeholder="https://ejemplo.com" required />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-grid-2">
+                        <div class="form-group-premium">
+                            <label for="credTelefono">
+                                <span>WhatsApp de Cobranza Directa *</span>
+                            </label>
+                            <div class="input-with-icon">
+                                <i data-lucide="message-circle"></i>
+                                <input type="tel" id="credTelefono" placeholder="529994967389" required />
+                            </div>
+                        </div>
+
+                        <div class="form-group-premium">
+                            <label for="credCorreo">
+                                <span>Correo Electrónico del Titular</span>
+                            </label>
+                            <div class="input-with-icon">
+                                <i data-lucide="mail"></i>
+                                <input type="email" id="credCorreo" placeholder="cliente@empresa.com" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECCIÓN 2: PLAN FINANCIERO Y CÁLCULO EN VIVO -->
+                <div class="modal-form-section">
+                    <div class="modal-section-title">
+                        <i data-lucide="wallet"></i>
+                        <span>Plan Financiero & Calendario de Pagos</span>
+                    </div>
+
+                    <div class="form-grid-3">
+                        <div class="form-group-premium">
+                            <label for="credTotalMeses">
+                                <span>Plazo (Meses)</span>
+                            </label>
+                            <div class="input-with-icon">
+                                <i data-lucide="calendar"></i>
+                                <input type="number" id="credTotalMeses" value="8" min="1" max="36" required />
+                            </div>
+                        </div>
+
+                        <div class="form-group-premium">
+                            <label for="credMontoMensual">
+                                <span>Mensualidad ($ MXN)</span>
+                            </label>
+                            <div class="input-with-icon">
+                                <i data-lucide="dollar-sign"></i>
+                                <input type="number" id="credMontoMensual" value="1000" min="0" step="50" required />
+                            </div>
+                        </div>
+
+                        <div class="form-group-premium">
+                            <label for="credDiaCorte">
+                                <span>Día de Corte (1 al 31)</span>
+                            </label>
+                            <div class="input-with-icon">
+                                <i data-lucide="clock"></i>
+                                <input type="number" id="credDiaCorte" value="5" min="1" max="31" required />
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Resumen Financiero en Vivo (Live Preview Box) -->
+                    <div class="credito-live-summary-card">
+                        <div class="summary-item">
+                            <span class="summary-lbl">Inversión Total Contratada</span>
+                            <strong class="summary-val highlight" id="summaryTotalCredito">$8,000 MXN</strong>
+                        </div>
+                        <div class="summary-divider"></div>
+                        <div class="summary-item">
+                            <span class="summary-lbl">Estructura del Plan</span>
+                            <strong class="summary-val" id="summaryEstructuraPlan">8 pagos de $1,000 MXN</strong>
+                        </div>
+                        <div class="summary-divider"></div>
+                        <div class="summary-item">
+                            <span class="summary-lbl">Próximo Vencimiento</span>
+                            <strong class="summary-val" id="summaryFechaVencimiento">Día 5 del mes</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECCIÓN 3: CONCEPTO Y NOTAS -->
+                <div class="modal-form-section">
+                    <div class="form-group-premium">
+                        <label for="credPlanNombre">
+                            <span>Concepto o Tipo de Desarrollo</span>
+                        </label>
+                        <div class="input-with-icon">
+                            <i data-lucide="layers"></i>
+                            <input type="text" id="credPlanNombre" value="Página Web Corporativa a 8 Meses" />
+                        </div>
+                    </div>
+
+                    <div class="form-group-premium" style="margin-top: 12px;">
+                        <label for="credNotas">
+                            <span>Notas Internas & Acuerdos Especiales (Opcional)</span>
+                        </label>
+                        <textarea id="credNotas" rows="2" class="textarea-control"
+                            placeholder="Detalles de facturación, persona encargada de tesorería o acuerdos previos..."></textarea>
+                    </div>
+                </div>
+
+                <!-- FOOTER CON ACCIONES -->
+                <div class="modal-footer-premium">
+                    <button type="button" class="btn btn-outline" id="cancelNuevoCreditoBtn">Cancelar</button>
+                    <button type="submit" class="btn btn-primary btn-save-credito" id="saveNuevoCreditoBtn">
+                        <i data-lucide="shield-check"></i>
+                        <span>Crear y Generar Token de Protección</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- MODAL: REGISTRAR PAGO MANUAL DE CUOTA -->
+    <!-- ========================================== -->
+    <div class="modal-overlay" id="registrarPagoModal" style="display: none;">
+        <div class="modal-card glass-panel" style="max-width: 520px;">
+            <div class="modal-header">
+                <div class="modal-title-wrap">
+                    <span class="badge badge-success">Ingreso de Pago</span>
+                    <h2 id="pagoModalCliente">Registrar Cuota</h2>
+                    <small id="pagoModalProgreso" class="muted">Cuota 1 de 8</small>
+                </div>
+                <button class="btn-close" id="closeRegistrarPagoModalBtn">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+
+            <form id="registrarPagoForm" class="modal-body">
+                <input type="hidden" id="pagoCreditoId" />
+                <input type="hidden" id="pagoNumeroCuota" />
+
+                <div class="form-grid-2">
+                    <div class="form-group">
+                        <label for="pagoMonto">Monto Recibido ($ MXN) *</label>
+                        <input type="number" id="pagoMonto" class="input-control" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="pagoFecha">Fecha del Pago *</label>
+                        <input type="date" id="pagoFecha" class="input-control" required />
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="pagoMetodo">Método de Pago *</label>
+                    <select id="pagoMetodo" class="select-control full" required>
+                        <option value="transferencia_spei">Transferencia Electrónica (SPEI)</option>
+                        <option value="efectivo">Efectivo</option>
+                        <option value="oxxo">Depósito OXXO / Tienda</option>
+                        <option value="tarjeta">Tarjeta de Débito / Crédito</option>
+                        <option value="otro">Otro Método</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="pagoComprobanteRef">Número de Referencia / Folio</label>
+                    <input type="text" id="pagoComprobanteRef" class="input-control"
+                        placeholder="Ej. SPEI 839201 o Clave de Rastreo" />
+                </div>
+
+                <div class="form-group">
+                    <label for="pagoNotas">Notas adicionales</label>
+                    <textarea id="pagoNotas" rows="2" class="textarea-control"
+                        placeholder="Comentarios sobre el pago recibido..."></textarea>
+                </div>
+
+                <div class="modal-footer-actions">
+                    <button type="button" class="btn btn-outline" id="cancelRegistrarPagoBtn">Cancelar</button>
+                    <button type="submit" class="btn btn-primary" id="btnConfirmarPago">
+                        <i data-lucide="check-circle"></i>
+                        <span>Confirmar Pago de Cuota</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- MODAL: SNIPPET DE CÓDIGO EMBEBIBLE -->
+    <!-- ========================================== -->
+    <div class="modal-overlay" id="snippetModal" style="display: none;">
+        <div class="modal-card glass-panel" style="max-width: 580px;">
+            <div class="modal-header">
+                <div class="modal-title-wrap">
+                    <span class="badge badge-accent">Integración Técnica</span>
+                    <h2>Código Killswitch para Sitio Web</h2>
+                    <small class="muted" id="snippetClienteName">Cliente</small>
+                </div>
+                <button class="btn-close" id="closeSnippetModalBtn">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <p style="font-size: 14px; color: var(--text-secondary); margin-bottom: 16px;">
+                    Copia este tag y colócalo dentro del <code style="color: var(--gold-primary);">&lt;head&gt;</code>
+                    de la página web del cliente. Permite el control del estado y bloqueo automático si se suspende el
+                    servicio.
+                </p>
+
+                <div class="snippet-code-box">
+                    <pre><code id="snippetCodeContent">&lt;!-- VOX Business Developer - Control de Licencia --&gt;
+&lt;script src="https://voxbusinessdeveloper.com/assets/js/vox-license.js" data-vox-site="" defer&gt;&lt;/script&gt;</code></pre>
+                </div>
+
+                <div class="modal-footer-actions" style="margin-top: 20px;">
+                    <button type="button" class="btn btn-outline" id="closeSnippetModalBtn2">Cerrar</button>
+                    <button type="button" class="btn btn-primary" id="btnCopySnippetCode">
+                        <i data-lucide="copy"></i>
+                        <span id="copySnippetBtnText">Copiar Código</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- MODAL: HISTORIAL DE PAGOS DE UN CRÉDITO -->
+    <!-- ========================================== -->
+    <div class="modal-overlay" id="historialPagosModal" style="display: none;">
+        <div class="modal-card glass-panel" style="max-width: 640px;">
+            <div class="modal-header">
+                <div class="modal-title-wrap">
+                    <span class="badge badge-accent">Estado de Cuenta</span>
+                    <h2 id="historialClienteName">Historial de Pagos</h2>
+                    <small id="historialProgresoSummary" class="muted">Cuotas pagadas</small>
+                </div>
+                <button class="btn-close" id="closeHistorialModalBtn">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <div class="table-responsive" style="max-height: 320px; overflow-y: auto;">
+                    <table class="leads-table">
+                        <thead>
+                            <tr>
+                                <th>Cuota</th>
+                                <th>Fecha</th>
+                                <th>Monto</th>
+                                <th>Método</th>
+                                <th>Folio / Ref</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historialTableBody">
+                            <!-- Inyectado dinámicamente -->
+                        </tbody>
+                    </table>
+                </div>
+                <div class="empty-state" id="emptyHistorial" style="display: none; padding: 20px 0;">
+                    <i data-lucide="receipt"></i>
+                    <p>Aún no se han registrado pagos para este sitio.</p>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- ========================================== -->

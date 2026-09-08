@@ -11,10 +11,14 @@ document.addEventListener('DOMContentLoaded', () => {
         leads: [],
         filteredLeads: [],
         activeLead: null,
-        currentView: 'pipeline', // 'pipeline', 'table', 'analytics'
+        currentView: 'pipeline', // 'pipeline', 'table', 'creditos', 'analytics'
         statusFilter: 'all',
         searchTerm: '',
-        charts: {}
+        charts: {},
+        creditos: [],
+        filteredCreditos: [],
+        creditoFilter: 'all',
+        activeCredito: null
     };
 
     // DOM Elements - Navigation & Views
@@ -32,10 +36,42 @@ document.addEventListener('DOMContentLoaded', () => {
     const kanbanViewContainer = document.getElementById('kanbanViewContainer');
     const tableViewContainer = document.getElementById('tableViewContainer');
     const analyticsViewContainer = document.getElementById('analyticsViewContainer');
+    const creditosViewContainer = document.getElementById('creditosViewContainer');
 
     const btnViewKanban = document.getElementById('btnViewKanban');
     const btnViewTable = document.getElementById('btnViewTable');
+    const btnViewCreditos = document.getElementById('btnViewCreditos');
     const btnViewCharts = document.getElementById('btnViewCharts');
+    const badgeCreditosAlert = document.getElementById('badgeCreditosAlert');
+
+    // Créditos DOM Elements
+    const creditosGrid = document.getElementById('creditosGrid');
+    const emptyStateCreditos = document.getElementById('emptyStateCreditos');
+    const btnOpenNuevoCreditoModal = document.getElementById('btnOpenNuevoCreditoModal');
+    const nuevoCreditoModal = document.getElementById('nuevoCreditoModal');
+    const closeNuevoCreditoModalBtn = document.getElementById('closeNuevoCreditoModalBtn');
+    const cancelNuevoCreditoBtn = document.getElementById('cancelNuevoCreditoBtn');
+    const nuevoCreditoForm = document.getElementById('nuevoCreditoForm');
+
+    const registrarPagoModal = document.getElementById('registrarPagoModal');
+    const closeRegistrarPagoModalBtn = document.getElementById('closeRegistrarPagoModalBtn');
+    const cancelRegistrarPagoBtn = document.getElementById('cancelRegistrarPagoBtn');
+    const registrarPagoForm = document.getElementById('registrarPagoForm');
+
+    const snippetModal = document.getElementById('snippetModal');
+    const closeSnippetModalBtn = document.getElementById('closeSnippetModalBtn');
+    const closeSnippetModalBtn2 = document.getElementById('closeSnippetModalBtn2');
+    const btnCopySnippetCode = document.getElementById('btnCopySnippetCode');
+    const copySnippetBtnText = document.getElementById('copySnippetBtnText');
+    const snippetCodeContent = document.getElementById('snippetCodeContent');
+    const snippetClienteName = document.getElementById('snippetClienteName');
+
+    const historialPagosModal = document.getElementById('historialPagosModal');
+    const closeHistorialModalBtn = document.getElementById('closeHistorialModalBtn');
+    const historialTableBody = document.getElementById('historialTableBody');
+    const emptyHistorial = document.getElementById('emptyHistorial');
+    const historialClienteName = document.getElementById('historialClienteName');
+    const historialProgresoSummary = document.getElementById('historialProgresoSummary');
 
     // Filters & Search (Search-Box)
     const searchInput = document.getElementById('searchInput');
@@ -245,6 +281,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         updateLastActivity();
         fetchLeads();
+        fetchCreditos();
+        setupRealtimeSubscription();
     }
 
     // Toggle Mostrar/Ocultar Contraseña
@@ -498,42 +536,143 @@ document.addEventListener('DOMContentLoaded', () => {
         const isConfigured = window.VOX_SUPABASE && window.VOX_SUPABASE.isConfigured();
         if (!isConfigured) return;
 
-        window.VOX_SUPABASE.client
-            .channel('leads-realtime-pro')
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'leads' }, () => {
-                fetchLeads();
-            })
-            .subscribe();
+        if (isConfigured) {
+            window.VOX_SUPABASE.client
+                .channel('creditos-realtime-pro')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'creditos_sitios' }, () => {
+                    fetchCreditos();
+                })
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'historial_pagos_credito' }, () => {
+                    fetchCreditos();
+                })
+                .subscribe();
+        }
     }
 
     // -------------------------------------------------------------
-    // 3. CAMBIO DE VISTAS (Kanban, Tabla, Gráficos)
+    // 2.2. CARGA Y GESTIÓN DE CRÉDITOS Y CONTROL DE SITIOS
+    // -------------------------------------------------------------
+    async function fetchCreditos() {
+        const isConfigured = window.VOX_SUPABASE && window.VOX_SUPABASE.isConfigured();
+
+        if (isConfigured) {
+            try {
+                const { data, error } = await window.VOX_SUPABASE.client
+                    .from('creditos_sitios')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+                state.creditos = data || [];
+                // Guardar copia local de respaldo
+                localStorage.setItem('vox_creditos_cache', JSON.stringify(state.creditos));
+            } catch (err) {
+                console.error('Error al cargar créditos de Supabase:', err);
+                state.creditos = JSON.parse(localStorage.getItem('vox_creditos_cache') || '[]');
+            }
+        } else {
+            const cached = localStorage.getItem('vox_creditos_cache');
+            if (cached) {
+                state.creditos = JSON.parse(cached);
+            } else {
+                // Créditos de demostración iniciales
+                state.creditos = [
+                    {
+                        id: 'demo_cred_1',
+                        site_key: 'vox_site_9f8a2b3c4d5e6f7a',
+                        cliente_nombre: 'Dra. Sofía Mendoza / Clínica Dental',
+                        dominio_url: 'https://dentalmendoza.com',
+                        contacto_telefono: '529994967389',
+                        contacto_correo: 'contacto@dentalmendoza.com',
+                        total_meses: 8,
+                        meses_pagados: 3,
+                        monto_mensual: 1000,
+                        dia_corte: 5,
+                        proximo_vencimiento: '2026-09-05',
+                        estado: 'activo',
+                        plan_nombre: 'Sitio Web Médico Corporativo',
+                        motivo_suspension: '',
+                        notas: 'Cliente muy puntual. Notificar vía WhatsApp 2 días antes.'
+                    },
+                    {
+                        id: 'demo_cred_2',
+                        site_key: 'vox_site_a1b2c3d4e5f67890',
+                        cliente_nombre: 'Grupo Constructor Albarrán',
+                        dominio_url: 'https://constructoraalbarran.mx',
+                        contacto_telefono: '525544332211',
+                        contacto_correo: 'pagos@albarran.mx',
+                        total_meses: 8,
+                        meses_pagados: 5,
+                        monto_mensual: 1000,
+                        dia_corte: 1,
+                        proximo_vencimiento: '2026-09-01',
+                        estado: 'en_gracia',
+                        plan_nombre: 'Portal Inmobiliario + Catálogo',
+                        motivo_suspension: '',
+                        notas: 'Cuota 6 pendiente por cambio de tesorería.'
+                    },
+                    {
+                        id: 'demo_cred_3',
+                        site_key: 'vox_site_deadbeef12345678',
+                        cliente_nombre: 'Restaurante & Grill La Fogata',
+                        dominio_url: 'https://lafogatagrill.com',
+                        contacto_telefono: '522221122334',
+                        contacto_correo: 'gerencia@lafogata.com',
+                        total_meses: 8,
+                        meses_pagados: 2,
+                        monto_mensual: 1000,
+                        dia_corte: 15,
+                        proximo_vencimiento: '2026-08-15',
+                        estado: 'suspendido',
+                        plan_nombre: 'Menú Digital Interactivo & Reservas',
+                        motivo_suspension: 'Falta de pago cuota 3 (vencida desde Agosto)',
+                        notas: 'Se envió recordatorio por WhatsApp sin respuesta.'
+                    }
+                ];
+                localStorage.setItem('vox_creditos_cache', JSON.stringify(state.creditos));
+            }
+        }
+
+        applyCreditosFilters();
+    }
+
+    // -------------------------------------------------------------
+    // 3. CAMBIO DE VISTAS (Kanban, Tabla, Créditos, Gráficos)
     // -------------------------------------------------------------
     function switchView(viewName) {
         state.currentView = viewName;
 
         // Actualizar botones de topbar
-        [btnViewKanban, btnViewTable, btnViewCharts].forEach(btn => btn.classList.remove('active'));
+        [btnViewKanban, btnViewTable, btnViewCreditos, btnViewCharts].forEach(btn => {
+            if (btn) btn.classList.remove('active');
+        });
         document.querySelectorAll('.sidebar-nav .nav-item').forEach(item => item.classList.remove('active'));
 
         kanbanViewContainer.style.display = 'none';
         tableViewContainer.style.display = 'none';
         analyticsViewContainer.style.display = 'none';
+        if (creditosViewContainer) creditosViewContainer.style.display = 'none';
 
         if (viewName === 'pipeline') {
-            btnViewKanban.classList.add('active');
+            if (btnViewKanban) btnViewKanban.classList.add('active');
             document.querySelector('.sidebar-nav .nav-item[data-view="pipeline"]')?.classList.add('active');
             kanbanViewContainer.style.display = 'block';
             currentViewTitle.textContent = 'Pipeline de Prospectos (Kanban)';
             renderKanban();
         } else if (viewName === 'table') {
-            btnViewTable.classList.add('active');
+            if (btnViewTable) btnViewTable.classList.add('active');
             document.querySelector('.sidebar-nav .nav-item[data-view="table"]')?.classList.add('active');
             tableViewContainer.style.display = 'block';
             currentViewTitle.textContent = 'Bandeja de Leads (Tabla)';
             renderTable();
+        } else if (viewName === 'creditos') {
+            if (btnViewCreditos) btnViewCreditos.classList.add('active');
+            document.querySelector('.sidebar-nav .nav-item[data-view="creditos"]')?.classList.add('active');
+            if (creditosViewContainer) creditosViewContainer.style.display = 'flex';
+            currentViewTitle.textContent = 'Créditos & Control de Sitios (Killswitch)';
+            renderCreditos();
         } else if (viewName === 'analytics') {
-            btnViewCharts.classList.add('active');
+            if (btnViewCharts) btnViewCharts.classList.add('active');
             document.querySelector('.sidebar-nav .nav-item[data-view="analytics"]')?.classList.add('active');
             analyticsViewContainer.style.display = 'block';
             currentViewTitle.textContent = 'Métricas y Analíticas Comerciales';
@@ -562,9 +701,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (sidebarToggleBtn) sidebarToggleBtn.addEventListener('click', openMobileSidebar);
     if (sidebarBackdrop) sidebarBackdrop.addEventListener('click', closeMobileSidebar);
 
-    btnViewKanban.addEventListener('click', () => switchView('pipeline'));
-    btnViewTable.addEventListener('click', () => switchView('table'));
-    btnViewCharts.addEventListener('click', () => switchView('analytics'));
+    if (btnViewKanban) btnViewKanban.addEventListener('click', () => switchView('pipeline'));
+    if (btnViewTable) btnViewTable.addEventListener('click', () => switchView('table'));
+    if (btnViewCreditos) btnViewCreditos.addEventListener('click', () => switchView('creditos'));
+    if (btnViewCharts) btnViewCharts.addEventListener('click', () => switchView('analytics'));
 
     document.querySelectorAll('.sidebar-nav .nav-item').forEach(item => {
         item.addEventListener('click', () => {
@@ -1232,6 +1372,647 @@ document.addEventListener('DOMContentLoaded', () => {
         URL.revokeObjectURL(url);
     });
 
+    // -------------------------------------------------------------
+    // 10. LÓGICA DEL MÓDULO DE CRÉDITOS Y KILLSWITCH DE SITIOS
+    // -------------------------------------------------------------
+
+    function applyCreditosFilters() {
+        let list = [...state.creditos];
+
+        // Filtro por Estado
+        if (state.creditoFilter !== 'all') {
+            list = list.filter(c => c.estado === state.creditoFilter);
+        }
+
+        // Filtro por búsqueda
+        if (state.searchTerm) {
+            const term = state.searchTerm.toLowerCase();
+            list = list.filter(c =>
+                (c.cliente_nombre && c.cliente_nombre.toLowerCase().includes(term)) ||
+                (c.dominio_url && c.dominio_url.toLowerCase().includes(term)) ||
+                (c.contacto_telefono && c.contacto_telefono.toLowerCase().includes(term)) ||
+                (c.contacto_correo && c.contacto_correo.toLowerCase().includes(term)) ||
+                (c.site_key && c.site_key.toLowerCase().includes(term)) ||
+                (c.plan_nombre && c.plan_nombre.toLowerCase().includes(term))
+            );
+        }
+
+        state.filteredCreditos = list;
+        updateCreditosKPIs();
+        if (state.currentView === 'creditos') {
+            renderCreditos();
+        }
+    }
+
+    function updateCreditosKPIs() {
+        const totalCreditos = state.creditos.length;
+        const activos = state.creditos.filter(c => c.estado === 'activo').length;
+        const enGracia = state.creditos.filter(c => c.estado === 'en_gracia').length;
+        const suspendidos = state.creditos.filter(c => c.estado === 'suspendido').length;
+        const liquidados = state.creditos.filter(c => c.estado === 'liquidado').length;
+
+        // Actualizar contadores de filtros pill
+        const countAll = document.getElementById('countCreditosAll');
+        const countActivos = document.getElementById('countCreditosActivos');
+        const countGracia = document.getElementById('countCreditosGracia');
+        const countSuspendidos = document.getElementById('countCreditosSuspendidos');
+        const countLiquidados = document.getElementById('countCreditosLiquidados');
+
+        if (countAll) countAll.textContent = totalCreditos;
+        if (countActivos) countActivos.textContent = activos;
+        if (countGracia) countGracia.textContent = enGracia;
+        if (countSuspendidos) countSuspendidos.textContent = suspendidos;
+        if (countLiquidados) countLiquidados.textContent = liquidados;
+
+        // Badge en el sidebar
+        if (badgeCreditosAlert) {
+            const alertCount = suspendidos + enGracia;
+            if (alertCount > 0) {
+                badgeCreditosAlert.textContent = alertCount;
+                badgeCreditosAlert.style.display = 'inline-block';
+            } else {
+                badgeCreditosAlert.style.display = 'none';
+            }
+        }
+
+        // Cálculos financieros
+        let carteraTotal = 0;
+        let cobradoTotal = 0;
+
+        state.creditos.forEach(c => {
+            const meses = parseInt(c.total_meses || 8, 10);
+            const pagados = parseInt(c.meses_pagados || 0, 10);
+            const monto = parseFloat(c.monto_mensual || 1000);
+
+            carteraTotal += meses * monto;
+            cobradoTotal += pagados * monto;
+        });
+
+        const porCobrar = Math.max(0, carteraTotal - cobradoTotal);
+
+        const kpiCarteraEl = document.getElementById('kpiCarteraTotal');
+        const kpiCobradoEl = document.getElementById('kpiCobradoTotal');
+        const kpiPorCobrarEl = document.getElementById('kpiPorCobrar');
+        const kpiSuspendidosEl = document.getElementById('kpiSuspendidos');
+
+        const formatoMoneda = (val) => '$' + Number(val).toLocaleString('es-MX', { minimumFractionDigits: 0 });
+
+        if (kpiCarteraEl) kpiCarteraEl.textContent = formatoMoneda(carteraTotal);
+        if (kpiCobradoEl) kpiCobradoEl.textContent = formatoMoneda(cobradoTotal);
+        if (kpiPorCobrarEl) kpiPorCobrarEl.textContent = formatoMoneda(porCobrar);
+        if (kpiSuspendidosEl) kpiSuspendidosEl.textContent = suspendidos;
+    }
+
+    function renderCreditos() {
+        if (!creditosGrid) return;
+        creditosGrid.innerHTML = '';
+
+        if (!state.filteredCreditos || state.filteredCreditos.length === 0) {
+            if (emptyStateCreditos) emptyStateCreditos.style.display = 'flex';
+            return;
+        }
+
+        if (emptyStateCreditos) emptyStateCreditos.style.display = 'none';
+
+        state.filteredCreditos.forEach(credito => {
+            const card = createCreditoCard(credito);
+            creditosGrid.appendChild(card);
+        });
+
+        if (window.lucide) window.lucide.createIcons();
+    }
+
+    function createCreditoCard(credito) {
+        const card = document.createElement('div');
+        card.className = `credito-card status-${credito.estado}`;
+
+        const totalMeses = parseInt(credito.total_meses || 8, 10);
+        const mesesPagados = parseInt(credito.meses_pagados || 0, 10);
+        const montoMensual = parseFloat(credito.monto_mensual || 1000);
+        const totalCredito = totalMeses * montoMensual;
+        const totalPagado = mesesPagados * montoMensual;
+        const porcentaje = Math.min(100, Math.round((mesesPagados / totalMeses) * 100));
+
+        // Crear segmentos visuales
+        let segmentsHtml = '';
+        for (let i = 1; i <= totalMeses; i++) {
+            const isPaid = i <= mesesPagados;
+            const isFull = mesesPagados >= totalMeses;
+            segmentsHtml += `<div class="credito-segment ${isPaid ? 'paid' : ''} ${isFull ? 'full' : ''}" title="Mes ${i}: ${isPaid ? 'Cubierto' : 'Pendiente'}"></div>`;
+        }
+
+        const estadoBadgeClass = credito.estado;
+        let estadoLabel = 'Activo';
+        if (credito.estado === 'en_gracia') estadoLabel = 'Por Vencer';
+        if (credito.estado === 'suspendido') estadoLabel = 'Suspendido';
+        if (credito.estado === 'liquidado') estadoLabel = 'Liquidado';
+
+        const isSuspendido = credito.estado === 'suspendido';
+        const isLiquidado = credito.estado === 'liquidado';
+
+        const waPhone = (credito.contacto_telefono || '').replace(/\D/g, '');
+        const waRemindMsg = encodeURIComponent(
+            `Hola ${credito.cliente_nombre}, te saludamos de VOX Business Developer. Te recordamos que la cuota ${mesesPagados + 1} de tu sitio web (${credito.dominio_url}) está próxima a corte ($${montoMensual.toLocaleString('es-MX')} MXN). ¿Deseas los datos para transferencia SPEI?`
+        );
+        const waLink = waPhone ? `https://wa.me/${waPhone}?text=${waRemindMsg}` : '#';
+
+        card.innerHTML = `
+            <div class="credito-card-header">
+                <div class="credito-cliente-info">
+                    <h3>${escapeHtml(credito.cliente_nombre)}</h3>
+                    <a href="${credito.dominio_url.startsWith('http') ? credito.dominio_url : 'https://' + credito.dominio_url}" target="_blank" rel="noopener noreferrer" class="credito-dominio-link">
+                        <i data-lucide="globe" style="width: 13px; height: 13px;"></i>
+                        <span>${escapeHtml(credito.dominio_url)}</span>
+                    </a>
+                </div>
+                <span class="credito-status-badge ${estadoBadgeClass}">${estadoLabel}</span>
+            </div>
+
+            <div class="credito-progress-box">
+                <div class="credito-progress-header">
+                    <span>Progreso: <strong>${mesesPagados} de ${totalMeses} meses</strong></span>
+                    <span><strong>$${totalPagado.toLocaleString('es-MX')}</strong> / $${totalCredito.toLocaleString('es-MX')} MXN</span>
+                </div>
+                <div class="credito-progress-bar">
+                    <div class="credito-progress-fill ${porcentaje >= 100 ? 'full' : ''}" style="width: ${porcentaje}%;"></div>
+                </div>
+                <div class="credito-progress-segments">
+                    ${segmentsHtml}
+                </div>
+            </div>
+
+            <div class="credito-details-row">
+                <div class="credito-detail-item">
+                    <span class="credito-detail-label">Monto por mes:</span>
+                    <span class="credito-detail-val">$${montoMensual.toLocaleString('es-MX')} MXN</span>
+                </div>
+                <div class="credito-detail-item">
+                    <span class="credito-detail-label">Día de corte:</span>
+                    <span class="credito-detail-val">Día ${credito.dia_corte || 1} de cada mes</span>
+                </div>
+                <div class="credito-detail-item">
+                    <span class="credito-detail-label">Próximo Vencimiento:</span>
+                    <span class="credito-detail-val" style="color: ${isSuspendido ? 'var(--red-tag)' : 'var(--text-primary)'};">${credito.proximo_vencimiento || 'Al día'}</span>
+                </div>
+                <div class="credito-detail-item">
+                    <span class="credito-detail-label">Plan / Concepto:</span>
+                    <span class="credito-detail-val">${escapeHtml(credito.plan_nombre || 'Página Web')}</span>
+                </div>
+            </div>
+
+            ${credito.motivo_suspension ? `
+                <div style="background: rgba(231, 76, 60, 0.1); border-left: 3px solid var(--red-tag); padding: 8px 10px; border-radius: 4px; font-size: 0.76rem; color: #ff8577;">
+                    <strong>Motivo:</strong> ${escapeHtml(credito.motivo_suspension)}
+                </div>
+            ` : ''}
+
+            <div class="credito-actions-grid">
+                ${!isLiquidado ? `
+                    <button class="btn-card-action btn-pay" data-action="registrar-pago" data-id="${credito.id}">
+                        <i data-lucide="plus-circle" style="width: 14px; height: 14px;"></i>
+                        <span>Registrar Pago</span>
+                    </button>
+                ` : `
+                    <button class="btn-card-action" data-action="ver-historial" data-id="${credito.id}">
+                        <i data-lucide="receipt" style="width: 14px; height: 14px;"></i>
+                        <span>Ver Pagos (8/8)</span>
+                    </button>
+                `}
+
+                ${isSuspendido ? `
+                    <button class="btn-card-action btn-killswitch-reactivate" data-action="toggle-killswitch" data-id="${credito.id}" data-current="suspendido">
+                        <i data-lucide="power" style="width: 14px; height: 14px;"></i>
+                        <span>Reactivar Sitio</span>
+                    </button>
+                ` : `
+                    <button class="btn-card-action btn-killswitch-suspend" data-action="toggle-killswitch" data-id="${credito.id}" data-current="activo">
+                        <i data-lucide="shield-alert" style="width: 14px; height: 14px;"></i>
+                        <span>Suspender Sitio</span>
+                    </button>
+                `}
+
+                <button class="btn-card-action" data-action="ver-snippet" data-id="${credito.id}">
+                    <i data-lucide="code" style="width: 14px; height: 14px;"></i>
+                    <span>Código Web</span>
+                </button>
+
+                <a href="${waLink}" target="_blank" rel="noopener noreferrer" class="btn-card-action btn-wa-remind">
+                    <i data-lucide="message-circle" style="width: 14px; height: 14px;"></i>
+                    <span>WhatsApp</span>
+                </a>
+            </div>
+        `;
+
+        // Event listeners para botones de la tarjeta
+        card.querySelector('[data-action="registrar-pago"]')?.addEventListener('click', () => {
+            abrirModalRegistrarPago(credito);
+        });
+
+        card.querySelector('[data-action="ver-historial"]')?.addEventListener('click', () => {
+            abrirModalHistorial(credito);
+        });
+
+        card.querySelector('[data-action="toggle-killswitch"]')?.addEventListener('click', () => {
+            toggleKillswitchSitio(credito);
+        });
+
+        card.querySelector('[data-action="ver-snippet"]')?.addEventListener('click', () => {
+            abrirModalSnippet(credito);
+        });
+
+        return card;
+    }
+
+    // Filtros de Créditos (Pill buttons)
+    document.querySelectorAll('[data-credito-filter]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('[data-credito-filter]').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            state.creditoFilter = btn.getAttribute('data-credito-filter');
+            applyCreditosFilters();
+        });
+    });
+
+    // -------------------------------------------------------------
+    // MODAL: NUEVO CRÉDITO DE SITIO
+    // -------------------------------------------------------------
+    function updateNuevoCreditoLiveSummary() {
+        const totalMeses = parseInt(document.getElementById('credTotalMeses')?.value, 10) || 8;
+        const montoMensual = parseFloat(document.getElementById('credMontoMensual')?.value) || 1000;
+        const diaCorte = parseInt(document.getElementById('credDiaCorte')?.value, 10) || 5;
+
+        const totalInversion = totalMeses * montoMensual;
+
+        const summaryTotalEl = document.getElementById('summaryTotalCredito');
+        const summaryEstructuraEl = document.getElementById('summaryEstructuraPlan');
+        const summaryVencimientoEl = document.getElementById('summaryFechaVencimiento');
+
+        if (summaryTotalEl) summaryTotalEl.textContent = '$' + totalInversion.toLocaleString('es-MX') + ' MXN';
+        if (summaryEstructuraEl) summaryEstructuraEl.textContent = `${totalMeses} pagos de $${montoMensual.toLocaleString('es-MX')} MXN`;
+        if (summaryVencimientoEl) summaryVencimientoEl.textContent = `Día ${diaCorte} de cada mes`;
+    }
+
+    if (btnOpenNuevoCreditoModal) {
+        btnOpenNuevoCreditoModal.addEventListener('click', () => {
+            if (nuevoCreditoForm) nuevoCreditoForm.reset();
+            const totalMesesInput = document.getElementById('credTotalMeses');
+            const montoMensualInput = document.getElementById('credMontoMensual');
+            const diaCorteInput = document.getElementById('credDiaCorte');
+            const planNombreInput = document.getElementById('credPlanNombre');
+
+            if (totalMesesInput) totalMesesInput.value = '8';
+            if (montoMensualInput) montoMensualInput.value = '1000';
+            if (diaCorteInput) diaCorteInput.value = '5';
+            if (planNombreInput) planNombreInput.value = 'Página Web Corporativa a 8 Meses';
+
+            updateNuevoCreditoLiveSummary();
+            nuevoCreditoModal.style.display = 'flex';
+            if (window.lucide) window.lucide.createIcons();
+        });
+    }
+
+    // Listeners para recálculo dinámico en vivo
+    ['credTotalMeses', 'credMontoMensual', 'credDiaCorte'].forEach(id => {
+        const input = document.getElementById(id);
+        if (input) {
+            input.addEventListener('input', updateNuevoCreditoLiveSummary);
+        }
+    });
+
+    function closeNuevoCreditoModal() {
+        if (nuevoCreditoModal) nuevoCreditoModal.style.display = 'none';
+    }
+
+    if (closeNuevoCreditoModalBtn) closeNuevoCreditoModalBtn.addEventListener('click', closeNuevoCreditoModal);
+    if (cancelNuevoCreditoBtn) cancelNuevoCreditoBtn.addEventListener('click', closeNuevoCreditoModal);
+
+    if (nuevoCreditoForm) {
+        nuevoCreditoForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const cliente_nombre = document.getElementById('credClienteNombre').value.trim();
+            const dominio_url = document.getElementById('credDominioUrl').value.trim();
+            const contacto_telefono = document.getElementById('credTelefono').value.trim();
+            const contacto_correo = document.getElementById('credCorreo').value.trim();
+            const total_meses = parseInt(document.getElementById('credTotalMeses').value, 10) || 8;
+            const monto_mensual = parseFloat(document.getElementById('credMontoMensual').value) || 1000;
+            const dia_corte = parseInt(document.getElementById('credDiaCorte').value, 10) || 5;
+            const plan_nombre = document.getElementById('credPlanNombre').value.trim() || 'Página Web Financiada';
+            const notas = document.getElementById('credNotas').value.trim();
+
+            const site_key = 'vox_site_' + Math.random().toString(36).substring(2, 10) + Math.random().toString(36).substring(2, 10);
+
+            // Calcular primer vencimiento
+            const hoy = new Date();
+            let mesVenc = hoy.getMonth() + 1;
+            let anioVenc = hoy.getFullYear();
+            if (mesVenc > 11) { mesVenc = 0; anioVenc++; }
+            const proxVencStr = `${anioVenc}-${String(mesVenc + 1).padStart(2, '0')}-${String(dia_corte).padStart(2, '0')}`;
+
+            const nuevoCredito = {
+                site_key,
+                cliente_nombre,
+                dominio_url,
+                contacto_telefono,
+                contacto_correo,
+                total_meses,
+                meses_pagados: 0,
+                monto_mensual,
+                dia_corte,
+                proximo_vencimiento: proxVencStr,
+                estado: 'activo',
+                motivo_suspension: '',
+                notas,
+                plan_nombre
+            };
+
+            const isConfigured = window.VOX_SUPABASE && window.VOX_SUPABASE.isConfigured();
+            let creditoGuardado = null;
+
+            if (isConfigured) {
+                try {
+                    const { data, error } = await window.VOX_SUPABASE.client
+                        .from('creditos_sitios')
+                        .insert([nuevoCredito])
+                        .select();
+
+                    if (error) {
+                        console.error('Error insertando en Supabase:', error);
+                        throw error;
+                    }
+                    if (data && data[0]) {
+                        creditoGuardado = data[0];
+                    }
+                } catch (err) {
+                    console.error('Error al guardar crédito en Supabase, guardando en local:', err);
+                }
+            }
+
+            if (!creditoGuardado) {
+                creditoGuardado = {
+                    ...nuevoCredito,
+                    id: 'cred_' + Date.now(),
+                    created_at: new Date().toISOString()
+                };
+            }
+
+            state.creditos.unshift(creditoGuardado);
+            localStorage.setItem('vox_creditos_cache', JSON.stringify(state.creditos));
+
+            closeNuevoCreditoModal();
+            applyCreditosFilters();
+
+            // Abrir automáticamente el modal con el snippet generado
+            abrirModalSnippet(creditoGuardado);
+        });
+    }
+
+    // -------------------------------------------------------------
+    // MODAL: REGISTRAR PAGO MANUAL
+    // -------------------------------------------------------------
+    function abrirModalRegistrarPago(credito) {
+        state.activeCredito = credito;
+
+        const clienteEl = document.getElementById('pagoModalCliente');
+        const progresoEl = document.getElementById('pagoModalProgreso');
+        const idInput = document.getElementById('pagoCreditoId');
+        const cuotaInput = document.getElementById('pagoNumeroCuota');
+        const montoInput = document.getElementById('pagoMonto');
+        const fechaInput = document.getElementById('pagoFecha');
+
+        const siguienteCuota = (parseInt(credito.meses_pagados || 0, 10)) + 1;
+
+        if (clienteEl) clienteEl.textContent = `Pago: ${credito.cliente_nombre}`;
+        if (progresoEl) progresoEl.textContent = `Registrando Cuota ${siguienteCuota} de ${credito.total_meses}`;
+        if (idInput) idInput.value = credito.id;
+        if (cuotaInput) cuotaInput.value = siguienteCuota;
+        if (montoInput) montoInput.value = credito.monto_mensual || 1000;
+        if (fechaInput) fechaInput.value = new Date().toISOString().slice(0, 10);
+
+        if (registrarPagoModal) registrarPagoModal.style.display = 'flex';
+    }
+
+    function closeRegistrarPagoModal() {
+        if (registrarPagoModal) registrarPagoModal.style.display = 'none';
+        state.activeCredito = null;
+    }
+
+    if (closeRegistrarPagoModalBtn) closeRegistrarPagoModalBtn.addEventListener('click', closeRegistrarPagoModal);
+    if (cancelRegistrarPagoBtn) cancelRegistrarPagoBtn.addEventListener('click', closeRegistrarPagoModal);
+
+    if (registrarPagoForm) {
+        registrarPagoForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!state.activeCredito) return;
+
+            const credito = state.activeCredito;
+            const creditoId = document.getElementById('pagoCreditoId').value;
+            const numeroCuota = parseInt(document.getElementById('pagoNumeroCuota').value, 10);
+            const monto = parseFloat(document.getElementById('pagoMonto').value);
+            const fecha = document.getElementById('pagoFecha').value;
+            const metodo = document.getElementById('pagoMetodo').value;
+            const comprobante = document.getElementById('pagoComprobanteRef').value.trim();
+            const notas = document.getElementById('pagoNotas').value.trim();
+
+            const nuevoMesesPagados = Math.min(credito.total_meses, (parseInt(credito.meses_pagados || 0, 10)) + 1);
+            const isLiquidado = nuevoMesesPagados >= credito.total_meses;
+            const nuevoEstado = isLiquidado ? 'liquidado' : 'activo';
+
+            const isConfigured = window.VOX_SUPABASE && window.VOX_SUPABASE.isConfigured();
+
+            if (isConfigured) {
+                try {
+                    // 1. Insertar en historial de pagos
+                    await window.VOX_SUPABASE.client
+                        .from('historial_pagos_credito')
+                        .insert([{
+                            credito_id: creditoId,
+                            numero_cuota: numeroCuota,
+                            monto: monto,
+                            fecha_pago: fecha,
+                            metodo_pago: metodo,
+                            comprobante_ref: comprobante,
+                            notas: notas,
+                            registrado_por: state.user ? state.user.email : 'admin'
+                        }]);
+
+                    // 2. Actualizar contador en creditos_sitios
+                    await window.VOX_SUPABASE.client
+                        .from('creditos_sitios')
+                        .update({
+                            meses_pagados: nuevoMesesPagados,
+                            estado: nuevoEstado,
+                            motivo_suspension: isLiquidado ? '' : (credito.estado === 'suspendido' ? '' : credito.motivo_suspension)
+                        })
+                        .eq('id', creditoId);
+
+                } catch (err) {
+                    console.error('Error al registrar pago en Supabase:', err);
+                }
+            }
+
+            // Actualizar estado local
+            credito.meses_pagados = nuevoMesesPagados;
+            credito.estado = nuevoEstado;
+            if (nuevoEstado === 'activo' || nuevoEstado === 'liquidado') {
+                credito.motivo_suspension = '';
+            }
+            localStorage.setItem('vox_creditos_cache', JSON.stringify(state.creditos));
+
+            closeRegistrarPagoModal();
+            applyCreditosFilters();
+            alert(`✅ Cuota ${numeroCuota} de $${monto.toLocaleString('es-MX')} MXN registrada con éxito para "${credito.cliente_nombre}".`);
+        });
+    }
+
+    // -------------------------------------------------------------
+    // ACCIÓN: TOGGLE KILLSWITCH (SUSPENDER / REACTIVAR)
+    // -------------------------------------------------------------
+    async function toggleKillswitchSitio(credito) {
+        const isCurrentlySuspendido = credito.estado === 'suspendido';
+
+        if (isCurrentlySuspendido) {
+            // Confirmar reactivación
+            const confirmar = confirm(`¿Deseas REACTIVAR el sitio web de "${credito.cliente_nombre}"?\nEl sitio volverá a cargar con normalidad para todos los visitantes.`);
+            if (!confirmar) return;
+
+            credito.estado = 'activo';
+            credito.motivo_suspension = '';
+        } else {
+            // Solicitar motivo de suspensión
+            const motivo = prompt(
+                `⚠️ ATENCIÓN: Estás a punto de SUSPENDER el sitio web de "${credito.cliente_nombre}".\nLos visitantes verán la cortina de administración de VOX.\n\nEscribe el motivo de la suspensión:`,
+                'Falta de pago de cuota mensual'
+            );
+            if (motivo === null) return; // Canceló
+
+            credito.estado = 'suspendido';
+            credito.motivo_suspension = motivo.trim() || 'Servicio pausado por administración';
+        }
+
+        const isConfigured = window.VOX_SUPABASE && window.VOX_SUPABASE.isConfigured();
+        if (isConfigured) {
+            try {
+                await window.VOX_SUPABASE.client
+                    .from('creditos_sitios')
+                    .update({
+                        estado: credito.estado,
+                        motivo_suspension: credito.motivo_suspension
+                    })
+                    .eq('id', credito.id);
+            } catch (err) {
+                console.error('Error al actualizar estado killswitch:', err);
+            }
+        }
+
+        localStorage.setItem('vox_creditos_cache', JSON.stringify(state.creditos));
+        applyCreditosFilters();
+    }
+
+    // -------------------------------------------------------------
+    // MODAL: SNIPPET DE CÓDIGO EMBEBIBLE
+    // -------------------------------------------------------------
+    function abrirModalSnippet(credito) {
+        if (snippetClienteName) snippetClienteName.textContent = `${credito.cliente_nombre} (${credito.dominio_url})`;
+
+        const snippetCode = `<!-- VOX Business Developer - Control de Licencia y Servicio -->\n<script src="https://voxbusinessdeveloper.com/assets/js/vox-license.js" data-vox-site="${credito.site_key}" defer></script>`;
+
+        if (snippetCodeContent) snippetCodeContent.textContent = snippetCode;
+        if (copySnippetBtnText) copySnippetBtnText.textContent = 'Copiar Código';
+
+        if (snippetModal) snippetModal.style.display = 'flex';
+    }
+
+    function closeSnippetModal() {
+        if (snippetModal) snippetModal.style.display = 'none';
+    }
+
+    if (closeSnippetModalBtn) closeSnippetModalBtn.addEventListener('click', closeSnippetModal);
+    if (closeSnippetModalBtn2) closeSnippetModalBtn2.addEventListener('click', closeSnippetModal);
+
+    if (btnCopySnippetCode) {
+        btnCopySnippetCode.addEventListener('click', () => {
+            if (!snippetCodeContent) return;
+            const code = snippetCodeContent.textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                if (copySnippetBtnText) copySnippetBtnText.textContent = '¡Copiado al Portapapeles!';
+                setTimeout(() => {
+                    if (copySnippetBtnText) copySnippetBtnText.textContent = 'Copiar Código';
+                }, 2500);
+            }).catch(() => {
+                alert('No se pudo copiar automáticamente. Por favor selecciónalo manualmente.');
+            });
+        });
+    }
+
+    // -------------------------------------------------------------
+    // MODAL: HISTORIAL DE PAGOS
+    // -------------------------------------------------------------
+    async function abrirModalHistorial(credito) {
+        if (historialClienteName) historialClienteName.textContent = `Pagos: ${credito.cliente_nombre}`;
+        if (historialProgresoSummary) historialProgresoSummary.textContent = `${credito.meses_pagados || 0} de ${credito.total_meses || 8} cuotas cubiertas ($${((credito.meses_pagados || 0) * (credito.monto_mensual || 1000)).toLocaleString('es-MX')} MXN)`;
+
+        if (historialTableBody) historialTableBody.innerHTML = '';
+        if (emptyHistorial) emptyHistorial.style.display = 'none';
+
+        const isConfigured = window.VOX_SUPABASE && window.VOX_SUPABASE.isConfigured();
+        let pagos = [];
+
+        if (isConfigured) {
+            try {
+                const { data, error } = await window.VOX_SUPABASE.client
+                    .from('historial_pagos_credito')
+                    .select('*')
+                    .eq('credito_id', credito.id)
+                    .order('numero_cuota', { ascending: true });
+
+                if (!error && data) pagos = data;
+            } catch (err) {
+                console.error('Error al obtener historial:', err);
+            }
+        }
+
+        if (pagos.length === 0) {
+            // Generar vista estimada si no hay registros individuales en Supabase
+            const totalPagados = parseInt(credito.meses_pagados || 0, 10);
+            if (totalPagados === 0) {
+                if (emptyHistorial) emptyHistorial.style.display = 'block';
+            } else {
+                for (let i = 1; i <= totalPagados; i++) {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td><span class="badge badge-accent">Cuota ${i}</span></td>
+                        <td>-</td>
+                        <td><strong>$${(credito.monto_mensual || 1000).toLocaleString('es-MX')} MXN</strong></td>
+                        <td>SPEI / Transferencia</td>
+                        <td><small class="muted">Pago registrado</small></td>
+                    `;
+                    historialTableBody.appendChild(row);
+                }
+            }
+        } else {
+            pagos.forEach(p => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><span class="badge badge-accent">Cuota ${p.numero_cuota}</span></td>
+                    <td>${p.fecha_pago || '-'}</td>
+                    <td><strong>$${Number(p.monto).toLocaleString('es-MX')} MXN</strong></td>
+                    <td>${p.metodo_pago ? p.metodo_pago.replace('_', ' ').toUpperCase() : 'SPEI'}</td>
+                    <td><small class="muted">${escapeHtml(p.comprobante_ref || '-')}</small></td>
+                `;
+                historialTableBody.appendChild(row);
+            });
+        }
+
+        if (historialPagosModal) historialPagosModal.style.display = 'flex';
+    }
+
+    if (closeHistorialModalBtn) {
+        closeHistorialModalBtn.addEventListener('click', () => {
+            if (historialPagosModal) historialPagosModal.style.display = 'none';
+        });
+    }
+
     // Helpers
     function escapeHtml(str) {
         if (!str) return '';
@@ -1252,3 +2033,4 @@ document.addEventListener('DOMContentLoaded', () => {
         return labels[estado] || estado || 'Nuevo';
     }
 });
+
