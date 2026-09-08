@@ -1093,3 +1093,38 @@ body::before, body::after {
     line-height: 1.5;
 }
 
+/* Country Phone Input Group in Service Modal */
+.service-field .phone-input-group {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+}
+
+.service-field .country-code-select {
+    width: 110px;
+    flex-shrink: 0;
+    background: rgba(13, 16, 19, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
+    padding: 12px 6px;
+    font-family: inherit;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: #fff;
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    text-align: center;
+}
+
+.service-field .country-code-select:focus {
+    border-color: #c4a265;
+    box-shadow: 0 0 0 3px rgba(196, 162, 101, 0.2);
+}
+
+.service-field .country-code-select option {
+    background-color: #0d1013;
+    color: #fff;
+}
+
+

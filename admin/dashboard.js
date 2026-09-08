@@ -1844,7 +1844,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const cliente_nombre = document.getElementById('credClienteNombre').value.trim();
             const dominio_url = document.getElementById('credDominioUrl').value.trim();
-            const contacto_telefono = document.getElementById('credTelefono').value.trim();
+            const rawTelefono = document.getElementById('credTelefono').value.trim();
+            const codigoPaisEl = document.getElementById('credCodigoPais');
+            const codigoPais = codigoPaisEl ? codigoPaisEl.value : '+52';
+            const contacto_telefono = rawTelefono ? `${codigoPais} ${rawTelefono}`.trim() : '';
             const contacto_correo = document.getElementById('credCorreo').value.trim();
             const total_meses = parseInt(document.getElementById('credTotalMeses').value, 10) || 8;
             const monto_mensual = parseFloat(document.getElementById('credMontoMensual').value) || 1000;

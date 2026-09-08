@@ -485,7 +485,29 @@ function initServiceLeadModal() {
                             </div>
                             <div class="service-field">
                                 <label for="leadTelefono">Teléfono / WhatsApp *</label>
-                                <input type="tel" id="leadTelefono" required placeholder="+52 55 1234 5678" />
+                                <div class="phone-input-group">
+                                    <select id="leadCodigoPais" class="country-code-select" aria-label="Código de país">
+                                        <option value="+52" selected>🇲🇽 +52</option>
+                                        <option value="+1">🇺🇸 +1</option>
+                                        <option value="+34">🇪🇸 +34</option>
+                                        <option value="+57">🇨🇴 +57</option>
+                                        <option value="+54">🇦🇷 +54</option>
+                                        <option value="+56">🇨🇱 +56</option>
+                                        <option value="+51">🇵🇪 +51</option>
+                                        <option value="+593">🇪🇨 +593</option>
+                                        <option value="+502">🇬🇹 +502</option>
+                                        <option value="+507">🇵🇦 +507</option>
+                                        <option value="+506">🇨🇷 +506</option>
+                                        <option value="+58">🇻🇪 +58</option>
+                                        <option value="+598">🇺🇾 +598</option>
+                                        <option value="+591">🇧🇴 +591</option>
+                                        <option value="+504">🇭🇳 +504</option>
+                                        <option value="+503">🇸🇻 +503</option>
+                                        <option value="+505">🇳🇮 +505</option>
+                                        <option value="+1-DO">🇩🇴 +1</option>
+                                    </select>
+                                    <input type="tel" id="leadTelefono" required placeholder="55 1234 5678" style="flex:1;" />
+                                </div>
                             </div>
                         </div>
 
@@ -563,11 +585,16 @@ function initServiceLeadModal() {
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
 
+            const rawTel = document.getElementById('leadTelefono').value.trim();
+            const codeEl = document.getElementById('leadCodigoPais');
+            const codeVal = codeEl ? codeEl.value : '+52';
+            const fullPhone = rawTel ? `${codeVal} ${rawTel}` : '';
+
             const leadData = {
                 nombre: document.getElementById('leadNombre').value,
                 empresa: document.getElementById('leadEmpresa').value,
                 correo: document.getElementById('leadCorreo').value,
-                telefono: document.getElementById('leadTelefono').value,
+                telefono: fullPhone,
                 tipo_financiamiento: document.getElementById('leadFinanciamiento').value,
                 mensaje: document.getElementById('leadMensaje').value,
                 servicio: currentServiceName

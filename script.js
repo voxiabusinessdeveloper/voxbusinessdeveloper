@@ -1039,6 +1039,14 @@ function validateStep(step){
 function updateReviewValues(){
     document.querySelectorAll('.review-value').forEach(el=>{
         const fieldName=el.dataset.field;
+        if (fieldName === 'telefono') {
+            const telInput = form.querySelector('[name="telefono"]');
+            const codeSelect = form.querySelector('[name="codigo_pais"]');
+            const rawTel = telInput ? telInput.value.trim() : '';
+            const code = codeSelect ? codeSelect.value : '+52';
+            el.textContent = rawTel ? `${code} ${rawTel}` : 'No proporcionado';
+            return;
+        }
         const input=form.querySelector(`[name="${fieldName}"]`);
         if(input){
             let val = input.value;
@@ -1062,7 +1070,7 @@ inputs.forEach(input=>{
 });
 
 function validateField(input){
-    const field=input.parentElement;
+    const field=input.closest('.field') || input.parentElement;
     const successIcon=field.querySelector('.field-icon.success');
     const errorIcon=field.querySelector('.field-icon.error');
     
@@ -1101,7 +1109,9 @@ form.addEventListener("submit", async (e)=>{
     const formData = new FormData(form);
     const nombre = formData.get('nombre');
     const correo = formData.get('correo');
-    const telefono = formData.get('telefono');
+    const codigo_pais = formData.get('codigo_pais') || '+52';
+    const rawTelefono = formData.get('telefono') || '';
+    const telefono = rawTelefono ? `${codigo_pais} ${rawTelefono}`.trim() : '';
     const servicio = formData.get('servicio') || 'Contacto General';
     const tipo_financiamiento = formData.get('tipo_financiamiento') || 'recurso_propio';
     const mensaje = formData.get('mensaje') || '';
