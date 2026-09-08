@@ -606,11 +606,34 @@ document.addEventListener('DOMContentLoaded', () => {
     // 5. RENDERIZADO PIPELINE KANBAN & DRAG AND DROP
     // -------------------------------------------------------------
     function renderKanban() {
-        const columns = ['nuevo', 'en_revision', 'contactado', 'cotizado', 'cerrado'];
+        const allColumns = ['nuevo', 'en_revision', 'contactado', 'cotizado', 'cerrado'];
+        const kanbanBoard = document.querySelector('.kanban-board');
 
-        columns.forEach(col => {
+        // Si se seleccionó un estado específico, mostramos únicamente esa columna
+        const activeColumns = state.statusFilter === 'all' 
+            ? allColumns 
+            : allColumns.filter(col => col === state.statusFilter);
+
+        // Ajustar layout de la cuadrícula si hay una sola columna filtrada
+        if (kanbanBoard) {
+            if (state.statusFilter !== 'all') {
+                kanbanBoard.style.gridTemplateColumns = 'minmax(300px, 480px)';
+            } else {
+                kanbanBoard.style.gridTemplateColumns = 'repeat(5, minmax(270px, 1fr))';
+            }
+        }
+
+        allColumns.forEach(col => {
+            const columnEl = document.querySelector(`.kanban-column[data-column="${col}"]`);
             const container = document.getElementById(`cards-${col}`);
             const counter = document.getElementById(`count-${col}`);
+
+            // Ocultar o mostrar la columna según el filtro seleccionado
+            if (columnEl) {
+                const shouldShow = activeColumns.includes(col);
+                columnEl.style.display = shouldShow ? 'flex' : 'none';
+            }
+
             if (!container) return;
 
             const colLeads = state.filteredLeads.filter(l => l.estado === col);
