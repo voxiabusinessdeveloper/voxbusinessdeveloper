@@ -545,13 +545,25 @@ document.addEventListener('DOMContentLoaded', () => {
         applyFilters();
     }
 
+    let creditosRealtimeChannel = null;
+
     function setupRealtimeSubscription() {
         const isConfigured = window.VOX_SUPABASE && window.VOX_SUPABASE.isConfigured();
         if (!isConfigured) return;
 
-        if (isConfigured) {
-            window.VOX_SUPABASE.client
-                .channel('creditos-realtime-pro')
+        // Si ya existe un canal suscrito, removerlo primero antes de crear uno nuevo
+        if (creditosRealtimeChannel) {
+            try {
+                window.VOX_SUPABASE.client.removeChannel(creditosRealtimeChannel);
+            } catch (err) {
+                console.warn('Error al limpiar canal realtime previo:', err);
+            }
+            creditosRealtimeChannel = null;
+        }
+
+        try {
+            creditosRealtimeChannel = window.VOX_SUPABASE.client
+                .channel('creditos-realtime-pro-' + Date.now())
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'creditos_sitios' }, () => {
                     fetchCreditos();
                 })
@@ -559,6 +571,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     fetchCreditos();
                 })
                 .subscribe();
+        } catch (err) {
+            console.error('Error al iniciar suscripción Realtime:', err);
         }
     }
 
