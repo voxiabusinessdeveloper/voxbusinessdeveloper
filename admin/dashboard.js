@@ -1662,7 +1662,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div style="display: flex; align-items: center; gap: 8px;">
                     <span class="credito-status-badge ${estadoBadgeClass}">${estadoLabel}</span>
                     <button class="btn-delete-card" data-action="eliminar-credito" data-id="${credito.id}" title="Eliminar sitio permanentemente" aria-label="Eliminar sitio">
-                        <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
+                        <i data-lucide="trash-2" style="width: 13px; height: 13px;"></i>
                     </button>
                 </div>
             </div>
@@ -1714,7 +1714,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 ` : `
                     <button class="btn-card-action" data-action="ver-historial" data-id="${credito.id}">
                         <i data-lucide="receipt" style="width: 14px; height: 14px;"></i>
-                        <span>Ver Pagos (8/8)</span>
+                        <span>Ver Pagos (${totalMeses}/${totalMeses})</span>
                     </button>
                 `}
 
@@ -1740,6 +1740,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     <span>WhatsApp</span>
                 </a>
             </div>
+            
+            <div class="credito-card-danger-footer">
+                <button class="btn-delete-credito-text" data-action="eliminar-credito" data-id="${credito.id}">
+                    <i data-lucide="trash-2" style="width: 13px; height: 13px;"></i>
+                    <span>Eliminar Registro y Licencia</span>
+                </button>
+            </div>
         `;
 
         // Event listeners para botones de la tarjeta
@@ -1759,8 +1766,10 @@ document.addEventListener('DOMContentLoaded', () => {
             abrirModalSnippet(credito);
         });
 
-        card.querySelector('[data-action="eliminar-credito"]')?.addEventListener('click', () => {
-            abrirModalEliminarCredito(credito);
+        card.querySelectorAll('[data-action="eliminar-credito"]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                abrirModalEliminarCredito(credito);
+            });
         });
 
         return card;
