@@ -1848,17 +1848,30 @@ document.addEventListener('DOMContentLoaded', () => {
         const cuotaInput = document.getElementById('pagoNumeroCuota');
         const montoInput = document.getElementById('pagoMonto');
         const fechaInput = document.getElementById('pagoFecha');
+        const pagoLiveCuotaBadge = document.getElementById('pagoLiveCuotaBadge');
+        const pagoLiveMontoSugerido = document.getElementById('pagoLiveMontoSugerido');
+        const pagoLiveStatusNext = document.getElementById('pagoLiveStatusNext');
 
         const siguienteCuota = (parseInt(credito.meses_pagados || 0, 10)) + 1;
+        const totalMeses = parseInt(credito.total_meses || 8, 10);
+        const isNextLiquidado = siguienteCuota >= totalMeses;
 
         if (clienteEl) clienteEl.textContent = `Pago: ${credito.cliente_nombre}`;
-        if (progresoEl) progresoEl.textContent = `Registrando Cuota ${siguienteCuota} de ${credito.total_meses}`;
+        if (progresoEl) progresoEl.textContent = `Abono de cuota mensual para ${credito.dominio_url}`;
         if (idInput) idInput.value = credito.id;
         if (cuotaInput) cuotaInput.value = siguienteCuota;
         if (montoInput) montoInput.value = credito.monto_mensual || 1000;
         if (fechaInput) fechaInput.value = new Date().toISOString().slice(0, 10);
 
+        if (pagoLiveCuotaBadge) pagoLiveCuotaBadge.textContent = `Cuota ${siguienteCuota} de ${totalMeses}`;
+        if (pagoLiveMontoSugerido) pagoLiveMontoSugerido.textContent = `$${(credito.monto_mensual || 1000).toLocaleString('es-MX')} MXN`;
+        if (pagoLiveStatusNext) {
+            pagoLiveStatusNext.textContent = isNextLiquidado ? 'Liquidado (100%)' : 'Sitio Activo';
+            pagoLiveStatusNext.className = isNextLiquidado ? 'badge badge-accent' : 'badge badge-success';
+        }
+
         if (registrarPagoModal) registrarPagoModal.style.display = 'flex';
+        if (window.lucide) window.lucide.createIcons();
     }
 
     function closeRegistrarPagoModal() {
