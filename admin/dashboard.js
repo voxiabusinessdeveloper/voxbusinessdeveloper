@@ -73,6 +73,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const historialClienteName = document.getElementById('historialClienteName');
     const historialProgresoSummary = document.getElementById('historialProgresoSummary');
 
+    // Modal Eliminar Crédito DOM Elements
+    const eliminarCreditoModal = document.getElementById('eliminarCreditoModal');
+    const closeEliminarCreditoModalBtn = document.getElementById('closeEliminarCreditoModalBtn');
+    const cancelEliminarCreditoBtn = document.getElementById('cancelEliminarCreditoBtn');
+    const eliminarCreditoForm = document.getElementById('eliminarCreditoForm');
+    const deleteCreditoId = document.getElementById('deleteCreditoId');
+    const deleteClienteNombre = document.getElementById('deleteClienteNombre');
+    const deleteDominioUrl = document.getElementById('deleteDominioUrl');
+    const deleteAdminPassword = document.getElementById('deleteAdminPassword');
+    const deleteCreditoAlert = document.getElementById('deleteCreditoAlert');
+    const btnConfirmarEliminacion = document.getElementById('btnConfirmarEliminacion');
+    const toggleDeletePwdBtn = document.getElementById('toggleDeletePwdBtn');
+
     // Filters & Search (Search-Box)
     const searchInput = document.getElementById('searchInput');
     const clearSearchBtn = document.getElementById('clearSearchBtn');
@@ -1525,7 +1538,12 @@ document.addEventListener('DOMContentLoaded', () => {
                         <span>${escapeHtml(credito.dominio_url)}</span>
                     </a>
                 </div>
-                <span class="credito-status-badge ${estadoBadgeClass}">${estadoLabel}</span>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span class="credito-status-badge ${estadoBadgeClass}">${estadoLabel}</span>
+                    <button class="btn-delete-card" data-action="eliminar-credito" data-id="${credito.id}" title="Eliminar sitio permanentemente" aria-label="Eliminar sitio">
+                        <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
+                    </button>
+                </div>
             </div>
 
             <div class="credito-progress-box">
@@ -1618,6 +1636,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         card.querySelector('[data-action="ver-snippet"]')?.addEventListener('click', () => {
             abrirModalSnippet(credito);
+        });
+
+        card.querySelector('[data-action="eliminar-credito"]')?.addEventListener('click', () => {
+            abrirModalEliminarCredito(credito);
         });
 
         return card;
@@ -2010,6 +2032,151 @@ document.addEventListener('DOMContentLoaded', () => {
     if (closeHistorialModalBtn) {
         closeHistorialModalBtn.addEventListener('click', () => {
             if (historialPagosModal) historialPagosModal.style.display = 'none';
+        });
+    }
+
+    // -------------------------------------------------------------
+    // MODAL: ELIMINAR SITIO CON CONFIRMACIÓN DE CLAVE
+    // -------------------------------------------------------------
+    function abrirModalEliminarCredito(credito) {
+        state.activeCredito = credito;
+
+        if (deleteCreditoId) deleteCreditoId.value = credito.id;
+        if (deleteClienteNombre) deleteClienteNombre.textContent = credito.cliente_nombre || 'Cliente';
+        if (deleteDominioUrl) deleteDominioUrl.textContent = credito.dominio_url || 'dominio.com';
+        if (deleteAdminPassword) {
+            deleteAdminPassword.value = '';
+            deleteAdminPassword.type = 'password';
+        }
+        if (toggleDeletePwdBtn) {
+            toggleDeletePwdBtn.innerHTML = '<i data-lucide="eye" id="toggleDeletePwdIcon"></i>';
+        }
+        if (deleteCreditoAlert) {
+            deleteCreditoAlert.style.display = 'none';
+            deleteCreditoAlert.textContent = '';
+        }
+        if (btnConfirmarEliminacion) {
+            btnConfirmarEliminacion.disabled = false;
+            btnConfirmarEliminacion.innerHTML = '<i data-lucide="trash-2"></i> <span>Eliminar Permanentemente</span>';
+        }
+
+        if (eliminarCreditoModal) eliminarCreditoModal.style.display = 'flex';
+        if (window.lucide) window.lucide.createIcons();
+
+        // Focus en campo de contraseña
+        setTimeout(() => {
+            if (deleteAdminPassword) deleteAdminPassword.focus();
+        }, 150);
+    }
+
+    function closeEliminarCreditoModal() {
+        if (eliminarCreditoModal) eliminarCreditoModal.style.display = 'none';
+        if (deleteAdminPassword) deleteAdminPassword.value = '';
+        if (deleteCreditoAlert) deleteCreditoAlert.style.display = 'none';
+        state.activeCredito = null;
+    }
+
+    if (closeEliminarCreditoModalBtn) closeEliminarCreditoModalBtn.addEventListener('click', closeEliminarCreditoModal);
+    if (cancelEliminarCreditoBtn) cancelEliminarCreditoBtn.addEventListener('click', closeEliminarCreditoModal);
+
+    // Toggle Mostrar/Ocultar contraseña en modal de eliminación
+    if (toggleDeletePwdBtn && deleteAdminPassword) {
+        toggleDeletePwdBtn.addEventListener('click', () => {
+            const isPassword = deleteAdminPassword.type === 'password';
+            deleteAdminPassword.type = isPassword ? 'text' : 'password';
+            const newIconName = isPassword ? 'eye-off' : 'eye';
+            toggleDeletePwdBtn.innerHTML = `<i data-lucide="${newIconName}" id="toggleDeletePwdIcon"></i>`;
+            if (window.lucide) window.lucide.createIcons();
+        });
+    }
+
+    // Procesar confirmación de eliminación
+    if (eliminarCreditoForm) {
+        eliminarCreditoForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const creditoId = deleteCreditoId ? deleteCreditoId.value : null;
+            const passwordIngresada = deleteAdminPassword ? deleteAdminPassword.value : '';
+
+            if (!creditoId) {
+                if (deleteCreditoAlert) {
+                    deleteCreditoAlert.textContent = 'Error: no se especificó el sitio a eliminar.';
+                    deleteCreditoAlert.style.display = 'block';
+                }
+                return;
+            }
+
+            if (!passwordIngresada) {
+                if (deleteCreditoAlert) {
+                    deleteCreditoAlert.textContent = 'Por favor ingresa tu contraseña de administrador.';
+                    deleteCreditoAlert.style.display = 'block';
+                }
+                return;
+            }
+
+            if (deleteCreditoAlert) deleteCreditoAlert.style.display = 'none';
+            if (btnConfirmarEliminacion) {
+                btnConfirmarEliminacion.disabled = true;
+                btnConfirmarEliminacion.innerHTML = '<span>Verificando y eliminando...</span>';
+            }
+
+            const isConfigured = window.VOX_SUPABASE && window.VOX_SUPABASE.isConfigured();
+
+            if (isConfigured) {
+                try {
+                    // Validar contraseña del administrador autenticado contra Supabase Auth
+                    const adminEmail = state.user && state.user.email ? state.user.email : '';
+                    if (!adminEmail) {
+                        throw new Error('Sesión de administrador no detectada. Vuelve a iniciar sesión.');
+                    }
+
+                    const { error: authError } = await window.VOX_SUPABASE.client.auth.signInWithPassword({
+                        email: adminEmail,
+                        password: passwordIngresada
+                    });
+
+                    if (authError) {
+                        throw new Error('Contraseña incorrecta. No se tienen permisos para eliminar.');
+                    }
+
+                    // Contraseña válida: proceder a eliminar el registro de creditos_sitios
+                    // Las filas en historial_pagos_credito se eliminan automáticamente por ON DELETE CASCADE
+                    const { error: deleteError } = await window.VOX_SUPABASE.client
+                        .from('creditos_sitios')
+                        .delete()
+                        .eq('id', creditoId);
+
+                    if (deleteError) {
+                        throw deleteError;
+                    }
+
+                    // Éxito en Supabase: actualizar estado local
+                    state.creditos = state.creditos.filter(c => c.id !== creditoId);
+                    localStorage.setItem('vox_creditos_cache', JSON.stringify(state.creditos));
+
+                    closeEliminarCreditoModal();
+                    applyCreditosFilters();
+
+                } catch (err) {
+                    console.error('Error al verificar/eliminar sitio:', err);
+                    if (deleteCreditoAlert) {
+                        deleteCreditoAlert.textContent = err.message || 'Error al eliminar el sitio.';
+                        deleteCreditoAlert.style.display = 'block';
+                    }
+                    if (btnConfirmarEliminacion) {
+                        btnConfirmarEliminacion.disabled = false;
+                        btnConfirmarEliminacion.innerHTML = '<i data-lucide="trash-2"></i> <span>Eliminar Permanentemente</span>';
+                        if (window.lucide) window.lucide.createIcons();
+                    }
+                }
+            } else {
+                // Modo Demo / Local
+                state.creditos = state.creditos.filter(c => c.id !== creditoId);
+                localStorage.setItem('vox_creditos_cache', JSON.stringify(state.creditos));
+
+                closeEliminarCreditoModal();
+                applyCreditosFilters();
+            }
         });
     }
 
