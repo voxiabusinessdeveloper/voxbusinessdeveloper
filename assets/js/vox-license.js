@@ -207,22 +207,9 @@
                     Portal Temporalmente Inactivo
                 </h1>
 
-                <p style="font-size: 14px; line-height: 1.6; color: #9AA2AC; margin: 0 0 22px 0;">
+                <p style="font-size: 14px; line-height: 1.6; color: #9AA2AC; margin: 0 0 28px 0;">
                     Este sitio web se encuentra en proceso de <strong style="color: #F5F7FA;">administración técnica y actualización de servicio</strong> por parte de VOX Business Developer.
                 </p>
-
-                ${clienteNombre ? `
-                <div style="background: rgba(9, 11, 14, 0.6); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 14px 18px; margin-bottom: 24px; text-align: left; font-size: 13px;">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
-                        <span style="color: #606873; font-weight: 500;">Titular del Servicio:</span>
-                        <strong style="color: #FFFFFF;">${clienteNombre}</strong>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span style="color: #606873; font-weight: 500;">ID de Referencia:</span>
-                        <code style="color: #C9A86A; background: rgba(201, 168, 106, 0.1); padding: 2px 8px; border-radius: 6px; font-family: monospace; font-size: 12px;">${SITE_KEY.slice(0, 16)}</code>
-                    </div>
-                </div>
-                ` : ''}
 
                 <div style="display: flex; flex-direction: column; gap: 12px;">
                     <a href="${waUrl}" target="_blank" rel="noopener noreferrer" style="
