@@ -792,7 +792,9 @@
                         <i data-lucide="alert-triangle"></i>
                     </div>
                     <div>
-                        <span class="badge" style="background: rgba(231, 76, 60, 0.15); color: #ff6b6b; border: 1px solid rgba(231, 76, 60, 0.3);">Acción Irreversible</span>
+                        <span class="badge"
+                            style="background: rgba(231, 76, 60, 0.15); color: #ff6b6b; border: 1px solid rgba(231, 76, 60, 0.3);">Acción
+                            Irreversible</span>
                         <h2 style="font-size: 1.15rem; margin-top: 2px;">Eliminar Registro de Sitio</h2>
                     </div>
                 </div>
@@ -809,21 +811,27 @@
                         Estás a punto de eliminar permanentemente el siguiente sitio y su historial de pagos:
                     </p>
                     <div class="delete-target-info">
-                        <strong id="deleteClienteNombre" style="color: var(--text-primary); font-size: 0.95rem; display: block;">Cliente</strong>
-                        <span id="deleteDominioUrl" style="color: var(--gold-primary); font-size: 0.8rem; font-family: monospace;">dominio.com</span>
+                        <strong id="deleteClienteNombre"
+                            style="color: var(--text-primary); font-size: 0.95rem; display: block;">Cliente</strong>
+                        <span id="deleteDominioUrl"
+                            style="color: var(--gold-primary); font-size: 0.8rem; font-family: monospace;">dominio.com</span>
                     </div>
                 </div>
 
-                <div id="deleteCreditoAlert" class="alert-box" style="display: none; margin-top: 14px; margin-bottom: 14px;"></div>
+                <div id="deleteCreditoAlert" class="alert-box"
+                    style="display: none; margin-top: 14px; margin-bottom: 14px;"></div>
 
                 <div class="form-group" style="margin-top: 16px;">
-                    <label for="deleteAdminPassword" style="font-size: 0.82rem; font-weight: 600; color: #ff8577; display: flex; align-items: center; gap: 6px;">
+                    <label for="deleteAdminPassword"
+                        style="font-size: 0.82rem; font-weight: 600; color: #ff8577; display: flex; align-items: center; gap: 6px;">
                         <i data-lucide="lock" style="width: 14px; height: 14px;"></i>
                         <span>Ingresa tu contraseña de Administrador para confirmar:</span>
                     </label>
                     <div class="input-with-icon" style="margin-top: 6px;">
-                        <input type="password" id="deleteAdminPassword" class="input-control" placeholder="Tu contraseña de acceso" required autocomplete="current-password" />
-                        <button type="button" class="btn-toggle-pwd" id="toggleDeletePwdBtn" tabindex="-1" title="Mostrar u ocultar contraseña">
+                        <input type="password" id="deleteAdminPassword" class="input-control"
+                            placeholder="Tu contraseña de acceso" required autocomplete="current-password" />
+                        <button type="button" class="btn-toggle-pwd" id="toggleDeletePwdBtn" tabindex="-1"
+                            title="Mostrar u ocultar contraseña">
                             <i data-lucide="eye" id="toggleDeletePwdIcon"></i>
                         </button>
                     </div>
@@ -832,11 +840,84 @@
                     </small>
                 </div>
 
-                <div class="modal-footer-actions" style="margin-top: 22px; display: flex; justify-content: flex-end; gap: 10px;">
+                <div class="modal-footer-actions"
+                    style="margin-top: 22px; display: flex; justify-content: flex-end; gap: 10px;">
                     <button type="button" class="btn btn-outline" id="cancelEliminarCreditoBtn">Cancelar</button>
                     <button type="submit" class="btn btn-danger-submit" id="btnConfirmarEliminacion">
                         <i data-lucide="trash-2"></i>
                         <span>Eliminar Permanentemente</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- MODAL: ELIMINAR PROSPECTO / LEAD -->
+    <!-- ========================================== -->
+    <div class="modal-overlay" id="eliminarLeadModal" style="display: none;">
+        <div class="modal-card glass-panel modal-delete-danger" style="max-width: 480px;">
+            <div class="modal-header" style="border-bottom: 1px solid rgba(231, 76, 60, 0.25);">
+                <div class="modal-title-wrap" style="display: flex; align-items: center; gap: 12px;">
+                    <div class="delete-warning-icon">
+                        <i data-lucide="user-x"></i>
+                    </div>
+                    <div>
+                        <span class="badge"
+                            style="background: rgba(231, 76, 60, 0.15); color: #ff6b6b; border: 1px solid rgba(231, 76, 60, 0.3);">Acción
+                            Irreversible</span>
+                        <h2 style="font-size: 1.15rem; margin-top: 2px;">Eliminar Prospecto</h2>
+                    </div>
+                </div>
+                <button class="btn-close" id="closeEliminarLeadModalBtn">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+
+            <form id="eliminarLeadForm" class="modal-body" style="padding-top: 20px;">
+                <input type="hidden" id="deleteLeadId" />
+
+                <div class="delete-client-preview">
+                    <p style="font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 8px;">
+                        ¿Estás seguro de que deseas eliminar permanentemente este prospecto de tu CRM?
+                    </p>
+                    <div class="delete-target-info">
+                        <strong id="deleteLeadNombre"
+                            style="color: var(--text-primary); font-size: 0.95rem; display: block;">Nombre del
+                            Lead</strong>
+                        <span id="deleteLeadInfo"
+                            style="color: var(--gold-primary); font-size: 0.8rem;">correo@empresa.com</span>
+                    </div>
+                </div>
+
+                <div id="deleteLeadAlert" class="alert-box"
+                    style="display: none; margin-top: 14px; margin-bottom: 14px;"></div>
+
+                <div class="form-group" style="margin-top: 16px;">
+                    <label for="deleteLeadAdminPassword"
+                        style="font-size: 0.82rem; font-weight: 600; color: #ff8577; display: flex; align-items: center; gap: 6px;">
+                        <i data-lucide="lock" style="width: 14px; height: 14px;"></i>
+                        <span>Ingresa tu contraseña de Administrador para confirmar:</span>
+                    </label>
+                    <div class="input-with-icon" style="margin-top: 6px;">
+                        <input type="password" id="deleteLeadAdminPassword" class="input-control"
+                            placeholder="Tu contraseña de acceso" required autocomplete="current-password" />
+                        <button type="button" class="btn-toggle-pwd" id="toggleDeleteLeadPwdBtn" tabindex="-1"
+                            title="Mostrar u ocultar contraseña">
+                            <i data-lucide="eye" id="toggleDeleteLeadPwdIcon"></i>
+                        </button>
+                    </div>
+                    <small style="color: var(--text-tertiary); font-size: 0.72rem; margin-top: 4px; display: block;">
+                        Esta acción borrará el prospecto del pipeline comercial y de la base de datos de Supabase.
+                    </small>
+                </div>
+
+                <div class="modal-footer-actions"
+                    style="margin-top: 22px; display: flex; justify-content: flex-end; gap: 10px;">
+                    <button type="button" class="btn btn-outline" id="cancelEliminarLeadBtn">Cancelar</button>
+                    <button type="submit" class="btn btn-danger-submit" id="btnConfirmarEliminacionLead">
+                        <i data-lucide="trash-2"></i>
+                        <span>Eliminar Prospecto</span>
                     </button>
                 </div>
             </form>
@@ -934,6 +1015,12 @@
                         <button class="btn btn-secondary btn-block" id="saveLeadChangesBtn">
                             <i data-lucide="save"></i>
                             <span>Guardar Cambios</span>
+                        </button>
+
+                        <button type="button" class="btn btn-outline-danger btn-block" id="btnOpenDeleteLeadModal"
+                            style="margin-top: 8px;">
+                            <i data-lucide="trash-2"></i>
+                            <span>Eliminar Prospecto</span>
                         </button>
 
                         <!-- WhatsApp Pro Quick Response -->

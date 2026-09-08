@@ -86,6 +86,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnConfirmarEliminacion = document.getElementById('btnConfirmarEliminacion');
     const toggleDeletePwdBtn = document.getElementById('toggleDeletePwdBtn');
 
+    // Modal Eliminar Lead DOM Elements
+    const eliminarLeadModal = document.getElementById('eliminarLeadModal');
+    const closeEliminarLeadModalBtn = document.getElementById('closeEliminarLeadModalBtn');
+    const cancelEliminarLeadBtn = document.getElementById('cancelEliminarLeadBtn');
+    const eliminarLeadForm = document.getElementById('eliminarLeadForm');
+    const deleteLeadId = document.getElementById('deleteLeadId');
+    const deleteLeadNombre = document.getElementById('deleteLeadNombre');
+    const deleteLeadInfo = document.getElementById('deleteLeadInfo');
+    const deleteLeadAdminPassword = document.getElementById('deleteLeadAdminPassword');
+    const deleteLeadAlert = document.getElementById('deleteLeadAlert');
+    const btnConfirmarEliminacionLead = document.getElementById('btnConfirmarEliminacionLead');
+    const toggleDeleteLeadPwdBtn = document.getElementById('toggleDeleteLeadPwdBtn');
+    const btnOpenDeleteLeadModal = document.getElementById('btnOpenDeleteLeadModal');
+
     // Filters & Search (Search-Box)
     const searchInput = document.getElementById('searchInput');
     const clearSearchBtn = document.getElementById('clearSearchBtn');
@@ -870,6 +884,9 @@ document.addEventListener('DOMContentLoaded', () => {
                             <button class="btn-icon-action wa wa-quick-btn" data-id="${lead.id}" title="WhatsApp Rápido">
                                 <i data-lucide="message-circle"></i>
                             </button>` : ''}
+                            <button class="btn-icon-action delete-btn delete-lead-btn" data-id="${lead.id}" title="Eliminar Prospecto">
+                                <i data-lucide="trash-2"></i>
+                            </button>
                         </div>
                     </div>
                 `;
@@ -919,6 +936,12 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         document.querySelectorAll('.wa-quick-btn').forEach(btn => {
             btn.addEventListener('click', () => openLeadModal(btn.getAttribute('data-id')));
+        });
+        document.querySelectorAll('.delete-lead-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                abrirModalEliminarLead(btn.getAttribute('data-id'));
+            });
         });
     }
 
@@ -1003,6 +1026,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         <button class="btn-icon-action wa wa-quick-btn" data-id="${lead.id}" title="WhatsApp">
                             <i data-lucide="message-circle"></i>
                         </button>` : ''}
+                        <button class="btn-icon-action delete-btn delete-lead-btn" data-id="${lead.id}" title="Eliminar Prospecto">
+                            <i data-lucide="trash-2"></i>
+                        </button>
                     </div>
                 </td>
             `;
@@ -1014,6 +1040,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         document.querySelectorAll('.view-btn, .wa-quick-btn').forEach(btn => {
             btn.addEventListener('click', () => openLeadModal(btn.getAttribute('data-id')));
+        });
+
+        document.querySelectorAll('.delete-lead-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                abrirModalEliminarLead(btn.getAttribute('data-id'));
+            });
         });
     }
 
@@ -2190,6 +2223,156 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 closeEliminarCreditoModal();
                 applyCreditosFilters();
+            }
+        });
+    }
+
+    // -------------------------------------------------------------
+    // MODAL: ELIMINAR PROSPECTO / LEAD CON CONFIRMACIÓN DE CLAVE
+    // -------------------------------------------------------------
+    function abrirModalEliminarLead(leadId) {
+        const lead = state.leads.find(l => String(l.id) === String(leadId));
+        if (!lead) return;
+
+        // Si el modal de ficha de lead está abierto, cerrarlo primero
+        closeLeadModal();
+
+        if (deleteLeadId) deleteLeadId.value = lead.id;
+        if (deleteLeadNombre) deleteLeadNombre.textContent = lead.nombre || 'Prospecto';
+        if (deleteLeadInfo) deleteLeadInfo.textContent = `${lead.correo} • ${lead.servicio || 'Servicio'}`;
+        if (deleteLeadAdminPassword) {
+            deleteLeadAdminPassword.value = '';
+            deleteLeadAdminPassword.type = 'password';
+        }
+        if (toggleDeleteLeadPwdBtn) {
+            toggleDeleteLeadPwdBtn.innerHTML = '<i data-lucide="eye" id="toggleDeleteLeadPwdIcon"></i>';
+        }
+        if (deleteLeadAlert) {
+            deleteLeadAlert.style.display = 'none';
+            deleteLeadAlert.textContent = '';
+        }
+        if (btnConfirmarEliminacionLead) {
+            btnConfirmarEliminacionLead.disabled = false;
+            btnConfirmarEliminacionLead.innerHTML = '<i data-lucide="trash-2"></i> <span>Eliminar Prospecto</span>';
+        }
+
+        if (eliminarLeadModal) eliminarLeadModal.style.display = 'flex';
+        if (window.lucide) window.lucide.createIcons();
+
+        setTimeout(() => {
+            if (deleteLeadAdminPassword) deleteLeadAdminPassword.focus();
+        }, 150);
+    }
+
+    function closeEliminarLeadModal() {
+        if (eliminarLeadModal) eliminarLeadModal.style.display = 'none';
+        if (deleteLeadAdminPassword) deleteLeadAdminPassword.value = '';
+        if (deleteLeadAlert) deleteLeadAlert.style.display = 'none';
+    }
+
+    if (closeEliminarLeadModalBtn) closeEliminarLeadModalBtn.addEventListener('click', closeEliminarLeadModal);
+    if (cancelEliminarLeadBtn) cancelEliminarLeadBtn.addEventListener('click', closeEliminarLeadModal);
+
+    if (btnOpenDeleteLeadModal) {
+        btnOpenDeleteLeadModal.addEventListener('click', () => {
+            if (state.activeLead) {
+                abrirModalEliminarLead(state.activeLead.id);
+            }
+        });
+    }
+
+    if (toggleDeleteLeadPwdBtn && deleteLeadAdminPassword) {
+        toggleDeleteLeadPwdBtn.addEventListener('click', () => {
+            const isPassword = deleteLeadAdminPassword.type === 'password';
+            deleteLeadAdminPassword.type = isPassword ? 'text' : 'password';
+            const newIconName = isPassword ? 'eye-off' : 'eye';
+            toggleDeleteLeadPwdBtn.innerHTML = `<i data-lucide="${newIconName}" id="toggleDeleteLeadPwdIcon"></i>`;
+            if (window.lucide) window.lucide.createIcons();
+        });
+    }
+
+    if (eliminarLeadForm) {
+        eliminarLeadForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const leadId = deleteLeadId ? deleteLeadId.value : null;
+            const passwordIngresada = deleteLeadAdminPassword ? deleteLeadAdminPassword.value : '';
+
+            if (!leadId) {
+                if (deleteLeadAlert) {
+                    deleteLeadAlert.textContent = 'Error: no se especificó el prospecto a eliminar.';
+                    deleteLeadAlert.style.display = 'block';
+                }
+                return;
+            }
+
+            if (!passwordIngresada) {
+                if (deleteLeadAlert) {
+                    deleteLeadAlert.textContent = 'Por favor ingresa tu contraseña de administrador.';
+                    deleteLeadAlert.style.display = 'block';
+                }
+                return;
+            }
+
+            if (deleteLeadAlert) deleteLeadAlert.style.display = 'none';
+            if (btnConfirmarEliminacionLead) {
+                btnConfirmarEliminacionLead.disabled = true;
+                btnConfirmarEliminacionLead.innerHTML = '<span>Verificando y eliminando...</span>';
+            }
+
+            const isConfigured = window.VOX_SUPABASE && window.VOX_SUPABASE.isConfigured();
+
+            if (isConfigured) {
+                try {
+                    const adminEmail = state.user && state.user.email ? state.user.email : '';
+                    if (!adminEmail) {
+                        throw new Error('Sesión de administrador no detectada. Vuelve a iniciar sesión.');
+                    }
+
+                    const { error: authError } = await window.VOX_SUPABASE.client.auth.signInWithPassword({
+                        email: adminEmail,
+                        password: passwordIngresada
+                    });
+
+                    if (authError) {
+                        throw new Error('Contraseña incorrecta. No se tienen permisos para eliminar.');
+                    }
+
+                    const { error: deleteError } = await window.VOX_SUPABASE.client
+                        .from('leads')
+                        .delete()
+                        .eq('id', leadId);
+
+                    if (deleteError) {
+                        throw deleteError;
+                    }
+
+                    // Éxito en Supabase: actualizar estado local
+                    state.leads = state.leads.filter(l => String(l.id) !== String(leadId));
+                    localStorage.setItem('vox_leads_cache', JSON.stringify(state.leads));
+
+                    closeEliminarLeadModal();
+                    applyFilters();
+
+                } catch (err) {
+                    console.error('Error al verificar/eliminar prospecto:', err);
+                    if (deleteLeadAlert) {
+                        deleteLeadAlert.textContent = err.message || 'Error al eliminar el prospecto.';
+                        deleteLeadAlert.style.display = 'block';
+                    }
+                    if (btnConfirmarEliminacionLead) {
+                        btnConfirmarEliminacionLead.disabled = false;
+                        btnConfirmarEliminacionLead.innerHTML = '<i data-lucide="trash-2"></i> <span>Eliminar Prospecto</span>';
+                        if (window.lucide) window.lucide.createIcons();
+                    }
+                }
+            } else {
+                // Modo Demo / Local
+                state.leads = state.leads.filter(l => String(l.id) !== String(leadId));
+                localStorage.setItem('vox_leads_cache', JSON.stringify(state.leads));
+
+                closeEliminarLeadModal();
+                applyFilters();
             }
         });
     }
