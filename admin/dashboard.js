@@ -2052,6 +2052,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (killswitchStatusBadge) {
                 killswitchStatusBadge.textContent = 'Reactivación de Servicio';
                 killswitchStatusBadge.className = 'badge badge-success';
+                killswitchStatusBadge.style.background = 'rgba(46, 204, 113, 0.15)';
+                killswitchStatusBadge.style.color = 'var(--green-tag)';
+                killswitchStatusBadge.style.borderColor = 'rgba(46, 204, 113, 0.3)';
             }
             if (killswitchIconBox) {
                 killswitchIconBox.style.background = 'rgba(46, 204, 113, 0.12)';
@@ -2064,10 +2067,11 @@ document.addEventListener('DOMContentLoaded', () => {
             if (killswitchSuspendGroup) killswitchSuspendGroup.style.display = 'none';
             if (killswitchReactivateNotice) killswitchReactivateNotice.style.display = 'block';
             if (btnConfirmarKillswitch) {
+                btnConfirmarKillswitch.disabled = false;
                 btnConfirmarKillswitch.className = 'btn btn-primary';
                 btnConfirmarKillswitch.style.background = 'linear-gradient(135deg, #2ecc71 0%, #27ae60 100%)';
+                btnConfirmarKillswitch.innerHTML = '<i data-lucide="power"></i><span id="btnConfirmarKillswitchText">Reactivar Sitio Ahora</span>';
             }
-            if (btnConfirmarKillswitchText) btnConfirmarKillswitchText.textContent = 'Reactivar Sitio Ahora';
         } else {
             // Configurar modal para Suspender
             if (killswitchModalTitle) killswitchModalTitle.textContent = 'Suspender Sitio Web (Killswitch)';
@@ -2091,9 +2095,11 @@ document.addEventListener('DOMContentLoaded', () => {
             if (killswitchReactivateNotice) killswitchReactivateNotice.style.display = 'none';
             if (killswitchMotivoInput) killswitchMotivoInput.value = 'Falta de pago de cuota mensual';
             if (btnConfirmarKillswitch) {
+                btnConfirmarKillswitch.disabled = false;
                 btnConfirmarKillswitch.className = 'btn btn-danger-submit';
+                btnConfirmarKillswitch.style.background = '';
+                btnConfirmarKillswitch.innerHTML = '<i data-lucide="power"></i><span id="btnConfirmarKillswitchText">Aplicar Bloqueo Killswitch</span>';
             }
-            if (btnConfirmarKillswitchText) btnConfirmarKillswitchText.textContent = 'Aplicar Bloqueo Killswitch';
         }
 
         if (killswitchModal) killswitchModal.style.display = 'flex';
@@ -2114,49 +2120,55 @@ document.addEventListener('DOMContentLoaded', () => {
             const creditoId = killswitchCreditoId ? killswitchCreditoId.value : null;
             const targetAction = killswitchTargetAction ? killswitchTargetAction.value : 'suspender';
             const credito = state.creditos.find(c => c.id === creditoId);
-            if (!credito) return;
+            if (!credito) {
+                closeKillswitchModal();
+                return;
+            }
 
             if (btnConfirmarKillswitch) {
                 btnConfirmarKillswitch.disabled = true;
                 btnConfirmarKillswitch.innerHTML = '<span>Procesando...</span>';
             }
 
-            if (targetAction === 'reactivar') {
-                credito.estado = 'activo';
-                credito.motivo_suspension = '';
-            } else {
-                const motivo = killswitchMotivoInput ? killswitchMotivoInput.value.trim() : '';
-                credito.estado = 'suspendido';
-                credito.motivo_suspension = motivo || 'Servicio pausado por administración';
-            }
-
-            const isConfigured = window.VOX_SUPABASE && window.VOX_SUPABASE.isConfigured();
-            if (isConfigured) {
-                try {
-                    await window.VOX_SUPABASE.client
-                        .from('creditos_sitios')
-                        .update({
-                            estado: credito.estado,
-                            motivo_suspension: credito.motivo_suspension
-                        })
-                        .eq('id', credito.id);
-                } catch (err) {
-                    console.error('Error al actualizar estado killswitch:', err);
+            try {
+                if (targetAction === 'reactivar') {
+                    credito.estado = 'activo';
+                    credito.motivo_suspension = '';
+                } else {
+                    const motivo = killswitchMotivoInput ? killswitchMotivoInput.value.trim() : '';
+                    credito.estado = 'suspendido';
+                    credito.motivo_suspension = motivo || 'Servicio pausado por administración';
                 }
-            }
 
-            localStorage.setItem('vox_creditos_cache', JSON.stringify(state.creditos));
-            closeKillswitchModal();
-            applyCreditosFilters();
+                const isConfigured = window.VOX_SUPABASE && window.VOX_SUPABASE.isConfigured();
+                if (isConfigured) {
+                    try {
+                        const { error } = await window.VOX_SUPABASE.client
+                            .from('creditos_sitios')
+                            .update({
+                                estado: credito.estado,
+                                motivo_suspension: credito.motivo_suspension
+                            })
+                            .eq('id', credito.id);
+                        if (error) console.error('Error al actualizar estado killswitch:', error);
+                    } catch (err) {
+                        console.error('Error de conexión al actualizar estado killswitch:', err);
+                    }
+                }
 
-            if (btnConfirmarKillswitch) {
-                btnConfirmarKillswitch.disabled = false;
-            }
+                localStorage.setItem('vox_creditos_cache', JSON.stringify(state.creditos));
+                applyCreditosFilters();
 
-            if (targetAction === 'reactivar') {
-                showToast(`El sitio de "${credito.cliente_nombre}" ha sido reactivado con éxito.`, 'success', 'Sitio Online');
-            } else {
-                showToast(`El sitio de "${credito.cliente_nombre}" ha sido bloqueado correctamente.`, 'error', 'Sitio Suspendido');
+                if (targetAction === 'reactivar') {
+                    showToast(`El sitio de "${credito.cliente_nombre}" ha sido reactivado con éxito.`, 'success', 'Sitio Online');
+                } else {
+                    showToast(`El sitio de "${credito.cliente_nombre}" ha sido bloqueado correctamente.`, 'error', 'Sitio Suspendido');
+                }
+            } finally {
+                closeKillswitchModal();
+                if (btnConfirmarKillswitch) {
+                    btnConfirmarKillswitch.disabled = false;
+                }
             }
         });
     }
