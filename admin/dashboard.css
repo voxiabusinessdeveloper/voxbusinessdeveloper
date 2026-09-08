@@ -437,7 +437,15 @@ input:focus,
     margin-bottom: 0 !important;
 }
 
+.input-password-wrap input {
+    padding-right: 40px !important;
+}
+
 .btn-toggle-pwd {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
     background: transparent;
     border: none;
     color: var(--text-tertiary);
@@ -445,18 +453,27 @@ input:focus,
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 2px;
-    transition: color 0.15s;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    border-radius: var(--radius-xs);
+    z-index: 3;
+    transition: all 0.15s ease;
 }
 
 .btn-toggle-pwd:hover {
     color: var(--gold-primary);
+    background: rgba(255, 255, 255, 0.05);
 }
 
 .btn-toggle-pwd svg,
 .btn-toggle-pwd i {
-    width: 14px;
-    height: 14px;
+    position: static !important;
+    transform: none !important;
+    width: 15px !important;
+    height: 15px !important;
+    pointer-events: auto !important;
+    color: inherit !important;
 }
 
 .btn-login-submit {

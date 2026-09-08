@@ -58,17 +58,15 @@
                 </div>
 
                 <div class="form-group">
-                    <div class="label-row">
-                        <label for="adminPassword">Contraseña</label>
-                        <button type="button" class="btn-toggle-pwd" id="togglePasswordBtn"
-                            title="Mostrar/Ocultar contraseña">
-                            <i data-lucide="eye" id="togglePwdIcon"></i>
-                        </button>
-                    </div>
-                    <div class="input-icon-wrap">
+                    <label for="adminPassword">Contraseña</label>
+                    <div class="input-icon-wrap input-password-wrap">
                         <i data-lucide="lock"></i>
                         <input type="password" id="adminPassword" placeholder="••••••••" required
                             autocomplete="current-password" />
+                        <button type="button" class="btn-toggle-pwd" id="togglePasswordBtn"
+                            title="Mostrar/Ocultar contraseña" aria-label="Mostrar u ocultar contraseña">
+                            <i data-lucide="eye" id="togglePwdIcon"></i>
+                        </button>
                     </div>
                 </div>
 
