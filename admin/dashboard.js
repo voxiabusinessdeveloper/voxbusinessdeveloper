@@ -194,6 +194,21 @@ document.addEventListener('DOMContentLoaded', () => {
         if (inactivityTimer) clearTimeout(inactivityTimer);
         localStorage.removeItem(LAST_ACTIVITY_KEY);
 
+        // Limpiar campos del formulario de login por seguridad y privacidad
+        if (loginForm) {
+            loginForm.reset();
+        }
+        const adminEmailInput = document.getElementById('adminEmail');
+        const adminPasswordInputEl = document.getElementById('adminPassword');
+        if (adminEmailInput) adminEmailInput.value = '';
+        if (adminPasswordInputEl) {
+            adminPasswordInputEl.value = '';
+            adminPasswordInputEl.type = 'password';
+        }
+        if (togglePasswordBtn) {
+            togglePasswordBtn.innerHTML = '<i data-lucide="eye" id="togglePwdIcon"></i>';
+        }
+
         loginWrapper.style.display = 'flex';
         dashboardLayout.style.display = 'none';
 
@@ -203,13 +218,27 @@ document.addEventListener('DOMContentLoaded', () => {
             loginAlert.style.backgroundColor = 'rgba(234, 179, 8, 0.15)';
             loginAlert.style.borderColor = 'rgba(234, 179, 8, 0.4)';
             loginAlert.style.color = '#fde047';
+        } else if (loginAlert) {
+            loginAlert.style.display = 'none';
         }
+
+        if (window.lucide) window.lucide.createIcons();
     }
 
     function setAuthenticatedUser(user) {
         state.user = user;
         userDisplayEmail.textContent = user.email || 'Admin';
         userAvatar.textContent = (user.email ? user.email.charAt(0) : 'A').toUpperCase();
+
+        // Limpiar inputs del login inmediatamente al autenticarse
+        if (loginForm) loginForm.reset();
+        const adminEmailInput = document.getElementById('adminEmail');
+        const adminPasswordInputEl = document.getElementById('adminPassword');
+        if (adminEmailInput) adminEmailInput.value = '';
+        if (adminPasswordInputEl) {
+            adminPasswordInputEl.value = '';
+            adminPasswordInputEl.type = 'password';
+        }
 
         loginWrapper.style.display = 'none';
         dashboardLayout.style.display = 'flex';
