@@ -487,24 +487,24 @@ function initServiceLeadModal() {
                                 <label for="leadTelefono">Teléfono / WhatsApp *</label>
                                 <div class="phone-input-group">
                                     <select id="leadCodigoPais" class="country-code-select" aria-label="Código de país">
-                                        <option value="+52" selected>🇲🇽 +52</option>
-                                        <option value="+1">🇺🇸 +1</option>
-                                        <option value="+34">🇪🇸 +34</option>
-                                        <option value="+57">🇨🇴 +57</option>
-                                        <option value="+54">🇦🇷 +54</option>
-                                        <option value="+56">🇨🇱 +56</option>
-                                        <option value="+51">🇵🇪 +51</option>
-                                        <option value="+593">🇪🇨 +593</option>
-                                        <option value="+502">🇬🇹 +502</option>
-                                        <option value="+507">🇵🇦 +507</option>
-                                        <option value="+506">🇨🇷 +506</option>
-                                        <option value="+58">🇻🇪 +58</option>
-                                        <option value="+598">🇺🇾 +598</option>
-                                        <option value="+591">🇧🇴 +591</option>
-                                        <option value="+504">🇭🇳 +504</option>
-                                        <option value="+503">🇸🇻 +503</option>
-                                        <option value="+505">🇳🇮 +505</option>
-                                        <option value="+1-DO">🇩🇴 +1</option>
+                                        <option value="+52" selected>+52 (MX)</option>
+                                        <option value="+1">+1 (US)</option>
+                                        <option value="+34">+34 (ES)</option>
+                                        <option value="+57">+57 (CO)</option>
+                                        <option value="+54">+54 (AR)</option>
+                                        <option value="+56">+56 (CL)</option>
+                                        <option value="+51">+51 (PE)</option>
+                                        <option value="+593">+593 (EC)</option>
+                                        <option value="+502">+502 (GT)</option>
+                                        <option value="+507">+507 (PA)</option>
+                                        <option value="+506">+506 (CR)</option>
+                                        <option value="+58">+58 (VE)</option>
+                                        <option value="+598">+598 (UY)</option>
+                                        <option value="+591">+591 (BO)</option>
+                                        <option value="+504">+504 (HN)</option>
+                                        <option value="+503">+503 (SV)</option>
+                                        <option value="+505">+505 (NI)</option>
+                                        <option value="+1-DO">+1 (DO)</option>
                                     </select>
                                     <input type="tel" id="leadTelefono" required placeholder="55 1234 5678" style="flex:1;" />
                                 </div>
