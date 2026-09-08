@@ -2358,8 +2358,6 @@ input:focus,
         align-items: flex-start;
         gap: 10px;
     }
-}
-
     .credito-live-summary-card {
         flex-direction: column;
         align-items: flex-start;
