@@ -100,6 +100,80 @@ document.addEventListener('DOMContentLoaded', () => {
     const toggleDeleteLeadPwdBtn = document.getElementById('toggleDeleteLeadPwdBtn');
     const btnOpenDeleteLeadModal = document.getElementById('btnOpenDeleteLeadModal');
 
+    // Modal Killswitch DOM Elements
+    const killswitchModal = document.getElementById('killswitchModal');
+    const closeKillswitchModalBtn = document.getElementById('closeKillswitchModalBtn');
+    const cancelKillswitchBtn = document.getElementById('cancelKillswitchBtn');
+    const killswitchForm = document.getElementById('killswitchForm');
+    const killswitchCreditoId = document.getElementById('killswitchCreditoId');
+    const killswitchTargetAction = document.getElementById('killswitchTargetAction');
+    const killswitchClienteNombre = document.getElementById('killswitchClienteNombre');
+    const killswitchDominioUrl = document.getElementById('killswitchDominioUrl');
+    const killswitchMotivoInput = document.getElementById('killswitchMotivoInput');
+    const killswitchSuspendGroup = document.getElementById('killswitchSuspendGroup');
+    const killswitchReactivateNotice = document.getElementById('killswitchReactivateNotice');
+    const killswitchModalTitle = document.getElementById('killswitchModalTitle');
+    const killswitchModalDesc = document.getElementById('killswitchModalDesc');
+    const killswitchStatusBadge = document.getElementById('killswitchStatusBadge');
+    const btnConfirmarKillswitch = document.getElementById('btnConfirmarKillswitch');
+    const btnConfirmarKillswitchText = document.getElementById('btnConfirmarKillswitchText');
+    const killswitchHeaderWrap = document.getElementById('killswitchHeaderWrap');
+    const killswitchIconBox = document.getElementById('killswitchIconBox');
+    const killswitchHeaderIcon = document.getElementById('killswitchHeaderIcon');
+
+    // Toast Notification System (Reemplazo profesional de alerts)
+    const voxToastContainer = document.getElementById('voxToastContainer');
+
+    function showToast(message, type = 'success', title = null) {
+        if (!voxToastContainer) {
+            console.log(`[Toast ${type}]`, message);
+            return;
+        }
+
+        const toast = document.createElement('div');
+        toast.className = `vox-toast toast-${type}`;
+
+        let iconName = 'check-circle';
+        let defaultTitle = 'Operación Exitosa';
+
+        if (type === 'error') {
+            iconName = 'alert-circle';
+            defaultTitle = 'Atención';
+        } else if (type === 'info') {
+            iconName = 'info';
+            defaultTitle = 'Información';
+        }
+
+        toast.innerHTML = `
+            <div class="toast-icon">
+                <i data-lucide="${iconName}"></i>
+            </div>
+            <div class="toast-content">
+                <span class="toast-title">${title || defaultTitle}</span>
+                <span class="toast-message">${escapeHtml(message)}</span>
+            </div>
+            <button class="toast-close" aria-label="Cerrar notificación">
+                <i data-lucide="x" style="width: 14px; height: 14px;"></i>
+            </button>
+        `;
+
+        const closeBtn = toast.querySelector('.toast-close');
+        const dismissToast = () => {
+            toast.classList.add('hiding');
+            setTimeout(() => {
+                if (toast.parentNode) toast.parentNode.removeChild(toast);
+            }, 300);
+        };
+
+        if (closeBtn) closeBtn.addEventListener('click', dismissToast);
+
+        voxToastContainer.appendChild(toast);
+        if (window.lucide) window.lucide.createIcons();
+
+        // Auto dismiss after 4.5s
+        setTimeout(dismissToast, 4500);
+    }
+
     // Filters & Search (Search-Box)
     const searchInput = document.getElementById('searchInput');
     const clearSearchBtn = document.getElementById('clearSearchBtn');
@@ -1348,7 +1422,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Exportar Excel (.xlsx) con Formato Profesional
     exportCsvBtn.addEventListener('click', () => {
         if (!state.filteredLeads || state.filteredLeads.length === 0) {
-            alert('No hay prospectos en la vista actual para exportar.');
+            showToast('No hay prospectos en la vista actual para exportar.', 'info', 'Sin Registros');
             return;
         }
 
@@ -1943,52 +2017,136 @@ document.addEventListener('DOMContentLoaded', () => {
 
             closeRegistrarPagoModal();
             applyCreditosFilters();
-            alert(`✅ Cuota ${numeroCuota} de $${monto.toLocaleString('es-MX')} MXN registrada con éxito para "${credito.cliente_nombre}".`);
+            showToast(`Cuota ${numeroCuota} de $${monto.toLocaleString('es-MX')} MXN registrada para "${credito.cliente_nombre}".`, 'success', 'Pago Confirmado');
         });
     }
 
     // -------------------------------------------------------------
-    // ACCIÓN: TOGGLE KILLSWITCH (SUSPENDER / REACTIVAR)
+    // ACCIÓN: CONTROL KILLSWITCH MEDIANTE MODAL PROFESIONAL
     // -------------------------------------------------------------
-    async function toggleKillswitchSitio(credito) {
+    function toggleKillswitchSitio(credito) {
+        state.activeCredito = credito;
         const isCurrentlySuspendido = credito.estado === 'suspendido';
 
+        if (killswitchCreditoId) killswitchCreditoId.value = credito.id;
+        if (killswitchTargetAction) killswitchTargetAction.value = isCurrentlySuspendido ? 'reactivar' : 'suspender';
+        if (killswitchClienteNombre) killswitchClienteNombre.textContent = credito.cliente_nombre || 'Cliente';
+        if (killswitchDominioUrl) killswitchDominioUrl.textContent = credito.dominio_url || 'dominio.com';
+
         if (isCurrentlySuspendido) {
-            // Confirmar reactivación
-            const confirmar = confirm(`¿Deseas REACTIVAR el sitio web de "${credito.cliente_nombre}"?\nEl sitio volverá a cargar con normalidad para todos los visitantes.`);
-            if (!confirmar) return;
-
-            credito.estado = 'activo';
-            credito.motivo_suspension = '';
-        } else {
-            // Solicitar motivo de suspensión
-            const motivo = prompt(
-                `⚠️ ATENCIÓN: Estás a punto de SUSPENDER el sitio web de "${credito.cliente_nombre}".\nLos visitantes verán la cortina de administración de VOX.\n\nEscribe el motivo de la suspensión:`,
-                'Falta de pago de cuota mensual'
-            );
-            if (motivo === null) return; // Canceló
-
-            credito.estado = 'suspendido';
-            credito.motivo_suspension = motivo.trim() || 'Servicio pausado por administración';
-        }
-
-        const isConfigured = window.VOX_SUPABASE && window.VOX_SUPABASE.isConfigured();
-        if (isConfigured) {
-            try {
-                await window.VOX_SUPABASE.client
-                    .from('creditos_sitios')
-                    .update({
-                        estado: credito.estado,
-                        motivo_suspension: credito.motivo_suspension
-                    })
-                    .eq('id', credito.id);
-            } catch (err) {
-                console.error('Error al actualizar estado killswitch:', err);
+            // Configurar modal para Reactivar
+            if (killswitchModalTitle) killswitchModalTitle.textContent = 'Reactivar Sitio Web';
+            if (killswitchModalDesc) killswitchModalDesc.textContent = 'Restablecer el acceso público de la página web.';
+            if (killswitchStatusBadge) {
+                killswitchStatusBadge.textContent = 'Reactivación de Servicio';
+                killswitchStatusBadge.className = 'badge badge-success';
             }
+            if (killswitchIconBox) {
+                killswitchIconBox.style.background = 'rgba(46, 204, 113, 0.12)';
+                killswitchIconBox.style.borderColor = 'rgba(46, 204, 113, 0.3)';
+                killswitchIconBox.style.color = 'var(--green-tag)';
+            }
+            if (killswitchHeaderIcon) {
+                killswitchHeaderIcon.setAttribute('data-lucide', 'power');
+            }
+            if (killswitchSuspendGroup) killswitchSuspendGroup.style.display = 'none';
+            if (killswitchReactivateNotice) killswitchReactivateNotice.style.display = 'block';
+            if (btnConfirmarKillswitch) {
+                btnConfirmarKillswitch.className = 'btn btn-primary';
+                btnConfirmarKillswitch.style.background = 'linear-gradient(135deg, #2ecc71 0%, #27ae60 100%)';
+            }
+            if (btnConfirmarKillswitchText) btnConfirmarKillswitchText.textContent = 'Reactivar Sitio Ahora';
+        } else {
+            // Configurar modal para Suspender
+            if (killswitchModalTitle) killswitchModalTitle.textContent = 'Suspender Sitio Web (Killswitch)';
+            if (killswitchModalDesc) killswitchModalDesc.textContent = 'Bloquear el sitio web con la cortina de administración de VOX.';
+            if (killswitchStatusBadge) {
+                killswitchStatusBadge.textContent = 'Suspensión por Falta de Pago';
+                killswitchStatusBadge.className = 'badge badge-danger';
+                killswitchStatusBadge.style.background = 'rgba(231, 76, 60, 0.15)';
+                killswitchStatusBadge.style.color = '#ff6b6b';
+                killswitchStatusBadge.style.borderColor = 'rgba(231, 76, 60, 0.3)';
+            }
+            if (killswitchIconBox) {
+                killswitchIconBox.style.background = 'rgba(231, 76, 60, 0.12)';
+                killswitchIconBox.style.borderColor = 'rgba(231, 76, 60, 0.3)';
+                killswitchIconBox.style.color = 'var(--red-tag)';
+            }
+            if (killswitchHeaderIcon) {
+                killswitchHeaderIcon.setAttribute('data-lucide', 'shield-alert');
+            }
+            if (killswitchSuspendGroup) killswitchSuspendGroup.style.display = 'block';
+            if (killswitchReactivateNotice) killswitchReactivateNotice.style.display = 'none';
+            if (killswitchMotivoInput) killswitchMotivoInput.value = 'Falta de pago de cuota mensual';
+            if (btnConfirmarKillswitch) {
+                btnConfirmarKillswitch.className = 'btn btn-danger-submit';
+            }
+            if (btnConfirmarKillswitchText) btnConfirmarKillswitchText.textContent = 'Aplicar Bloqueo Killswitch';
         }
 
-        localStorage.setItem('vox_creditos_cache', JSON.stringify(state.creditos));
-        applyCreditosFilters();
+        if (killswitchModal) killswitchModal.style.display = 'flex';
+        if (window.lucide) window.lucide.createIcons();
+    }
+
+    function closeKillswitchModal() {
+        if (killswitchModal) killswitchModal.style.display = 'none';
+        state.activeCredito = null;
+    }
+
+    if (closeKillswitchModalBtn) closeKillswitchModalBtn.addEventListener('click', closeKillswitchModal);
+    if (cancelKillswitchBtn) cancelKillswitchBtn.addEventListener('click', closeKillswitchModal);
+
+    if (killswitchForm) {
+        killswitchForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const creditoId = killswitchCreditoId ? killswitchCreditoId.value : null;
+            const targetAction = killswitchTargetAction ? killswitchTargetAction.value : 'suspender';
+            const credito = state.creditos.find(c => c.id === creditoId);
+            if (!credito) return;
+
+            if (btnConfirmarKillswitch) {
+                btnConfirmarKillswitch.disabled = true;
+                btnConfirmarKillswitch.innerHTML = '<span>Procesando...</span>';
+            }
+
+            if (targetAction === 'reactivar') {
+                credito.estado = 'activo';
+                credito.motivo_suspension = '';
+            } else {
+                const motivo = killswitchMotivoInput ? killswitchMotivoInput.value.trim() : '';
+                credito.estado = 'suspendido';
+                credito.motivo_suspension = motivo || 'Servicio pausado por administración';
+            }
+
+            const isConfigured = window.VOX_SUPABASE && window.VOX_SUPABASE.isConfigured();
+            if (isConfigured) {
+                try {
+                    await window.VOX_SUPABASE.client
+                        .from('creditos_sitios')
+                        .update({
+                            estado: credito.estado,
+                            motivo_suspension: credito.motivo_suspension
+                        })
+                        .eq('id', credito.id);
+                } catch (err) {
+                    console.error('Error al actualizar estado killswitch:', err);
+                }
+            }
+
+            localStorage.setItem('vox_creditos_cache', JSON.stringify(state.creditos));
+            closeKillswitchModal();
+            applyCreditosFilters();
+
+            if (btnConfirmarKillswitch) {
+                btnConfirmarKillswitch.disabled = false;
+            }
+
+            if (targetAction === 'reactivar') {
+                showToast(`El sitio de "${credito.cliente_nombre}" ha sido reactivado con éxito.`, 'success', 'Sitio Online');
+            } else {
+                showToast(`El sitio de "${credito.cliente_nombre}" ha sido bloqueado correctamente.`, 'error', 'Sitio Suspendido');
+            }
+        });
     }
 
     // -------------------------------------------------------------
@@ -2018,11 +2176,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const code = snippetCodeContent.textContent;
             navigator.clipboard.writeText(code).then(() => {
                 if (copySnippetBtnText) copySnippetBtnText.textContent = '¡Copiado al Portapapeles!';
+                showToast('Código de integración copiado al portapapeles.', 'info', 'Código Copiado');
                 setTimeout(() => {
                     if (copySnippetBtnText) copySnippetBtnText.textContent = 'Copiar Código';
                 }, 2500);
             }).catch(() => {
-                alert('No se pudo copiar automáticamente. Por favor selecciónalo manualmente.');
+                showToast('No se pudo copiar automáticamente. Por favor selecciónalo manualmente.', 'error', 'Error al Copiar');
             });
         });
     }

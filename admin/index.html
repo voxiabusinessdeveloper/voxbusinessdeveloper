@@ -642,14 +642,18 @@
     <div class="modal-overlay" id="registrarPagoModal" style="display: none;">
         <div class="modal-card modal-credito-premium" style="max-width: 580px;">
             <!-- HEADER PREMIUM -->
-            <div class="modal-header-premium" style="background: linear-gradient(180deg, rgba(46, 204, 113, 0.08) 0%, rgba(17, 20, 24, 0.4) 100%);">
-                <div class="modal-header-icon-box" style="background: rgba(46, 204, 113, 0.12); border-color: rgba(46, 204, 113, 0.3); color: var(--green-tag);">
+            <div class="modal-header-premium"
+                style="background: linear-gradient(180deg, rgba(46, 204, 113, 0.08) 0%, rgba(17, 20, 24, 0.4) 100%);">
+                <div class="modal-header-icon-box"
+                    style="background: rgba(46, 204, 113, 0.12); border-color: rgba(46, 204, 113, 0.3); color: var(--green-tag);">
                     <i data-lucide="receipt"></i>
                 </div>
                 <div style="flex: 1;">
-                    <span class="badge badge-success" style="font-size: 0.68rem; padding: 2px 8px;">Recepción de Ingreso</span>
+                    <span class="badge badge-success" style="font-size: 0.68rem; padding: 2px 8px;">Recepción de
+                        Ingreso</span>
                     <h2 id="pagoModalCliente" style="font-size: 1.2rem; margin-top: 2px;">Registrar Cuota</h2>
-                    <p class="modal-header-desc" id="pagoModalProgreso">Ingresa los datos del pago para actualizar el balance del cliente.</p>
+                    <p class="modal-header-desc" id="pagoModalProgreso">Ingresa los datos del pago para actualizar el
+                        balance del cliente.</p>
                 </div>
                 <button class="btn-close" id="closeRegistrarPagoModalBtn">
                     <i data-lucide="x"></i>
@@ -676,7 +680,8 @@
                         <div class="summary-divider"></div>
                         <div class="pago-live-item">
                             <span class="pago-live-lbl">Estado tras el Pago</span>
-                            <span class="badge badge-success" id="pagoLiveStatusNext" style="font-size: 0.72rem; align-self: flex-start; margin-top: 2px;">Sitio Activo</span>
+                            <span class="badge badge-success" id="pagoLiveStatusNext"
+                                style="font-size: 0.72rem; align-self: flex-start; margin-top: 2px;">Sitio Activo</span>
                         </div>
                     </div>
 
@@ -724,7 +729,8 @@
                                 </label>
                                 <div class="input-with-icon">
                                     <i data-lucide="arrow-right-left"></i>
-                                    <select id="pagoMetodo" class="select-control full" style="padding-left: 40px;" required>
+                                    <select id="pagoMetodo" class="select-control full" style="padding-left: 40px;"
+                                        required>
                                         <option value="transferencia_spei">Transferencia (SPEI)</option>
                                         <option value="efectivo">Efectivo / Caja</option>
                                         <option value="oxxo">Depósito OXXO / Tienda</option>
@@ -1121,6 +1127,81 @@
             </div>
         </div>
     </div>
+
+    <!-- ========================================== -->
+    <!-- MODAL: CONTROL DE KILLSWITCH (SUSPENDER / REACTIVAR SITIO) -->
+    <!-- ========================================== -->
+    <div class="modal-overlay" id="killswitchModal" style="display: none;">
+        <div class="modal-card modal-credito-premium" style="max-width: 500px;">
+            <div class="modal-header-premium" id="killswitchHeaderWrap">
+                <div class="modal-header-icon-box" id="killswitchIconBox">
+                    <i data-lucide="shield-alert" id="killswitchHeaderIcon"></i>
+                </div>
+                <div style="flex: 1;">
+                    <span class="badge" id="killswitchStatusBadge">Control de Servicio</span>
+                    <h2 id="killswitchModalTitle" style="font-size: 1.15rem; margin-top: 2px;">Estado del Sitio Web</h2>
+                    <p class="modal-header-desc" id="killswitchModalDesc">Administra la disponibilidad de la web.</p>
+                </div>
+                <button class="btn-close" id="closeKillswitchModalBtn">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+
+            <form id="killswitchForm">
+                <div class="modal-body-premium">
+                    <input type="hidden" id="killswitchCreditoId" />
+                    <input type="hidden" id="killswitchTargetAction" />
+
+                    <div class="delete-client-preview" style="margin-bottom: 14px;">
+                        <span
+                            style="font-size: 0.72rem; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 2px;">Sitio
+                            Web Seleccionado</span>
+                        <strong id="killswitchClienteNombre"
+                            style="color: var(--text-primary); font-size: 0.95rem; display: block;">Cliente</strong>
+                        <span id="killswitchDominioUrl"
+                            style="color: var(--gold-primary); font-size: 0.8rem; font-family: monospace;">dominio.com</span>
+                    </div>
+
+                    <div id="killswitchSuspendGroup" class="modal-form-section">
+                        <div class="form-group-premium">
+                            <label for="killswitchMotivoInput">
+                                <span>Motivo de la Suspensión (Visible en pantalla de bloqueo):</span>
+                            </label>
+                            <div class="input-with-icon">
+                                <i data-lucide="alert-circle"></i>
+                                <input type="text" id="killswitchMotivoInput"
+                                    placeholder="Ej. Falta de pago de cuota mensual" />
+                            </div>
+                            <small style="color: var(--text-tertiary); font-size: 0.74rem; margin-top: 4px;">
+                                Los visitantes verán la pantalla corporativa de VOX indicando este estado de servicio.
+                            </small>
+                        </div>
+                    </div>
+
+                    <div id="killswitchReactivateNotice"
+                        style="display: none; background: rgba(46, 204, 113, 0.08); border: 1px solid rgba(46, 204, 113, 0.25); border-radius: var(--radius-sm); padding: 14px; font-size: 0.84rem; color: #a3e9b9; line-height: 1.4;">
+                        <i data-lucide="check-circle"
+                            style="width: 16px; height: 16px; display: inline-block; vertical-align: middle; margin-right: 6px; color: var(--green-tag);"></i>
+                        <span>El sitio web se <strong>restablecerá inmediatamente</strong> para todos los usuarios y
+                            visitantes. La pantalla de bloqueo quedará inactiva.</span>
+                    </div>
+                </div>
+
+                <div class="modal-footer-premium">
+                    <button type="button" class="btn btn-outline" id="cancelKillswitchBtn">Cancelar</button>
+                    <button type="submit" class="btn" id="btnConfirmarKillswitch">
+                        <i data-lucide="power"></i>
+                        <span id="btnConfirmarKillswitchText">Confirmar Acción</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- CONTENEDOR DE NOTIFICACIONES TOAST PREMIUM -->
+    <!-- ========================================== -->
+    <div id="voxToastContainer" class="toast-container" aria-live="polite"></div>
 
     <!-- SCRIPTS -->
     <script src="/assets/js/lucide.min.js"></script>
