@@ -1916,7 +1916,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Disparar notificación por correo a vox.iabusinessdeveloper@gmail.com
             if (window.LeadService && typeof window.LeadService.sendCreditoNotification === 'function') {
-                window.LeadService.sendCreditoNotification(creditoGuardado);
+                window.LeadService.sendCreditoNotification(creditoGuardado).then((res) => {
+                    if (res && res.success) {
+                        showToast('Correo de alerta enviado a vox.iabusinessdeveloper@gmail.com', 'success');
+                    } else {
+                        console.warn('No se pudo confirmar el envío del correo:', res);
+                    }
+                }).catch(err => console.error('Error al disparar notificación:', err));
             }
 
             closeNuevoCreditoModal();

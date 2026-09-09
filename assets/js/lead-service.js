@@ -108,36 +108,44 @@ const LeadService = {
      */
     async sendCreditoNotification(credito) {
         try {
-            const formData = new FormData();
+            console.log('📤 Preparando envío de correo de nuevo crédito a vox.iabusinessdeveloper@gmail.com...');
             const totalInversion = (credito.total_meses || 0) * (credito.monto_mensual || 0);
-            formData.append('_subject', `💳 Nuevo Crédito Registrado: ${credito.cliente_nombre} (${credito.plan_nombre || 'Plan Financiado'})`);
-            formData.append('_template', 'table');
-            formData.append('_captcha', 'false');
-            formData.append('Tipo de Registro', 'Nuevo Crédito / Financiamiento de Sitio Web');
-            formData.append('Cliente / Empresa', credito.cliente_nombre || 'N/A');
-            formData.append('Dominio / URL', credito.dominio_url || 'N/A');
-            formData.append('Teléfono', credito.contacto_telefono || 'N/A');
-            formData.append('Correo del Cliente', credito.contacto_correo || 'N/A');
-            formData.append('Plan Contratado', credito.plan_nombre || 'Página Web Financiada');
-            formData.append('Total de Meses / Cuotas', `${credito.total_meses} meses`);
-            formData.append('Monto Mensual', `$${Number(credito.monto_mensual || 0).toLocaleString('es-MX')} MXN`);
-            formData.append('Inversión Total', `$${totalInversion.toLocaleString('es-MX')} MXN`);
-            formData.append('Día de Corte', `Día ${credito.dia_corte} de cada mes`);
-            formData.append('Próximo Vencimiento', credito.proximo_vencimiento || 'N/A');
-            formData.append('Site Key (Kill-Switch)', credito.site_key || 'N/A');
-            formData.append('Notas / Observaciones', credito.notas || 'Sin notas adicionales');
-            formData.append('Fecha de Registro', new Date().toLocaleString('es-MX'));
+            
+            const payload = {
+                _subject: `💳 Nuevo Crédito Registrado: ${credito.cliente_nombre} (${credito.plan_nombre || 'Plan Financiado'})`,
+                _template: 'table',
+                _captcha: 'false',
+                'Tipo de Registro': 'Nuevo Crédito / Financiamiento de Sitio Web',
+                'Cliente / Empresa': credito.cliente_nombre || 'N/A',
+                'Dominio / URL': credito.dominio_url || 'N/A',
+                'Teléfono': credito.contacto_telefono || 'N/A',
+                'Correo del Cliente': credito.contacto_correo || 'N/A',
+                'Plan Contratado': credito.plan_nombre || 'Página Web Financiada',
+                'Total de Meses / Cuotas': `${credito.total_meses} meses`,
+                'Monto Mensual': `$${Number(credito.monto_mensual || 0).toLocaleString('es-MX')} MXN`,
+                'Inversión Total': `$${totalInversion.toLocaleString('es-MX')} MXN`,
+                'Día de Corte': `Día ${credito.dia_corte} de cada mes`,
+                'Próximo Vencimiento': credito.proximo_vencimiento || 'N/A',
+                'Site Key (Kill-Switch)': credito.site_key || 'N/A',
+                'Notas / Observaciones': credito.notas || 'Sin notas adicionales',
+                'Fecha de Registro': new Date().toLocaleString('es-MX')
+            };
 
-            await fetch('https://formsubmit.co/ajax/vox.iabusinessdeveloper@gmail.com', {
+            const response = await fetch('https://formsubmit.co/ajax/vox.iabusinessdeveloper@gmail.com', {
                 method: 'POST',
-                body: formData,
                 headers: {
+                    'Content-Type': 'application/json',
                     'Accept': 'application/json'
-                }
+                },
+                body: JSON.stringify(payload)
             });
-            console.log('📧 Alerta de crédito enviada a vox.iabusinessdeveloper@gmail.com');
+
+            const result = await response.json().catch(() => null);
+            console.log('📧 Respuesta de FormSubmit para nuevo crédito:', response.status, result);
+            return { success: response.ok, data: result };
         } catch (e) {
-            console.warn('⚠️ No se pudo enviar el correo de alerta de crédito:', e);
+            console.error('⚠️ Error al enviar correo de alerta de crédito:', e);
+            return { success: false, error: e };
         }
     },
 
