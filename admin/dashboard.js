@@ -1914,6 +1914,11 @@ document.addEventListener('DOMContentLoaded', () => {
             state.creditos.unshift(creditoGuardado);
             localStorage.setItem('vox_creditos_cache', JSON.stringify(state.creditos));
 
+            // Disparar notificación por correo a vox.iabusinessdeveloper@gmail.com
+            if (window.LeadService && typeof window.LeadService.sendCreditoNotification === 'function') {
+                window.LeadService.sendCreditoNotification(creditoGuardado);
+            }
+
             closeNuevoCreditoModal();
             applyCreditosFilters();
 

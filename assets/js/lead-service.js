@@ -103,6 +103,45 @@ const LeadService = {
     },
 
     /**
+     * Envía un email a vox.iabusinessdeveloper@gmail.com con los datos del nuevo crédito registrado
+     * @param {Object} credito 
+     */
+    async sendCreditoNotification(credito) {
+        try {
+            const formData = new FormData();
+            const totalInversion = (credito.total_meses || 0) * (credito.monto_mensual || 0);
+            formData.append('_subject', `💳 Nuevo Crédito Registrado: ${credito.cliente_nombre} (${credito.plan_nombre || 'Plan Financiado'})`);
+            formData.append('_template', 'table');
+            formData.append('_captcha', 'false');
+            formData.append('Tipo de Registro', 'Nuevo Crédito / Financiamiento de Sitio Web');
+            formData.append('Cliente / Empresa', credito.cliente_nombre || 'N/A');
+            formData.append('Dominio / URL', credito.dominio_url || 'N/A');
+            formData.append('Teléfono', credito.contacto_telefono || 'N/A');
+            formData.append('Correo del Cliente', credito.contacto_correo || 'N/A');
+            formData.append('Plan Contratado', credito.plan_nombre || 'Página Web Financiada');
+            formData.append('Total de Meses / Cuotas', `${credito.total_meses} meses`);
+            formData.append('Monto Mensual', `$${Number(credito.monto_mensual || 0).toLocaleString('es-MX')} MXN`);
+            formData.append('Inversión Total', `$${totalInversion.toLocaleString('es-MX')} MXN`);
+            formData.append('Día de Corte', `Día ${credito.dia_corte} de cada mes`);
+            formData.append('Próximo Vencimiento', credito.proximo_vencimiento || 'N/A');
+            formData.append('Site Key (Kill-Switch)', credito.site_key || 'N/A');
+            formData.append('Notas / Observaciones', credito.notas || 'Sin notas adicionales');
+            formData.append('Fecha de Registro', new Date().toLocaleString('es-MX'));
+
+            await fetch('https://formsubmit.co/ajax/vox.iabusinessdeveloper@gmail.com', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'Accept': 'application/json'
+                }
+            });
+            console.log('📧 Alerta de crédito enviada a vox.iabusinessdeveloper@gmail.com');
+        } catch (e) {
+            console.warn('⚠️ No se pudo enviar el correo de alerta de crédito:', e);
+        }
+    },
+
+    /**
      * Hook preparado para integrar WhatsApp en el futuro
      */
     async sendWhatsAppNotification(payload) {
