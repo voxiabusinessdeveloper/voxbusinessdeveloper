@@ -249,7 +249,7 @@ module.exports = async function handler(req, res) {
             }
         }
 
-        // 4. Notificación por Email desde el Servidor
+        // 4. Notificación por Email desde el Servidor (FormSubmit)
         try {
             const emailFormData = {
                 _subject: `🔥 Nuevo Lead: ${cleanServicio.toUpperCase()} - ${cleanNombre}`,
@@ -267,14 +267,20 @@ module.exports = async function handler(req, res) {
             };
 
             const notificationEndpoint = process.env.EMAIL_NOTIFICATION_ENDPOINT || 'https://formsubmit.co/ajax/vox.iabusinessdeveloper@gmail.com';
-            await fetch(notificationEndpoint, {
+            const emailRes = await fetch(notificationEndpoint, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Accept': 'application/json'
+                    'Accept': 'application/json',
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                    'Origin': 'https://voxbusinessdeveloper.com',
+                    'Referer': 'https://voxbusinessdeveloper.com/'
                 },
                 body: JSON.stringify(emailFormData)
             });
+
+            const emailResult = await emailRes.json().catch(() => null);
+            console.log('[FormSubmit Status]:', emailRes.status, emailResult);
         } catch (emailErr) {
             console.warn('[Email Dispatch Warning]:', emailErr.message);
         }
