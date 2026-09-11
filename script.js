@@ -346,34 +346,38 @@ function el(html){const t=document.createElement("template");t.innerHTML=html.tr
 
 // Marquee (doubled for seamless loop)
 const track=document.getElementById("marqueeTrack");
-[...MARQUEE,...MARQUEE].forEach(item=>{
-    track.appendChild(el(`<span>${item}</span>`));
-});
+if (track) {
+    [...MARQUEE,...MARQUEE].forEach(item=>{
+        track.appendChild(el(`<span>${item}</span>`));
+    });
+}
 
 // Services
 const sg=document.getElementById("servicesGrid");
-SERVICES.forEach((s,i)=>{
-    const serviceEl=el(`
-    <div class="service reveal" style="--d:${(i%3)*.07}s">
-        <div class="service-image">
-            <img src="${s.image}" alt="${s.title}" loading="lazy" />
-            <div class="service-overlay">
-                <div class="service-content">
-                    <div class="service-ico"><i data-lucide="${s.icon}"></i></div>
-                    <h3>${s.title}</h3>
-                    <p>${s.text}</p>
-                    <button class="service-btn">Ver más</button>
+if (sg) {
+    SERVICES.forEach((s,i)=>{
+        const serviceEl=el(`
+        <div class="service reveal" style="--d:${(i%3)*.07}s">
+            <div class="service-image">
+                <img src="${s.image}" alt="${s.title}" loading="lazy" />
+                <div class="service-overlay">
+                    <div class="service-content">
+                        <div class="service-ico"><i data-lucide="${s.icon}"></i></div>
+                        <h3>${s.title}</h3>
+                        <p>${s.text}</p>
+                        <button class="service-btn">Ver más</button>
+                    </div>
                 </div>
             </div>
-        </div>
-    </div>`);
-    serviceEl.style.cursor="pointer";
-    serviceEl.addEventListener("click",()=>{
-        const serviceId = SERVICE_IDS[i] || 'arquitectura';
-        window.location.href = `/servicios/${serviceId}`;
+        </div>`);
+        serviceEl.style.cursor="pointer";
+        serviceEl.addEventListener("click",()=>{
+            const serviceId = SERVICE_IDS[i] || 'arquitectura';
+            window.location.href = `/servicios/${serviceId}`;
+        });
+        sg.appendChild(serviceEl);
     });
-    sg.appendChild(serviceEl);
-});
+}
 
 // ===== INTERSECTION OBSERVER PARA CARGA DIFERIDA DE VIDEO SOBRE NOSOTROS =====
 const initAboutVideoLazyLoad = () => {
