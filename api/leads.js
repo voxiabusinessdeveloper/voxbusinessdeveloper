@@ -249,9 +249,9 @@ module.exports = async function handler(req, res) {
             }
         }
 
-        // 4. Notificación por Email desde el Servidor (FormSubmit)
+        // 4. Notificación por Email desde el Servidor (FormSubmit / Resend / Webhook)
         try {
-            const emailFormData = {
+            const emailFields = {
                 _subject: `🔥 Nuevo Lead: ${cleanServicio.toUpperCase()} - ${cleanNombre}`,
                 _template: 'table',
                 _captcha: 'false',
@@ -267,20 +267,33 @@ module.exports = async function handler(req, res) {
             };
 
             const notificationEndpoint = process.env.EMAIL_NOTIFICATION_ENDPOINT || 'https://formsubmit.co/ajax/vox.iabusinessdeveloper@gmail.com';
+            
+            // 4.1 Enviar en formato JSON
             const emailRes = await fetch(notificationEndpoint, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json',
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                    'Origin': 'https://voxbusinessdeveloper.com',
-                    'Referer': 'https://voxbusinessdeveloper.com/'
+                    'User-Agent': 'Mozilla/5.0 (compatible; VoxBot/1.0)'
                 },
-                body: JSON.stringify(emailFormData)
+                body: JSON.stringify(emailFields)
             });
 
-            const emailResult = await emailRes.json().catch(() => null);
-            console.log('[FormSubmit Status]:', emailRes.status, emailResult);
+            // 4.2 Si falla el endpoint ajax, fallback al endpoint directo form-urlencoded
+            if (!emailRes.ok) {
+                const params = new URLSearchParams();
+                for (const [key, value] of Object.entries(emailFields)) {
+                    params.append(key, value);
+                }
+                await fetch('https://formsubmit.co/vox.iabusinessdeveloper@gmail.com', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'User-Agent': 'Mozilla/5.0 (compatible; VoxBot/1.0)'
+                    },
+                    body: params.toString()
+                }).catch(() => {});
+            }
         } catch (emailErr) {
             console.warn('[Email Dispatch Warning]:', emailErr.message);
         }
