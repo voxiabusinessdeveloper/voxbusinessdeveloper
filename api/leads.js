@@ -76,15 +76,15 @@ async function checkBotId(botIdToken, honeypotValue) {
     }
 
     try {
-        // Formato esperado vox_bot_<timestamp_base36>_<checksum>
+        // Formato esperado vox_bot_<timestamp_base36>_<salt>
         const parts = botIdToken.split('_');
         if (parts.length < 3 || parts[0] !== 'vox' || parts[1] !== 'bot') {
             return { valid: false, reason: 'invalid_token_format' };
         }
         const timestamp = parseInt(parts[2], 36);
         const now = Date.now();
-        // El token debe haber sido generado entre 1 segundo y 24 horas antes
-        if (isNaN(timestamp) || (now - timestamp < 1000) || (now - timestamp > 24 * 60 * 60 * 1000)) {
+        // Permitir un margen de -60s a +24 horas para absorber diferencias de reloj cliente/servidor
+        if (isNaN(timestamp) || (timestamp - now > 60 * 1000) || (now - timestamp > 24 * 60 * 60 * 1000)) {
             return { valid: false, reason: 'invalid_time_window' };
         }
     } catch {
