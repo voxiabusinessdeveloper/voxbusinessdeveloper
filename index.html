@@ -330,7 +330,7 @@
     <!-- HERO -->
     <section class="hero" id="top">
         <div class="hero-video">
-            <video autoplay muted loop playsinline>
+            <video autoplay muted loop playsinline preload="metadata" poster="assets/images/hero/image-og.jpg">
                 <source src="assets/videos/hero bg.mp4" type="video/mp4">
             </video>
             <div class="hero-video-overlay"></div>
@@ -374,9 +374,11 @@
                 </div>
             </div>
 
-            <!-- Video Section -->
-            <div class="about-video reveal" style="--d:.2s"><video autoplay muted loop playsinline>
-                    <source src="assets/videos/sobre-nosotros video.mp4" type="video/mp4">
+            <!-- Video Section (Lazy Loaded on Scroll Viewport) -->
+            <div class="about-video reveal" style="--d:.2s"><video id="aboutVideo" muted loop playsinline
+                    preload="metadata" poster="assets/images/services/solutions-portfolio.jpeg"
+                    data-src="assets/videos/sobre-nosotros video.mp4">
+                    <source src="" type="video/mp4">
                 </video>
                 <div class="video-overlay"></div>
             </div><!-- Projects Gallery -->
@@ -552,12 +554,11 @@
                         </div>
                     </div>
 
-                    <form id="contactForm" class="form-grid"
-                        action="https://formsubmit.co/vox.iabusinessdeveloper@gmail.com" method="POST">
-                        <!-- Configuración FormSubmit -->
-                        <input type="hidden" name="_subject" value="Nuevo contacto desde VOX Business Developer">
-                        <input type="hidden" name="_captcha" value="false">
-                        <input type="hidden" name="_template" value="table">
+                    <form id="contactForm" class="form-grid" action="/api/leads" method="POST">
+                        <!-- Anti-Spam Honeypot -->
+                        <input type="text" name="_hp" id="voxHoneypot"
+                            style="display:none !important; position:absolute !important; left:-9999px !important;"
+                            tabindex="-1" autocomplete="off" aria-hidden="true">
 
                         <!-- Step 1: Basic Info -->
                         <div class="form-step active" data-step="1">
@@ -576,7 +577,8 @@
                             <div class="field">
                                 <label>Teléfono / WhatsApp</label>
                                 <div class="phone-input-group">
-                                    <select name="codigo_pais" id="contactCodigoPais" class="country-code-select" aria-label="Código de país">
+                                    <select name="codigo_pais" id="contactCodigoPais" class="country-code-select"
+                                        aria-label="Código de país">
                                         <option value="+52" selected>+52 (MX)</option>
                                         <option value="+1">+1 (US)</option>
                                         <option value="+34">+34 (ES)</option>
@@ -597,7 +599,8 @@
                                         <option value="+1-DO">+1 (DO)</option>
                                     </select>
                                     <div style="flex:1; position:relative;">
-                                        <input name="telefono" type="tel" placeholder="55 1234 5678" required style="width: 100%;" />
+                                        <input name="telefono" type="tel" placeholder="55 1234 5678" required
+                                            style="width: 100%;" />
                                         <i data-lucide="check" class="field-icon success" style="display:none"></i>
                                         <i data-lucide="x" class="field-icon error" style="display:none"></i>
                                     </div>
@@ -773,11 +776,11 @@
             </div>
             <div class="footer-col">
                 <h4>Servicios</h4>
-                <a href="servicios/arquitectura.html">Arquitectura</a>
-                <a href="servicios/marketing.html">Marketing</a>
-                <a href="servicios/juridico.html">Legal Corporativo</a>
-                <a href="servicios/branding.html">Branding</a>
-                <a href="servicios/desarrollo.html">Desarrollo Web</a>
+                <a href="/servicios/arquitectura">Arquitectura</a>
+                <a href="/servicios/marketing">Marketing</a>
+                <a href="/servicios/juridico">Legal Corporativo</a>
+                <a href="/servicios/branding">Branding</a>
+                <a href="/servicios/desarrollo">Desarrollo Web</a>
             </div>
             <div class="footer-col">
                 <h4>Legal</h4>
@@ -801,8 +804,6 @@
 
     <script src="assets/js/lucide.min.js"></script>
     <script src="assets/js/lenis.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="assets/js/supabase-config.js"></script>
     <script src="assets/js/lead-service.js"></script>
     <script src="script.js"></script>
 </body>

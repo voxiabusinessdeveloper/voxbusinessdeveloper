@@ -467,6 +467,7 @@ function initServiceLeadModal() {
                     </div>
 
                     <form class="service-lead-form" id="serviceLeadForm">
+                        <input type="text" name="_hp" id="voxHoneypot" style="display:none !important; position:absolute !important; left:-9999px !important;" tabindex="-1" autocomplete="off" aria-hidden="true">
                         <div class="form-row">
                             <div class="service-field">
                                 <label for="leadNombre">Nombre completo *</label>

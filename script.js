@@ -370,10 +370,44 @@ SERVICES.forEach((s,i)=>{
     serviceEl.style.cursor="pointer";
     serviceEl.addEventListener("click",()=>{
         const serviceId = SERVICE_IDS[i] || 'arquitectura';
-        window.location.href = `servicios/${serviceId}.html`;
+        window.location.href = `/servicios/${serviceId}`;
     });
     sg.appendChild(serviceEl);
 });
+
+// ===== INTERSECTION OBSERVER PARA CARGA DIFERIDA DE VIDEO SOBRE NOSOTROS =====
+const initAboutVideoLazyLoad = () => {
+    const aboutVid = document.getElementById('aboutVideo');
+    if (!aboutVid) return;
+
+    const sourceEl = aboutVid.querySelector('source');
+    const dataSrc = aboutVid.getAttribute('data-src');
+
+    if ('IntersectionObserver' in window) {
+        const videoObserver = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    if (sourceEl && dataSrc && !sourceEl.src.includes(dataSrc)) {
+                        sourceEl.src = dataSrc;
+                        aboutVid.load();
+                        aboutVid.play().catch(() => {});
+                    }
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, {
+            rootMargin: '200px 0px',
+            threshold: 0.1
+        });
+        videoObserver.observe(aboutVid);
+    } else {
+        if (sourceEl && dataSrc) {
+            sourceEl.src = dataSrc;
+            aboutVid.load();
+        }
+    }
+};
+document.addEventListener('DOMContentLoaded', initAboutVideoLazyLoad);
 
 // Methodology Carousel
 const initMethodologyCarousel = () => {
