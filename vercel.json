@@ -72,14 +72,12 @@
     {
       "source": "/index.html",
       "destination": "/",
-      "permanent": true,
-      "statusCode": 308
+      "permanent": true
     },
     {
       "source": "/servicios/:slug.html",
       "destination": "/servicios/:slug",
-      "permanent": true,
-      "statusCode": 308
+      "permanent": true
     }
   ],
   "rewrites": [
