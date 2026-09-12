@@ -3,10 +3,10 @@
  * 
  * Procesa prospectos entrantes con:
  * 1. Rate limiting por IP (previene ataques de fuerza bruta/spam masivo).
- * 2. Validación de Token Anti-Spam / BotID y Honeypot.
- * 3. Normalización y sanitización estricta de entradas.
- * 4. Almacenamiento seguro en Supabase utilizando Service Role Key (server-side).
- * 5. Notificación por correo vía endpoint seguro de backend.
+ * 2. Validación de Token Anti-Spam con verificación real de proveedor (Cloudflare Turnstile, reCAPTCHA, hCaptcha, BotID) y Honeypot.
+ * 3. Normalización y sanitización estricta de entradas (correo obligatorio y validado).
+ * 4. Almacenamiento seguro en Supabase (retorna error y no da éxito si la inserción en BD falla).
+ * 5. Notificación por correo vía Resend / FormSubmit tras confirmación de guardado.
  * 6. Manejo seguro de errores sin filtrar datos sensibles de infraestructura.
  */
 
@@ -37,18 +37,110 @@ function isRateLimited(ip) {
 }
 
 /**
- * Validador de BotID / Anti-Spam
- * Admite token de cliente (timestamp encriptado/firmado o integración con BotID API si configurada)
+ * Validador de Anti-Spam con verificación real de proveedor
+ * Soporta Cloudflare Turnstile, Google reCAPTCHA, hCaptcha y BotID.
+ * Rechaza solicitudes cuando no pueda verificarse la autenticidad.
  */
-async function checkBotId(botIdToken, honeypotValue) {
-    // 1. Honeypot check: si un bot llenó el campo oculto, rechazar
+async function verifyAntiSpam(token, honeypotValue, clientIp) {
+    // 1. Honeypot check: si un bot llenó el campo oculto, rechazar inmediatamente
     if (honeypotValue && honeypotValue.trim() !== '') {
         return { valid: false, reason: 'honeypot_triggered' };
     }
 
-    // 2. Si existe variable de entorno BOTID_SECRET_KEY, verificar contra la API de BotID
+    const turnstileSecret = process.env.TURNSTILE_SECRET_KEY || process.env.CLOUDFLARE_TURNSTILE_SECRET_KEY;
+    const recaptchaSecret = process.env.RECAPTCHA_SECRET_KEY || process.env.GOOGLE_RECAPTCHA_SECRET_KEY;
+    const hcaptchaSecret = process.env.HCAPTCHA_SECRET_KEY;
     const botIdSecret = process.env.BOTID_SECRET_KEY;
-    if (botIdSecret && botIdToken) {
+
+    // 2. Verificación Cloudflare Turnstile
+    if (turnstileSecret) {
+        if (!token || typeof token !== 'string') {
+            return { valid: false, reason: 'missing_turnstile_token' };
+        }
+        try {
+            const formData = new URLSearchParams();
+            formData.append('secret', turnstileSecret);
+            formData.append('response', token);
+            if (clientIp) formData.append('remoteip', clientIp);
+
+            const verifyRes = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: formData.toString()
+            });
+            const data = await verifyRes.json();
+            if (!data || !data.success) {
+                console.warn('[Anti-Spam] Verificación Turnstile fallida:', data);
+                return { valid: false, reason: 'turnstile_verification_failed' };
+            }
+            return { valid: true, provider: 'turnstile' };
+        } catch (err) {
+            console.error('[Anti-Spam] Error consultando Turnstile API:', err.message);
+            return { valid: false, reason: 'turnstile_api_error' };
+        }
+    }
+
+    // 3. Verificación Google reCAPTCHA
+    if (recaptchaSecret) {
+        if (!token || typeof token !== 'string') {
+            return { valid: false, reason: 'missing_recaptcha_token' };
+        }
+        try {
+            const formData = new URLSearchParams();
+            formData.append('secret', recaptchaSecret);
+            formData.append('response', token);
+            if (clientIp) formData.append('remoteip', clientIp);
+
+            const verifyRes = await fetch('https://www.google.com/recaptcha/api/siteverify', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: formData.toString()
+            });
+            const data = await verifyRes.json();
+            if (!data || !data.success || (typeof data.score === 'number' && data.score < 0.5)) {
+                console.warn('[Anti-Spam] Verificación reCAPTCHA fallida:', data);
+                return { valid: false, reason: 'recaptcha_verification_failed' };
+            }
+            return { valid: true, provider: 'recaptcha' };
+        } catch (err) {
+            console.error('[Anti-Spam] Error consultando reCAPTCHA API:', err.message);
+            return { valid: false, reason: 'recaptcha_api_error' };
+        }
+    }
+
+    // 4. Verificación hCaptcha
+    if (hcaptchaSecret) {
+        if (!token || typeof token !== 'string') {
+            return { valid: false, reason: 'missing_hcaptcha_token' };
+        }
+        try {
+            const formData = new URLSearchParams();
+            formData.append('secret', hcaptchaSecret);
+            formData.append('response', token);
+            if (clientIp) formData.append('remoteip', clientIp);
+
+            const verifyRes = await fetch('https://hcaptcha.com/siteverify', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: formData.toString()
+            });
+            const data = await verifyRes.json();
+            if (!data || !data.success) {
+                console.warn('[Anti-Spam] Verificación hCaptcha fallida:', data);
+                return { valid: false, reason: 'hcaptcha_verification_failed' };
+            }
+            return { valid: true, provider: 'hcaptcha' };
+        } catch (err) {
+            console.error('[Anti-Spam] Error consultando hCaptcha API:', err.message);
+            return { valid: false, reason: 'hcaptcha_api_error' };
+        }
+    }
+
+    // 5. Verificación BotID
+    if (botIdSecret) {
+        if (!token || typeof token !== 'string') {
+            return { valid: false, reason: 'missing_botid_token' };
+        }
         try {
             const verifyRes = await fetch('https://api.botid.io/v1/verify', {
                 method: 'POST',
@@ -56,57 +148,45 @@ async function checkBotId(botIdToken, honeypotValue) {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${botIdSecret}`
                 },
-                body: JSON.stringify({ token: botIdToken })
+                body: JSON.stringify({ token })
             });
             if (verifyRes.ok) {
                 const data = await verifyRes.json();
                 if (data && data.success === false) {
                     return { valid: false, reason: 'botid_verification_failed' };
                 }
+                return { valid: true, provider: 'botid' };
             }
+            return { valid: false, reason: 'botid_verification_failed' };
         } catch (err) {
-            console.warn('[Anti-Spam] Advertencia al validar con servicio BotID:', err.message);
-            // Fallback a validación algorítmica de token
+            console.error('[Anti-Spam] Error consultando BotID API:', err.message);
+            return { valid: false, reason: 'botid_api_error' };
         }
     }
 
-    // 3. Validación de token local (firmado con timestamp)
-    if (!botIdToken || typeof botIdToken !== 'string') {
-        return { valid: false, reason: 'missing_token' };
+    // 6. Si se configuró REQUIRE_ANTISPAM_VERIFICATION y no hay proveedor verificado, rechazar
+    const requireVerification = process.env.REQUIRE_ANTISPAM_VERIFICATION === 'true';
+    if (requireVerification) {
+        return { valid: false, reason: 'unconfigured_verification_provider' };
     }
 
-    try {
-        // Formato esperado vox_bot_<timestamp_base36>_<salt>
-        const parts = botIdToken.split('_');
-        if (parts.length < 3 || parts[0] !== 'vox' || parts[1] !== 'bot') {
-            return { valid: false, reason: 'invalid_token_format' };
-        }
-        const timestamp = parseInt(parts[2], 36);
-        const now = Date.now();
-        // Permitir un margen de -60s a +24 horas para absorber diferencias de reloj cliente/servidor
-        if (isNaN(timestamp) || (timestamp - now > 60 * 1000) || (now - timestamp > 24 * 60 * 60 * 1000)) {
-            return { valid: false, reason: 'invalid_time_window' };
-        }
-    } catch {
-        return { valid: false, reason: 'token_parse_error' };
-    }
-
-    return { valid: true };
+    // Si no hay proveedor configurado aún, validar que pase rate limiting y honeypot
+    return { valid: true, provider: 'honeypot_ratelimit' };
 }
 
 /**
- * Sanitiza texto simple para prevenir inyecciones y caracteres no imprimibles
+ * Sanitiza texto simple para prevenir inyecciones y caracteres no deseados
  */
 function sanitizeText(input, maxLength = 255) {
     if (typeof input !== 'string') return '';
     return input
-        .replace(/[<>]/g, '') // Elimina caracteres HTML
+        .replace(/[<>]/g, '') // Elimina etiquetas HTML
         .trim()
         .slice(0, maxLength);
 }
 
 /**
- * Validador de email
+ * Validador estricto de email
  */
 function isValidEmail(email) {
     if (!email || typeof email !== 'string') return false;
@@ -134,6 +214,7 @@ module.exports = async function handler(req, res) {
     if (req.method !== 'POST') {
         return res.status(405).json({
             success: false,
+            error: 'method_not_allowed',
             message: 'Método no permitido. Solo se admite POST.'
         });
     }
@@ -147,6 +228,7 @@ module.exports = async function handler(req, res) {
     if (isRateLimited(clientIp)) {
         return res.status(429).json({
             success: false,
+            error: 'rate_limited',
             message: 'Has realizado demasiadas solicitudes en poco tiempo. Por favor, intenta de nuevo en un momento.'
         });
     }
@@ -162,16 +244,19 @@ module.exports = async function handler(req, res) {
             tipo_financiamiento,
             mensaje,
             origen_url,
+            token,
             botIdToken,
             _hp // honeypot
         } = body;
 
-        // 1. Verificación Anti-Spam / BotID
-        const botCheck = await checkBotId(botIdToken, _hp);
+        const antiSpamToken = token || botIdToken || body['g-recaptcha-response'] || body['cf-turnstile-response'] || body['h-captcha-response'];
+
+        // 1. Verificación Anti-Spam Real
+        const botCheck = await verifyAntiSpam(antiSpamToken, _hp, clientIp);
         if (!botCheck.valid) {
-            // Responder con código genérico para no dar pistas al bot
             return res.status(400).json({
                 success: false,
+                error: 'antispam_verification_failed',
                 message: 'No fue posible validar la autenticidad del envío. Por favor, recarga la página e intenta de nuevo.'
             });
         }
@@ -189,13 +274,24 @@ module.exports = async function handler(req, res) {
         if (!cleanNombre || cleanNombre.length < 2) {
             return res.status(400).json({
                 success: false,
+                error: 'invalid_name',
                 message: 'Por favor, introduce un nombre válido.'
+            });
+        }
+
+        // El correo es obligatorio y estrictamente validado
+        if (!cleanCorreo) {
+            return res.status(400).json({
+                success: false,
+                error: 'missing_email',
+                message: 'El correo electrónico es obligatorio para procesar tu solicitud.'
             });
         }
 
         if (!isValidEmail(cleanCorreo)) {
             return res.status(400).json({
                 success: false,
+                error: 'invalid_email',
                 message: 'Por favor, introduce un correo electrónico válido.'
             });
         }
@@ -211,87 +307,150 @@ module.exports = async function handler(req, res) {
             origen_url: cleanOrigenUrl,
             created_at: new Date().toISOString(),
             estado: 'nuevo',
-            notas: `IP: ${clientIp} | Verificado Anti-Spam`
+            notas: `IP: ${clientIp} | Verificado (${botCheck.provider || 'seguro'})`
         };
 
-        // 3. Inserción Segura en Supabase (Backend)
+        // 3. Inserción Obligatoria en Supabase (Backend Server-Side)
         const supabaseUrl = process.env.SUPABASE_URL || 'https://umnnzfaymrictdpxpurh.supabase.co';
         const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_ANON_KEY;
 
-        let dbInserted = false;
-        let leadId = null;
-
-        if (supabaseUrl && supabaseKey) {
-            try {
-                const dbRes = await fetch(`${supabaseUrl}/rest/v1/leads`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'apikey': supabaseKey,
-                        'Authorization': `Bearer ${supabaseKey}`,
-                        'Prefer': 'return=representation'
-                    },
-                    body: JSON.stringify(leadPayload)
-                });
-
-                if (dbRes.ok) {
-                    const insertedData = await dbRes.json();
-                    if (Array.isArray(insertedData) && insertedData.length > 0) {
-                        leadId = insertedData[0].id;
-                    }
-                    dbInserted = true;
-                } else {
-                    const errorText = await dbRes.text();
-                    console.error('[Supabase Server Error]:', dbRes.status, errorText);
-                }
-            } catch (dbErr) {
-                console.error('[Supabase Connection Error]:', dbErr.message);
-            }
+        if (!supabaseUrl || !supabaseKey) {
+            console.error('[Supabase Config Error]: Faltan SUPABASE_URL o credenciales en variables de entorno.');
+            return res.status(500).json({
+                success: false,
+                error: 'database_not_configured',
+                message: 'Error de configuración del servidor de base de datos.'
+            });
         }
 
-        // 4. Notificación por Email desde el Servidor (FormSubmit / Resend / Webhook)
+        let leadId = null;
         try {
-            const emailFields = {
-                _subject: `🔥 Nuevo Lead: ${cleanServicio.toUpperCase()} - ${cleanNombre}`,
-                _template: 'table',
-                _captcha: 'false',
-                'Nombre': cleanNombre,
-                'Correo': cleanCorreo,
-                'Teléfono': cleanTelefono || 'No proporcionado',
-                'Empresa': cleanEmpresa,
-                'Servicio Solicitado': cleanServicio,
-                'Tipo Financiamiento': cleanFinanciamiento,
-                'Mensaje': cleanMensaje || 'Sin mensaje adicional',
-                'Origen': cleanOrigenUrl,
-                'Fecha': new Date().toLocaleString('es-MX', { timeZone: 'America/Mexico_City' })
-            };
-
-            const notificationEndpoint = process.env.EMAIL_NOTIFICATION_ENDPOINT || 'https://formsubmit.co/ajax/vox.iabusinessdeveloper@gmail.com';
-            
-            // 4.1 Enviar en formato JSON
-            const emailRes = await fetch(notificationEndpoint, {
+            const dbRes = await fetch(`${supabaseUrl}/rest/v1/leads`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                    'User-Agent': 'Mozilla/5.0 (compatible; VoxBot/1.0)'
+                    'apikey': supabaseKey,
+                    'Authorization': `Bearer ${supabaseKey}`,
+                    'Prefer': 'return=representation'
                 },
-                body: JSON.stringify(emailFields)
+                body: JSON.stringify(leadPayload)
             });
 
-            // 4.2 Si falla el endpoint ajax, fallback al endpoint directo form-urlencoded
-            if (!emailRes.ok) {
-                const params = new URLSearchParams();
-                for (const [key, value] of Object.entries(emailFields)) {
-                    params.append(key, value);
-                }
-                await fetch('https://formsubmit.co/vox.iabusinessdeveloper@gmail.com', {
+            if (!dbRes.ok) {
+                const errorText = await dbRes.text();
+                console.error('[Supabase Server Error]:', dbRes.status, errorText);
+                return res.status(502).json({
+                    success: false,
+                    error: 'database_insert_failed',
+                    message: 'No fue posible guardar tu solicitud en la base de datos. Por favor, intenta nuevamente.'
+                });
+            }
+
+            const insertedData = await dbRes.json();
+            if (Array.isArray(insertedData) && insertedData.length > 0) {
+                leadId = insertedData[0].id;
+            }
+        } catch (dbErr) {
+            console.error('[Supabase Connection Error]:', dbErr.message);
+            return res.status(502).json({
+                success: false,
+                error: 'database_connection_error',
+                message: 'Error de conexión con la base de datos. Por favor intenta más tarde.'
+            });
+        }
+
+        // 4. Notificación por Email (Solo se ejecuta si el lead ya fue guardado exitosamente en BD)
+        try {
+            const resendApiKey = process.env.RESEND_API_KEY;
+            const toEmail = process.env.NOTIFICATION_EMAIL || 'vox.iabusinessdeveloper@gmail.com';
+
+            if (resendApiKey) {
+                const htmlContent = `
+                <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; background: #161a1f; color: #ffffff; border-radius: 12px; overflow: hidden; border: 1px solid #2a3038;">
+                    <div style="background: #111418; padding: 24px; border-bottom: 2px solid #ff6a00; text-align: center;">
+                        <h2 style="margin: 0; color: #ffffff; font-size: 20px; letter-spacing: 1px;">VOX BUSINESS DEVELOPER</h2>
+                        <p style="margin: 6px 0 0 0; color: #ff6a00; font-size: 14px; font-weight: 600;">🔥 Nuevo Lead Recibido</p>
+                    </div>
+                    <div style="padding: 24px;">
+                        <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                            <tr style="border-bottom: 1px solid #2a3038;">
+                                <td style="padding: 10px 0; color: #8a94a6; width: 40%;">Nombre:</td>
+                                <td style="padding: 10px 0; color: #ffffff; font-weight: 600;">${cleanNombre}</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #2a3038;">
+                                <td style="padding: 10px 0; color: #8a94a6;">Correo:</td>
+                                <td style="padding: 10px 0; color: #ff6a00;"><a href="mailto:${cleanCorreo}" style="color: #ff6a00; text-decoration: none;">${cleanCorreo}</a></td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #2a3038;">
+                                <td style="padding: 10px 0; color: #8a94a6;">Teléfono:</td>
+                                <td style="padding: 10px 0; color: #ffffff;">${cleanTelefono || 'No proporcionado'}</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #2a3038;">
+                                <td style="padding: 10px 0; color: #8a94a6;">Empresa:</td>
+                                <td style="padding: 10px 0; color: #ffffff;">${cleanEmpresa}</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #2a3038;">
+                                <td style="padding: 10px 0; color: #8a94a6;">Servicio:</td>
+                                <td style="padding: 10px 0; color: #ffffff; font-weight: 600;">${cleanServicio}</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #2a3038;">
+                                <td style="padding: 10px 0; color: #8a94a6;">Financiamiento:</td>
+                                <td style="padding: 10px 0; color: #ffffff;">${cleanFinanciamiento}</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #2a3038;">
+                                <td style="padding: 10px 0; color: #8a94a6;">Mensaje:</td>
+                                <td style="padding: 10px 0; color: #ffffff; line-height: 1.5;">${cleanMensaje || 'Sin mensaje adicional'}</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 10px 0; color: #8a94a6;">Origen:</td>
+                                <td style="padding: 10px 0; color: #8a94a6; font-size: 12px;">${cleanOrigenUrl}</td>
+                            </tr>
+                        </table>
+                        <div style="margin-top: 24px; text-align: center;">
+                            <a href="https://wa.me/${(cleanTelefono || '').replace(/[^0-9]/g, '')}" style="display: inline-block; background: #ff6a00; color: #ffffff; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px;">Contactar por WhatsApp</a>
+                        </div>
+                    </div>
+                </div>
+                `;
+
+                const fromEmail = process.env.RESEND_FROM_EMAIL || 'VOX Leads <onboarding@resend.dev>';
+                const resendRes = await fetch('https://api.resend.com/emails', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                        'User-Agent': 'Mozilla/5.0 (compatible; VoxBot/1.0)'
+                        'Authorization': `Bearer ${resendApiKey}`,
+                        'Content-Type': 'application/json'
                     },
-                    body: params.toString()
+                    body: JSON.stringify({
+                        from: fromEmail,
+                        to: [toEmail],
+                        subject: `🔥 Nuevo Lead: ${cleanServicio.toUpperCase()} - ${cleanNombre}`,
+                        html: htmlContent
+                    })
+                });
+
+                const resendData = await resendRes.json().catch(() => null);
+                console.log('[Resend Email Status]:', resendRes.status, resendData);
+            } else {
+                // Fallback a FormSubmit si aún no se configura RESEND_API_KEY
+                const emailFields = {
+                    _subject: `🔥 Nuevo Lead: ${cleanServicio.toUpperCase()} - ${cleanNombre}`,
+                    _template: 'table',
+                    _captcha: 'false',
+                    'Nombre': cleanNombre,
+                    'Correo': cleanCorreo,
+                    'Teléfono': cleanTelefono || 'No proporcionado',
+                    'Empresa': cleanEmpresa,
+                    'Servicio': cleanServicio,
+                    'Mensaje': cleanMensaje,
+                    'Origen': cleanOrigenUrl
+                };
+                await fetch('https://formsubmit.co/ajax/vox.iabusinessdeveloper@gmail.com', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(emailFields)
                 }).catch(() => {});
             }
         } catch (emailErr) {
@@ -308,6 +467,7 @@ module.exports = async function handler(req, res) {
         console.error('[Server Internal Error]:', error);
         return res.status(500).json({
             success: false,
+            error: 'internal_error',
             message: 'Ocurrió un error inesperado al procesar tu solicitud. Por favor, intenta de nuevo más tarde.'
         });
     }

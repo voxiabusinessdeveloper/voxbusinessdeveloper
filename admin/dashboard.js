@@ -1842,6 +1842,7 @@ document.addEventListener('DOMContentLoaded', () => {
         nuevoCreditoForm.addEventListener('submit', async (e) => {
             e.preventDefault();
 
+            const saveBtn = document.getElementById('saveNuevoCreditoBtn');
             const cliente_nombre = document.getElementById('credClienteNombre').value.trim();
             const dominio_url = document.getElementById('credDominioUrl').value.trim();
             const rawTelefono = document.getElementById('credTelefono').value.trim();
@@ -1882,35 +1883,53 @@ document.addEventListener('DOMContentLoaded', () => {
             };
 
             const isConfigured = window.VOX_SUPABASE && window.VOX_SUPABASE.isConfigured();
+            if (!isConfigured) {
+                showToast('No se puede crear el crédito: la conexión con Supabase no está configurada.', 'error', 'Error de Base de Datos');
+                return;
+            }
+
+            if (saveBtn) {
+                saveBtn.disabled = true;
+                saveBtn.innerHTML = '<span>Guardando en base de datos...</span>';
+            }
+
             let creditoGuardado = null;
 
-            if (isConfigured) {
-                try {
-                    const { data, error } = await window.VOX_SUPABASE.client
-                        .from('creditos_sitios')
-                        .insert([nuevoCredito])
-                        .select();
+            try {
+                const { data, error } = await window.VOX_SUPABASE.client
+                    .from('creditos_sitios')
+                    .insert([nuevoCredito])
+                    .select();
 
-                    if (error) {
-                        console.error('Error insertando en Supabase:', error);
-                        throw error;
+                if (error) {
+                    console.error('Error insertando crédito en Supabase:', error);
+                    showToast('Error al guardar crédito en Supabase: ' + (error.message || 'Fallo de inserción'), 'error', 'Error al Crear Crédito');
+                    if (saveBtn) {
+                        saveBtn.disabled = false;
+                        saveBtn.innerHTML = '<i data-lucide="check"></i> <span>Activar y Generar Licencia</span>';
+                        if (window.lucide) window.lucide.createIcons();
                     }
-                    if (data && data[0]) {
-                        creditoGuardado = data[0];
-                    }
-                } catch (err) {
-                    console.error('Error al guardar crédito en Supabase, guardando en local:', err);
+                    return;
                 }
+
+                if (data && data[0]) {
+                    creditoGuardado = data[0];
+                } else {
+                    throw new Error('Supabase no devolvió el registro insertado.');
+                }
+
+            } catch (err) {
+                console.error('Excepción al guardar crédito en Supabase:', err);
+                showToast('Error de conexión con Supabase: ' + (err.message || 'No se pudo guardar'), 'error', 'Error al Crear Crédito');
+                if (saveBtn) {
+                    saveBtn.disabled = false;
+                    saveBtn.innerHTML = '<i data-lucide="check"></i> <span>Activar y Generar Licencia</span>';
+                    if (window.lucide) window.lucide.createIcons();
+                }
+                return;
             }
 
-            if (!creditoGuardado) {
-                creditoGuardado = {
-                    ...nuevoCredito,
-                    id: 'cred_' + Date.now(),
-                    created_at: new Date().toISOString()
-                };
-            }
-
+            // Inserción confirmada en Supabase: actualizar estado local
             state.creditos.unshift(creditoGuardado);
             localStorage.setItem('vox_creditos_cache', JSON.stringify(state.creditos));
 
@@ -1919,14 +1938,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 window.LeadService.sendCreditoNotification(creditoGuardado).then((res) => {
                     if (res && res.success) {
                         showToast('Correo de alerta enviado a vox.iabusinessdeveloper@gmail.com', 'success');
-                    } else {
-                        console.warn('No se pudo confirmar el envío del correo:', res);
                     }
                 }).catch(err => console.error('Error al disparar notificación:', err));
             }
 
+            if (saveBtn) {
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = '<i data-lucide="check"></i> <span>Activar y Generar Licencia</span>';
+                if (window.lucide) window.lucide.createIcons();
+            }
+
             closeNuevoCreditoModal();
             applyCreditosFilters();
+            showToast(`Crédito creado y registrado con éxito para "${creditoGuardado.cliente_nombre}".`, 'success', 'Crédito Creado');
 
             // Abrir automáticamente el modal con el snippet generado
             abrirModalSnippet(creditoGuardado);
@@ -1984,6 +2008,7 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
             if (!state.activeCredito) return;
 
+            const confirmarPagoBtn = document.getElementById('btnConfirmarPago');
             const credito = state.activeCredito;
             const creditoId = document.getElementById('pagoCreditoId').value;
             const numeroCuota = parseInt(document.getElementById('pagoNumeroCuota').value, 10);
@@ -1998,45 +2023,87 @@ document.addEventListener('DOMContentLoaded', () => {
             const nuevoEstado = isLiquidado ? 'liquidado' : 'activo';
 
             const isConfigured = window.VOX_SUPABASE && window.VOX_SUPABASE.isConfigured();
-
-            if (isConfigured) {
-                try {
-                    // 1. Insertar en historial de pagos
-                    await window.VOX_SUPABASE.client
-                        .from('historial_pagos_credito')
-                        .insert([{
-                            credito_id: creditoId,
-                            numero_cuota: numeroCuota,
-                            monto: monto,
-                            fecha_pago: fecha,
-                            metodo_pago: metodo,
-                            comprobante_ref: comprobante,
-                            notas: notas,
-                            registrado_por: state.user ? state.user.email : 'admin'
-                        }]);
-
-                    // 2. Actualizar contador en creditos_sitios
-                    await window.VOX_SUPABASE.client
-                        .from('creditos_sitios')
-                        .update({
-                            meses_pagados: nuevoMesesPagados,
-                            estado: nuevoEstado,
-                            motivo_suspension: isLiquidado ? '' : (credito.estado === 'suspendido' ? '' : credito.motivo_suspension)
-                        })
-                        .eq('id', creditoId);
-
-                } catch (err) {
-                    console.error('Error al registrar pago en Supabase:', err);
-                }
+            if (!isConfigured) {
+                showToast('No se puede registrar el pago: la conexión con Supabase no está configurada.', 'error', 'Error de Base de Datos');
+                return;
             }
 
-            // Actualizar estado local
+            if (confirmarPagoBtn) {
+                confirmarPagoBtn.disabled = true;
+                confirmarPagoBtn.innerHTML = '<span>Registrando pago en base de datos...</span>';
+            }
+
+            try {
+                // 1. Insertar en historial de pagos
+                const { error: insertError } = await window.VOX_SUPABASE.client
+                    .from('historial_pagos_credito')
+                    .insert([{
+                        credito_id: creditoId,
+                        numero_cuota: numeroCuota,
+                        monto: monto,
+                        fecha_pago: fecha,
+                        metodo_pago: metodo,
+                        comprobante_ref: comprobante,
+                        notas: notas,
+                        registrado_por: state.user ? state.user.email : 'admin'
+                    }]);
+
+                if (insertError) {
+                    console.error('Error insertando pago en Supabase:', insertError);
+                    showToast('Error al registrar pago en Supabase: ' + (insertError.message || 'Fallo de inserción'), 'error', 'Error al Registrar Pago');
+                    if (confirmarPagoBtn) {
+                        confirmarPagoBtn.disabled = false;
+                        confirmarPagoBtn.innerHTML = '<i data-lucide="check"></i> <span>Confirmar y Guardar Pago</span>';
+                        if (window.lucide) window.lucide.createIcons();
+                    }
+                    return;
+                }
+
+                // 2. Actualizar contador en creditos_sitios
+                const { error: updateError } = await window.VOX_SUPABASE.client
+                    .from('creditos_sitios')
+                    .update({
+                        meses_pagados: nuevoMesesPagados,
+                        estado: nuevoEstado,
+                        motivo_suspension: isLiquidado ? '' : (credito.estado === 'suspendido' ? '' : credito.motivo_suspension)
+                    })
+                    .eq('id', creditoId);
+
+                if (updateError) {
+                    console.error('Error actualizando crédito en Supabase tras pago:', updateError);
+                    showToast('El pago se guardó pero falló actualizar el estado del crédito: ' + (updateError.message || 'Error de actualización'), 'error', 'Error de Actualización');
+                    if (confirmarPagoBtn) {
+                        confirmarPagoBtn.disabled = false;
+                        confirmarPagoBtn.innerHTML = '<i data-lucide="check"></i> <span>Confirmar y Guardar Pago</span>';
+                        if (window.lucide) window.lucide.createIcons();
+                    }
+                    return;
+                }
+
+            } catch (err) {
+                console.error('Excepción al registrar pago en Supabase:', err);
+                showToast('Error de conexión al registrar pago: ' + (err.message || 'Error inesperado'), 'error', 'Error al Registrar Pago');
+                if (confirmarPagoBtn) {
+                    confirmarPagoBtn.disabled = false;
+                    confirmarPagoBtn.innerHTML = '<i data-lucide="check"></i> <span>Confirmar y Guardar Pago</span>';
+                    if (window.lucide) window.lucide.createIcons();
+                }
+                return;
+            }
+
+            // Actualizar estado local únicamente tras validación y éxito en Supabase
             credito.meses_pagados = nuevoMesesPagados;
             credito.estado = nuevoEstado;
             if (nuevoEstado === 'activo' || nuevoEstado === 'liquidado') {
                 credito.motivo_suspension = '';
             }
             localStorage.setItem('vox_creditos_cache', JSON.stringify(state.creditos));
+
+            if (confirmarPagoBtn) {
+                confirmarPagoBtn.disabled = false;
+                confirmarPagoBtn.innerHTML = '<i data-lucide="check"></i> <span>Confirmar y Guardar Pago</span>';
+                if (window.lucide) window.lucide.createIcons();
+            }
 
             closeRegistrarPagoModal();
             applyCreditosFilters();

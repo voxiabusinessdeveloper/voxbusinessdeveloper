@@ -1170,33 +1170,35 @@ form.addEventListener("submit", async (e)=>{
                 mensaje
             });
         }
+
+        // Configurar enlace directo de WhatsApp en tarjeta de éxito
+        const waSuccessBtn = document.getElementById('waSuccessBtn');
+        if (waSuccessBtn) {
+            const cleanTel = (telefono || '').replace(/[^0-9]/g, '');
+            waSuccessBtn.href = `https://wa.me/5215554077643?text=${encodeURIComponent('Hola VOX, mi nombre es ' + nombre + ' y me interesa información sobre ' + servicio + '.')}`;
+        }
+        
+        // Show success message
+        form.setAttribute("hidden","");
+        success.removeAttribute("hidden");
+        
+        // Add extra pulse elements for better animation
+        const ring=success.querySelector('.success-ring');
+        if(ring && ring.children.length<=1){
+            ring.innerHTML='<span class="pulse"></span><span class="pulse"></span><span class="pulse"></span><span class="check-big"><i data-lucide="check"></i></span>';
+        }
+        
+        if (window.lucide) lucide.createIcons();
+
     } catch (err) {
         console.error('Error al registrar lead:', err);
+        alert(err.message || 'Ocurrió un error al enviar tu información. Por favor, verifica tus datos o contáctanos por WhatsApp.');
     } finally {
         if (submitBtn) {
             submitBtn.classList.remove('loading');
             submitBtn.disabled = false;
         }
     }
-    
-    // Configurar enlace directo de WhatsApp en tarjeta de éxito
-    const waSuccessBtn = document.getElementById('waSuccessBtn');
-    if (waSuccessBtn) {
-        const cleanTel = (telefono || '').replace(/[^0-9]/g, '');
-        waSuccessBtn.href = `https://wa.me/5215554077643?text=${encodeURIComponent('Hola VOX, mi nombre es ' + nombre + ' y me interesa información sobre ' + servicio + '.')}`;
-    }
-    
-    // Show success message
-    form.setAttribute("hidden","");
-    success.removeAttribute("hidden");
-    
-    // Add extra pulse elements for better animation
-    const ring=success.querySelector('.success-ring');
-    if(ring && ring.children.length<=1){
-        ring.innerHTML='<span class="pulse"></span><span class="pulse"></span><span class="pulse"></span><span class="check-big"><i data-lucide="check"></i></span>';
-    }
-    
-    if (window.lucide) lucide.createIcons();
 });
 document.getElementById("resetBtn").addEventListener("click",()=>{
     form.reset();

@@ -615,7 +615,7 @@ function initServiceLeadModal() {
                 successContainer.style.display = 'block';
                 form.reset();
             } catch (err) {
-                alert('Ocurrió un error al procesar tu solicitud. Por favor intenta de nuevo.');
+                alert(err.message || 'Ocurrió un error al procesar tu solicitud. Por favor intenta de nuevo.');
                 console.error(err);
             } finally {
                 submitBtn.disabled = false;

@@ -2,20 +2,35 @@
  * VOX Business Developer - Lead Service (Producción Segura)
  * 
  * Envío seguro de prospectos a través de Vercel Serverless Function `/api/leads`.
- * Protegido con BotID / Anti-Spam token del lado del cliente y fallback local.
+ * Integrado con verificación Anti-Spam real y manejo de errores.
  */
 
 const LeadService = {
     LOCAL_STORAGE_KEY: 'vox_leads_cache',
-    _initTime: Date.now(),
 
     /**
-     * Genera un token Anti-Spam / BotID dinámico basado en tiempo y entropía
+     * Obtiene el token de captcha disponible de los proveedores compatibles
      */
-    generateBotToken() {
-        const timestamp = Date.now().toString(36);
-        const salt = Math.random().toString(36).substring(2, 9);
-        return `vox_bot_${timestamp}_${salt}`;
+    getCaptchaToken() {
+        if (typeof window.turnstile !== 'undefined' && typeof window.turnstile.getResponse === 'function') {
+            try {
+                const t = window.turnstile.getResponse();
+                if (t) return t;
+            } catch (e) {}
+        }
+        if (typeof window.grecaptcha !== 'undefined' && typeof window.grecaptcha.getResponse === 'function') {
+            try {
+                const g = window.grecaptcha.getResponse();
+                if (g) return g;
+            } catch (e) {}
+        }
+        if (typeof window.hcaptcha !== 'undefined' && typeof window.hcaptcha.getResponse === 'function') {
+            try {
+                const h = window.hcaptcha.getResponse();
+                if (h) return h;
+            } catch (e) {}
+        }
+        return '';
     },
 
     /**
@@ -24,6 +39,8 @@ const LeadService = {
      * @returns {Promise<{success: boolean, message: string, leadId?: string}>}
      */
     async submitLead(leadData) {
+        const captchaToken = leadData.token || leadData.botIdToken || this.getCaptchaToken();
+
         const payload = {
             nombre: leadData.nombre?.trim() || '',
             correo: leadData.correo?.trim().toLowerCase() || '',
@@ -33,7 +50,7 @@ const LeadService = {
             tipo_financiamiento: leadData.tipo_financiamiento || 'recurso_propio',
             mensaje: leadData.mensaje?.trim() || '',
             origen_url: window.location.href,
-            botIdToken: this.generateBotToken(),
+            token: captchaToken,
             _hp: document.getElementById('voxHoneypot')?.value || ''
         };
 
@@ -53,8 +70,8 @@ const LeadService = {
             }));
 
             if (!response.ok || !result.success) {
-                console.warn('⚠️ Respuesta del servidor /api/leads:', result);
-                throw new Error(result.message || 'Error al enviar el formulario.');
+                console.warn('⚠️ Respuesta de error de /api/leads:', result);
+                throw new Error(result.message || 'Error al procesar el prospecto en el servidor.');
             }
 
             console.log('✅ Lead procesado exitosamente por /api/leads:', result);
@@ -70,16 +87,7 @@ const LeadService = {
 
         } catch (err) {
             console.error('❌ Error enviando lead a /api/leads:', err);
-
-            // Si el backend falla por entorno de desarrollo local sin serverless, guardar localmente para no perder la intención
-            const fallbackId = 'local_' + Date.now();
-            this.saveLocalLead(payload, fallbackId);
-
-            return {
-                success: true,
-                leadId: fallbackId,
-                message: 'Tu solicitud ha sido guardada. Nos comunicaremos contigo a la brevedad.'
-            };
+            throw err;
         }
     },
 
@@ -89,6 +97,7 @@ const LeadService = {
     saveLocalLead(payload, leadId) {
         try {
             const localPayload = { ...payload, id: leadId || ('lead_' + Date.now()), created_at: new Date().toISOString() };
+            delete localPayload.token;
             delete localPayload.botIdToken;
             delete localPayload._hp;
             const currentLeads = this.getLocalLeads();
