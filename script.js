@@ -19,11 +19,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // ===== HERO CAROUSEL =====
 const HERO_SLIDES = [
-    "assets/svg/architecture-render.svg",
-    "assets/svg/marketing-strategy.svg",
-    "assets/svg/legal-services.svg",
-    "assets/svg/financial-services.svg",
-    "assets/svg/branding-design.svg",
+    { src: "assets/svg/architecture-render.svg", alt: "Arquitectura y Renders 3D en Puebla — VOX" },
+    { src: "assets/svg/marketing-strategy.svg", alt: "Marketing Inmobiliario y Estrategia Comercial — VOX" },
+    { src: "assets/svg/legal-services.svg", alt: "Servicios Legales y Corporativos Inmobiliarios — VOX" },
+    { src: "assets/svg/financial-services.svg", alt: "Consultoría Fiscal y Financiera para Empresas — VOX" },
+    { src: "assets/svg/branding-design.svg", alt: "Branding e Identidad Visual Inmobiliaria — VOX" },
 ];
 
 const initHeroCarousel = () => {
@@ -38,8 +38,10 @@ const initHeroCarousel = () => {
     HERO_SLIDES.forEach((slide, index) => {
         const slideEl = document.createElement('div');
         slideEl.className = `hero-slide ${index === 0 ? 'active' : ''}`;
+        const slideSrc = typeof slide === 'string' ? slide : slide.src;
+        const slideAlt = typeof slide === 'string' ? 'Servicios integrales VOX Business Developer' : slide.alt;
         slideEl.innerHTML = `
-            <img src="${slide}" alt="" />
+            <img src="${slideSrc}" alt="${slideAlt}" />
             <div class="hero-slide-overlay"></div>
         `;
         carousel.appendChild(slideEl);

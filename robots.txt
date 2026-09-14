@@ -12,4 +12,4 @@ Allow: /assets/images/
 Allow: /manifest.json
 Allow: /browserconfig.xml
 
-Sitemap https://voxbusinessdeveloper.com/sitemap.xml
+Sitemap: https://voxbusinessdeveloper.com/sitemap.xml
