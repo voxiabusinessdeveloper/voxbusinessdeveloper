@@ -237,17 +237,17 @@ document.addEventListener('DOMContentLoaded', aboutCarousel);
 const WHATSAPP = "5215554077643"; // número actualizado
 const WA_URL = `https://wa.me/${WHATSAPP}`;
 
-const MARQUEE = ["Arquitectura","Diseño","Estrategia","Visualización","Marketing","Branding","Desarrollo","Consultoría"];
+const MARQUEE = ["Arquitectura", "Diseño", "Estrategia", "Visualización", "Marketing", "Branding", "Desarrollo", "Consultoría"];
 
 const SERVICES = [
-    {icon:"building-2",title:"Arquitectura y Visualización Hiperrealista",text:"Creamos renders y visualizaciones arquitectónicas de alta calidad.",image:"assets/servicios/arquitectura y visualizacion.jpeg"},
-    {icon:"megaphone",title:"Marketing Inmobiliario",text:"Diseñamos estrategias enfocadas en atraer clientes y acelerar las ventas.",image:"assets/servicios/marketing inmobiliario.jpeg"},
-    {icon:"scale",title:"Servicios Jurídicos Inmobiliarios",text:"Brindamos respaldo legal para empresas y desarrolladores.",image:"assets/servicios/servicios juridicos inmobiliarios.jpeg"},
-    {icon:"calculator",title:"Servicios Contables y Fiscales Inmobiliarios",text:"Optimizamos la administración financiera y el cumplimiento legal.",image:"assets/servicios/contable y fiscal.jpeg"},
-    {icon:"palette",title:"Branding y Desarrollo de Marca",text:"Construimos marcas sólidas que generan confianza y posicionamiento en el mercado.",image:"assets/servicios/branding y desarrollo de marca.jpeg"},
-    {icon:"code-2",title:"Desarrollo Web",text:"Creamos plataformas digitales enfocadas en la conversión.",image:"assets/servicios/desarrollo web.jpeg"},
-    {icon:"layout",title:"Interiorismo Comercial y Corporativo",text:"Diseñamos espacios que fortalecen la experiencia del cliente.",image:"assets/servicios/interiorismo comercial y corporativo.jpeg"},
-    {icon:"search-check",title:"Auditorias empresariales",text:"Evaluamos la operación para detectar oportunidades de mejora.",image:"assets/servicios/auditorias empresariales.jpeg"},
+    { icon: "building-2", title: "Arquitectura y Visualización Hiperrealista", text: "Creamos renders y visualizaciones arquitectónicas de alta calidad.", image: "assets/servicios/arquitectura y visualizacion.jpeg" },
+    { icon: "megaphone", title: "Marketing Inmobiliario", text: "Diseñamos estrategias enfocadas en atraer clientes y acelerar las ventas.", image: "assets/servicios/marketing inmobiliario.jpeg" },
+    { icon: "scale", title: "Servicios Jurídicos Inmobiliarios", text: "Brindamos respaldo legal para empresas y desarrolladores.", image: "assets/servicios/servicios juridicos inmobiliarios.jpeg" },
+    { icon: "calculator", title: "Servicios Contables y Fiscales Inmobiliarios", text: "Optimizamos la administración financiera y el cumplimiento legal.", image: "assets/servicios/contable y fiscal.jpeg" },
+    { icon: "palette", title: "Branding y Desarrollo de Marca", text: "Construimos marcas sólidas que generan confianza y posicionamiento en el mercado.", image: "assets/servicios/branding y desarrollo de marca.jpeg" },
+    { icon: "code-2", title: "Desarrollo Web", text: "Creamos plataformas digitales enfocadas en la conversión.", image: "assets/servicios/desarrollo web.jpeg" },
+    { icon: "layout", title: "Interiorismo Comercial y Corporativo", text: "Diseñamos espacios que fortalecen la experiencia del cliente.", image: "assets/servicios/interiorismo comercial y corporativo.jpeg" },
+    { icon: "search-check", title: "Auditorias empresariales", text: "Evaluamos la operación para detectar oportunidades de mejora.", image: "assets/servicios/auditorias empresariales.jpeg" },
 ];
 
 // SKILLS eliminado según análisis - redundante con Servicios
@@ -312,54 +312,54 @@ const METHODOLOGY = [
 ];
 
 const STATS = [
-    {value:120,suffix:"+",label:"Clientes atendidos"},
-    {value:340,suffix:"+",label:"Proyectos entregados"},
-    {value:15,suffix:" años",label:"De experiencia"},
-    {value:24,prefix:"< ",suffix:"h",label:"Tiempo de respuesta"},
+    { value: 120, suffix: "+", label: "Clientes atendidos" },
+    { value: 340, suffix: "+", label: "Proyectos entregados" },
+    { value: 15, suffix: " años", label: "De experiencia" },
+    { value: 24, prefix: "< ", suffix: "h", label: "Tiempo de respuesta" },
 ];
 
 const PROJECTS = [
-    {tag:"Arquitectura",title:"Visualización Hiperrealista",text:"Renders arquitectónicos de alta fidelidad para proyectos residenciales.",image:"assets/svg/architecture-render.svg",size:"large"},
-    {tag:"Interiorismo",title:"Diseño de Espacios Comerciales",text:"Concepto interiorismo para showroom corporativo.",image:"assets/svg/marketing-strategy.svg",size:"medium"},
-    {tag:"Branding",title:"Identidad Corporativa",text:"Desarrollo de marca completa para firma de construcción.",image:"assets/svg/legal-services.svg",size:"medium"},
-    {tag:"Desarrollo Web",title:"Plataforma Digital Inmobiliaria",text:"Web de alta conversión para desarrolladora.",image:"assets/svg/financial-services.svg",size:"large"},
-    {tag:"Estrategia",title:"Consultoría de Negocios",text:"Planeación comercial para firma de arquitectura.",image:"assets/svg/branding-design.svg",size:"medium"},
+    { tag: "Arquitectura", title: "Visualización Hiperrealista", text: "Renders arquitectónicos de alta fidelidad para proyectos residenciales.", image: "assets/svg/architecture-render.svg", size: "large" },
+    { tag: "Interiorismo", title: "Diseño de Espacios Comerciales", text: "Concepto interiorismo para showroom corporativo.", image: "assets/svg/marketing-strategy.svg", size: "medium" },
+    { tag: "Branding", title: "Identidad Corporativa", text: "Desarrollo de marca completa para firma de construcción.", image: "assets/svg/legal-services.svg", size: "medium" },
+    { tag: "Desarrollo Web", title: "Plataforma Digital Inmobiliaria", text: "Web de alta conversión para desarrolladora.", image: "assets/svg/financial-services.svg", size: "large" },
+    { tag: "Estrategia", title: "Consultoría de Negocios", text: "Planeación comercial para firma de arquitectura.", image: "assets/svg/branding-design.svg", size: "medium" },
 ];
 
 const TESTIMONIALS = [
-    {name:"Andrés Molina",company:"CEO, Grupo Aurora",rating:5,text:"El nivel de estrategia y ejecución de VOX transformó por completo nuestra presencia digital. Resultados desde el primer mes.",image:"assets/images/logos/vox_fox.png",companyLogo:"assets/images/logos/vox_logo_4k.png"},
-    {name:"Valentina Ríos",company:"CMO, Nova Retail",rating:5,text:"Un equipo que entiende de negocio, no solo de diseño. La página convierte y la marca por fin se ve premium.",image:"assets/images/logos/vox_fox.png",companyLogo:"assets/images/logos/vox_logo_4k.png"},
-    {name:"Diego Fuentes",company:"Fundador, LoopPay",rating:5,text:"Profesionalismo absoluto. Cumplieron cada plazo y superaron nuestras expectativas de calidad.",image:"assets/images/logos/vox_fox.png",companyLogo:"assets/images/logos/vox_logo_4k.png"},
+    { name: "Andrés Molina", company: "CEO, Grupo Aurora", rating: 5, text: "El nivel de estrategia y ejecución de VOX transformó por completo nuestra presencia digital. Resultados desde el primer mes.", image: "assets/images/logos/vox_fox.png", companyLogo: "assets/images/logos/vox_logo_4k.png" },
+    { name: "Valentina Ríos", company: "CMO, Nova Retail", rating: 5, text: "Un equipo que entiende de negocio, no solo de diseño. La página convierte y la marca por fin se ve premium.", image: "assets/images/logos/vox_fox.png", companyLogo: "assets/images/logos/vox_logo_4k.png" },
+    { name: "Diego Fuentes", company: "Fundador, LoopPay", rating: 5, text: "Profesionalismo absoluto. Cumplieron cada plazo y superaron nuestras expectativas de calidad.", image: "assets/images/logos/vox_fox.png", companyLogo: "assets/images/logos/vox_logo_4k.png" },
 ];
 
 const FAQS = [
-    {q:"¿Qué es la metodología VOX®?",a:"VOX® es un sistema integral de crecimiento empresarial que conecta estrategia, marca, marketing, ventas y optimización para construir negocios más sólidos y escalables."},
-    {q:"¿VOX® solo se encarga de marketing?",a:"No. El marketing es solo una parte del sistema. VOX® trabaja desde la visión del negocio hasta la conversión y evolución continua."},
-    {q:"¿Por qué mi empresa necesita una estrategia antes de hacer marketing?",a:"Porque crecer sin dirección genera esfuerzos aislados. Primero definimos objetivos, mercado y posicionamiento para construir acciones con propósito."},
-    {q:"¿Cómo mejora VOX® la experiencia de mi marca?",a:"Diseñamos una experiencia completa: identidad, comunicación, visualización, procesos comerciales y cada punto de contacto con el cliente."},
-    {q:"¿VOX® ayuda a aumentar las ventas?",a:"Sí. A través de procesos comerciales, CRM, automatización, seguimiento y estrategias de conversión transformamos oportunidades en resultados."},
-    {q:"¿Qué pasa después de implementar la metodología VOX®?",a:"El crecimiento continúa. Analizamos datos, optimizamos procesos e incorporamos innovación para que la empresa siga evolucionando."},
+    { q: "¿Qué es la metodología VOX®?", a: "VOX® es un sistema integral de crecimiento empresarial que conecta estrategia, marca, marketing, ventas y optimización para construir negocios más sólidos y escalables." },
+    { q: "¿VOX® solo se encarga de marketing?", a: "No. El marketing es solo una parte del sistema. VOX® trabaja desde la visión del negocio hasta la conversión y evolución continua." },
+    { q: "¿Por qué mi empresa necesita una estrategia antes de hacer marketing?", a: "Porque crecer sin dirección genera esfuerzos aislados. Primero definimos objetivos, mercado y posicionamiento para construir acciones con propósito." },
+    { q: "¿Cómo mejora VOX® la experiencia de mi marca?", a: "Diseñamos una experiencia completa: identidad, comunicación, visualización, procesos comerciales y cada punto de contacto con el cliente." },
+    { q: "¿VOX® ayuda a aumentar las ventas?", a: "Sí. A través de procesos comerciales, CRM, automatización, seguimiento y estrategias de conversión transformamos oportunidades en resultados." },
+    { q: "¿Qué pasa después de implementar la metodología VOX®?", a: "El crecimiento continúa. Analizamos datos, optimizamos procesos e incorporamos innovación para que la empresa siga evolucionando." },
 ];
 
 // SERVICE_OPTIONS eliminado - campo de servicio de interés removido del formulario
 
 // ===== RENDER =====
-function el(html){const t=document.createElement("template");t.innerHTML=html.trim();return t.content.firstChild;}
+function el(html) { const t = document.createElement("template"); t.innerHTML = html.trim(); return t.content.firstChild; }
 
 // Marquee (doubled for seamless loop)
-const track=document.getElementById("marqueeTrack");
+const track = document.getElementById("marqueeTrack");
 if (track) {
-    [...MARQUEE,...MARQUEE].forEach(item=>{
+    [...MARQUEE, ...MARQUEE].forEach(item => {
         track.appendChild(el(`<span>${item}</span>`));
     });
 }
 
 // Services
-const sg=document.getElementById("servicesGrid");
+const sg = document.getElementById("servicesGrid");
 if (sg) {
-    SERVICES.forEach((s,i)=>{
-        const serviceEl=el(`
-        <div class="service reveal" style="--d:${(i%3)*.07}s">
+    SERVICES.forEach((s, i) => {
+        const serviceEl = el(`
+        <div class="service reveal" style="--d:${(i % 3) * .07}s">
             <div class="service-image">
                 <img src="${s.image}" alt="${s.title}" loading="lazy" />
                 <div class="service-overlay">
@@ -372,8 +372,8 @@ if (sg) {
                 </div>
             </div>
         </div>`);
-        serviceEl.style.cursor="pointer";
-        serviceEl.addEventListener("click",()=>{
+        serviceEl.style.cursor = "pointer";
+        serviceEl.addEventListener("click", () => {
             const serviceId = SERVICE_IDS[i] || 'arquitectura';
             window.location.href = `/servicios/${serviceId}`;
         });
@@ -396,7 +396,7 @@ const initAboutVideoLazyLoad = () => {
                     if (sourceEl && dataSrc && !sourceEl.src.includes(dataSrc)) {
                         sourceEl.src = dataSrc;
                         aboutVid.load();
-                        aboutVid.play().catch(() => {});
+                        aboutVid.play().catch(() => { });
                     }
                     observer.unobserve(entry.target);
                 }
@@ -460,19 +460,19 @@ const initMethodologyCarousel = () => {
     const updateCarousel = (instant = false) => {
         const slides = document.querySelectorAll('.methodology-slide');
         const cards = document.querySelectorAll('.methodology-card');
-        
+
         // Smooth fade transition
         const realIndex = currentIndex % METHODOLOGY.length;
         if (cards[realIndex]) {
             cards[realIndex].style.opacity = '0.3';
             cards[realIndex].style.transform = 'scale(0.98)';
-            
+
             setTimeout(() => {
                 cards[realIndex].style.opacity = '1';
                 cards[realIndex].style.transform = 'scale(1)';
             }, 300);
         }
-        
+
         // Move track
         if (instant) {
             track.style.transition = 'none';
@@ -480,7 +480,7 @@ const initMethodologyCarousel = () => {
             track.style.transition = 'transform 0.8s cubic-bezier(0.4, 0, 0.2, 1)';
         }
         track.style.transform = `translateX(-${currentIndex * 100}%)`;
-        
+
         // Update dots
         const dotIndex = currentIndex % METHODOLOGY.length;
         dots.forEach((dot, index) => {
@@ -497,7 +497,7 @@ const initMethodologyCarousel = () => {
     const nextSlide = () => {
         currentIndex++;
         updateCarousel();
-        
+
         // Si llegamos al clon del primero, saltar al primero real instantáneamente
         if (currentIndex === totalSlides - 1) {
             setTimeout(() => {
@@ -591,11 +591,11 @@ const initMethodologyCarousel = () => {
 initMethodologyCarousel();
 
 // Stats
-const stg=document.getElementById("statsGrid");
-if(stg){
-    STATS.forEach(s=>stg.appendChild(el(`
+const stg = document.getElementById("statsGrid");
+if (stg) {
+    STATS.forEach(s => stg.appendChild(el(`
         <div class="stat reveal">
-            <div class="num">${s.prefix||""}<span class="count" data-to="${s.value}">0</span><em>${s.suffix}</em></div>
+            <div class="num">${s.prefix || ""}<span class="count" data-to="${s.value}">0</span><em>${s.suffix}</em></div>
             <p>${s.label}</p>
         </div>`)));
 }
@@ -745,10 +745,10 @@ const initTestimonialsCarousel = () => {
     TESTIMONIALS.forEach((testimonial, index) => {
         const slide = document.createElement('div');
         slide.className = 'testimonial-slide';
-        
+
         // Generate stars
         const starsHTML = Array(testimonial.rating).fill('<i data-lucide="star"></i>').join('');
-        
+
         slide.innerHTML = `
             <div class="testimonial-card reveal">
                 <div class="testimonial-image">
@@ -859,11 +859,11 @@ const initTestimonialsCarousel = () => {
 document.addEventListener('DOMContentLoaded', initTestimonialsCarousel);
 
 // FAQ
-const fl=document.getElementById("faqList");
-if(fl){
-    FAQS.forEach((f,i)=>{
-        const item=el(`
-        <div class="faq-item ${i===0?'open':''} reveal">
+const fl = document.getElementById("faqList");
+if (fl) {
+    FAQS.forEach((f, i) => {
+        const item = el(`
+        <div class="faq-item ${i === 0 ? 'open' : ''} reveal">
             <button class="faq-q"><span>${f.q}</span><span class="faq-toggle"><i data-lucide="plus"></i></span></button>
             <div class="faq-a"><p>${f.a}</p></div>
         </div>`);
@@ -872,112 +872,114 @@ if(fl){
 }
 
 // WhatsApp links
-document.getElementById("year").textContent=new Date().getFullYear();
-["waFormBtn","waSuccessBtn","fabWa"].forEach(id=>{const e=document.getElementById(id);if(e)e.href=WA_URL;});
+document.getElementById("year").textContent = new Date().getFullYear();
+["waFormBtn", "waSuccessBtn", "fabWa"].forEach(id => { const e = document.getElementById(id); if (e) e.href = WA_URL; });
 
 // Icons
 lucide.createIcons();
 
 // ===== INTERACTIONS =====
 // FAQ accordion
-function refreshFaqHeights(){
-    fl.querySelectorAll(".faq-item").forEach(it=>{
-        const a=it.querySelector(".faq-a");
-        a.style.maxHeight=it.classList.contains("open")?a.scrollHeight+"px":"0px";
+function refreshFaqHeights() {
+    fl.querySelectorAll(".faq-item").forEach(it => {
+        const a = it.querySelector(".faq-a");
+        a.style.maxHeight = it.classList.contains("open") ? a.scrollHeight + "px" : "0px";
     });
 }
-fl.querySelectorAll(".faq-q").forEach(btn=>{
-    btn.addEventListener("click",()=>{
-        const item=btn.parentElement;
-        const wasOpen=item.classList.contains("open");
-        fl.querySelectorAll(".faq-item").forEach(i=>i.classList.remove("open"));
-        if(!wasOpen)item.classList.add("open");
+fl.querySelectorAll(".faq-q").forEach(btn => {
+    btn.addEventListener("click", () => {
+        const item = btn.parentElement;
+        const wasOpen = item.classList.contains("open");
+        fl.querySelectorAll(".faq-item").forEach(i => i.classList.remove("open"));
+        if (!wasOpen) item.classList.add("open");
         refreshFaqHeights();
     });
 });
-setTimeout(refreshFaqHeights,100);
+setTimeout(refreshFaqHeights, 100);
 
 // Navbar scrolled + FAB
-const navbar=document.getElementById("navbar");
-const fab=document.getElementById("fabWa");
-function onScroll(){
-    const y=window.scrollY;
-    navbar.classList.toggle("scrolled",y>40);
-    fab.classList.toggle("show",y>600);
+const navbar = document.getElementById("navbar");
+const fab = document.getElementById("fabWa");
+function onScroll() {
+    const y = window.scrollY;
+    navbar.classList.toggle("scrolled", y > 40);
+    fab.classList.toggle("show", y > 600);
 }
-window.addEventListener("scroll",onScroll,{passive:true});onScroll();
+window.addEventListener("scroll", onScroll, { passive: true }); onScroll();
 
 // Mobile menu
-const menuToggle=document.getElementById("menuToggle");
-const mobileMenu=document.getElementById("mobileMenu");
-menuToggle.addEventListener("click",()=>{
+const menuToggle = document.getElementById("menuToggle");
+const mobileMenu = document.getElementById("mobileMenu");
+menuToggle.addEventListener("click", () => {
     mobileMenu.classList.toggle("open");
-    menuToggle.innerHTML=mobileMenu.classList.contains("open")?'<i data-lucide="x"></i>':'<i data-lucide="menu"></i>';
+    menuToggle.innerHTML = mobileMenu.classList.contains("open") ? '<i data-lucide="x"></i>' : '<i data-lucide="menu"></i>';
     lucide.createIcons();
 });
 
 // Lenis smooth scroll
-let lenis=null;
-if(!window.matchMedia("(prefers-reduced-motion: reduce)").matches && window.Lenis){
-    lenis=new Lenis({lerp:0.09});
-    function raf(t){lenis.raf(t);requestAnimationFrame(raf);}requestAnimationFrame(raf);
+let lenis = null;
+if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches && window.Lenis) {
+    lenis = new Lenis({ lerp: 0.09 });
+    function raf(t) { lenis.raf(t); requestAnimationFrame(raf); } requestAnimationFrame(raf);
 }
-function scrollTo(target){
-    const node=document.querySelector(target);if(!node)return;
-    if(lenis)lenis.scrollTo(node,{offset:-80,duration:1.4});
-    else node.scrollIntoView({behavior:"smooth"});
+function scrollTo(target) {
+    const node = document.querySelector(target); if (!node) return;
+    if (lenis) lenis.scrollTo(node, { offset: -80, duration: 1.4 });
+    else node.scrollIntoView({ behavior: "smooth" });
 }
-document.querySelectorAll("[data-scroll]").forEach(a=>{
-    a.addEventListener("click",e=>{
-        const href=a.getAttribute("href");
-        if(href&&href.startsWith("#")){e.preventDefault();scrollTo(href);
+document.querySelectorAll("[data-scroll]").forEach(a => {
+    a.addEventListener("click", e => {
+        const href = a.getAttribute("href");
+        if (href && href.startsWith("#")) {
+            e.preventDefault(); scrollTo(href);
             mobileMenu.classList.remove("open");
-            menuToggle.innerHTML='<i data-lucide="menu"></i>';lucide.createIcons();}
+            menuToggle.innerHTML = '<i data-lucide="menu"></i>'; lucide.createIcons();
+        }
     });
 });
 
 // Hero parallax - actualizado para usar hero-video
-const heroVideo=document.querySelector(".hero-video video");
-if(heroVideo){
-    window.addEventListener("scroll",()=>{
-        const y=window.scrollY;
-        if(y<window.innerHeight)heroVideo.style.transform=`translateY(${y*0.35}px) scale(${1+y*0.0001})`;
-    },{passive:true});
+const heroVideo = document.querySelector(".hero-video video");
+if (heroVideo) {
+    window.addEventListener("scroll", () => {
+        const y = window.scrollY;
+        if (y < window.innerHeight) heroVideo.style.transform = `translateY(${y * 0.35}px) scale(${1 + y * 0.0001})`;
+    }, { passive: true });
 }
 
 // Contact icons parallax
-const contactIcons=document.querySelectorAll('.info-item i');
-if(contactIcons.length>0){
-    window.addEventListener("scroll",()=>{
-        const y=window.scrollY;
-        contactIcons.forEach((icon,index)=>{
-            const speed=0.05+(index*0.02);
-            icon.style.transform=`translateY(${y*speed}px)`;
+const contactIcons = document.querySelectorAll('.info-item i');
+if (contactIcons.length > 0) {
+    window.addEventListener("scroll", () => {
+        const y = window.scrollY;
+        contactIcons.forEach((icon, index) => {
+            const speed = 0.05 + (index * 0.02);
+            icon.style.transform = `translateY(${y * speed}px)`;
         });
-    },{passive:true});
+    }, { passive: true });
 }
 
 // Scroll reveal
-const io=new IntersectionObserver((entries)=>{
-    entries.forEach(en=>{
-        if(en.isIntersecting){
+const io = new IntersectionObserver((entries) => {
+    entries.forEach(en => {
+        if (en.isIntersecting) {
             // Add staggered delay based on class
-            if(en.target.classList.contains('stagger-1')){
-                setTimeout(()=>en.target.classList.add("in"), 100);
-            } else if(en.target.classList.contains('stagger-2')){
-                setTimeout(()=>en.target.classList.add("in"), 200);
-            } else if(en.target.classList.contains('stagger-3')){
-                setTimeout(()=>en.target.classList.add("in"), 300);
-            } else if(en.target.classList.contains('stagger-4')){
-                setTimeout(()=>en.target.classList.add("in"), 400);
+            if (en.target.classList.contains('stagger-1')) {
+                setTimeout(() => en.target.classList.add("in"), 100);
+            } else if (en.target.classList.contains('stagger-2')) {
+                setTimeout(() => en.target.classList.add("in"), 200);
+            } else if (en.target.classList.contains('stagger-3')) {
+                setTimeout(() => en.target.classList.add("in"), 300);
+            } else if (en.target.classList.contains('stagger-4')) {
+                setTimeout(() => en.target.classList.add("in"), 400);
             } else {
                 en.target.classList.add("in");
             }
             io.unobserve(en.target);
         }
     });
-},{threshold:0.15});
-document.querySelectorAll(".reveal").forEach(e=>io.observe(e));
+}, { threshold: 0.15 });
+document.querySelectorAll(".reveal").forEach(e => io.observe(e));
 
 // Observe methodology cards for scroll animation with staggered delays
 document.querySelectorAll(".methodology-card").forEach((card, index) => {
@@ -986,99 +988,99 @@ document.querySelectorAll(".methodology-card").forEach((card, index) => {
 });
 
 // Observe services for scroll animation
-document.querySelectorAll(".service").forEach(e=>io.observe(e));
+document.querySelectorAll(".service").forEach(e => io.observe(e));
 
 // Observe about section elements for scroll animation
-document.querySelectorAll(".gallery-item, .about-card, .client-logo").forEach(e=>io.observe(e));
+document.querySelectorAll(".gallery-item, .about-card, .client-logo").forEach(e => io.observe(e));
 
 // Count up
-const counted=new WeakSet();
-const countIo=new IntersectionObserver((entries)=>{
-    entries.forEach(en=>{
-        if(en.isIntersecting&&!counted.has(en.target)){
+const counted = new WeakSet();
+const countIo = new IntersectionObserver((entries) => {
+    entries.forEach(en => {
+        if (en.isIntersecting && !counted.has(en.target)) {
             counted.add(en.target);
-            const to=+en.target.dataset.to;const start=performance.now();const dur=1600;
-            function tick(now){
-                const p=Math.min((now-start)/dur,1);
-                const e=1-Math.pow(1-p,3);
-                en.target.textContent=Math.round(to*e);
-                if(p<1)requestAnimationFrame(tick);
+            const to = +en.target.dataset.to; const start = performance.now(); const dur = 1600;
+            function tick(now) {
+                const p = Math.min((now - start) / dur, 1);
+                const e = 1 - Math.pow(1 - p, 3);
+                en.target.textContent = Math.round(to * e);
+                if (p < 1) requestAnimationFrame(tick);
             }
             requestAnimationFrame(tick);
         }
     });
-},{threshold:0.5});
-document.querySelectorAll(".count").forEach(c=>countIo.observe(c));
+}, { threshold: 0.5 });
+document.querySelectorAll(".count").forEach(c => countIo.observe(c));
 
 // Contact form wizard
-const form=document.getElementById("contactForm");
-const success=document.getElementById("successCard");
-const submitBtn=form.querySelector('button[type="submit"]');
-const progressSteps=document.querySelectorAll('.progress-step');
-const formSteps=document.querySelectorAll('.form-step');
-let currentStep=1;
+const form = document.getElementById("contactForm");
+const success = document.getElementById("successCard");
+const submitBtn = form.querySelector('button[type="submit"]');
+const progressSteps = document.querySelectorAll('.progress-step');
+const formSteps = document.querySelectorAll('.form-step');
+let currentStep = 1;
 
 // Step navigation
-document.querySelectorAll('.next-step').forEach(btn=>{
-    btn.addEventListener('click',()=>{
-        if(validateStep(currentStep)){
-            goToStep(currentStep+1);
+document.querySelectorAll('.next-step').forEach(btn => {
+    btn.addEventListener('click', () => {
+        if (validateStep(currentStep)) {
+            goToStep(currentStep + 1);
         }
     });
 });
 
-document.querySelectorAll('.prev-step').forEach(btn=>{
-    btn.addEventListener('click',()=>{
-        goToStep(currentStep-1);
+document.querySelectorAll('.prev-step').forEach(btn => {
+    btn.addEventListener('click', () => {
+        goToStep(currentStep - 1);
     });
 });
 
-function goToStep(step){
-    currentStep=step;
-    
+function goToStep(step) {
+    currentStep = step;
+
     // Update progress steps
-    progressSteps.forEach((progressStep,index)=>{
-        progressStep.classList.remove('active','completed');
-        if(index+1===step){
+    progressSteps.forEach((progressStep, index) => {
+        progressStep.classList.remove('active', 'completed');
+        if (index + 1 === step) {
             progressStep.classList.add('active');
-        }else if(index+1<step){
+        } else if (index + 1 < step) {
             progressStep.classList.add('completed');
         }
     });
-    
+
     // Update form steps
-    formSteps.forEach((formStep,index)=>{
+    formSteps.forEach((formStep, index) => {
         formStep.classList.remove('active');
-        if(index+1===step){
+        if (index + 1 === step) {
             formStep.classList.add('active');
         }
     });
-    
+
     // Update review values on step 3
-    if(step===3){
+    if (step === 3) {
         updateReviewValues();
     }
-    
+
     lucide.createIcons();
 }
 
-function validateStep(step){
-    const currentStepEl=document.querySelector(`.form-step[data-step="${step}"]`);
-    const inputs=currentStepEl.querySelectorAll('input, textarea');
-    let isValid=true;
-    
-    inputs.forEach(input=>{
-        if(!validateField(input)){
-            isValid=false;
+function validateStep(step) {
+    const currentStepEl = document.querySelector(`.form-step[data-step="${step}"]`);
+    const inputs = currentStepEl.querySelectorAll('input, textarea');
+    let isValid = true;
+
+    inputs.forEach(input => {
+        if (!validateField(input)) {
+            isValid = false;
         }
     });
-    
+
     return isValid;
 }
 
-function updateReviewValues(){
-    document.querySelectorAll('.review-value').forEach(el=>{
-        const fieldName=el.dataset.field;
+function updateReviewValues() {
+    document.querySelectorAll('.review-value').forEach(el => {
+        const fieldName = el.dataset.field;
         if (fieldName === 'telefono') {
             const telInput = form.querySelector('[name="telefono"]');
             const codeSelect = form.querySelector('[name="codigo_pais"]');
@@ -1087,64 +1089,64 @@ function updateReviewValues(){
             el.textContent = rawTel ? `${code} ${rawTel}` : 'No proporcionado';
             return;
         }
-        const input=form.querySelector(`[name="${fieldName}"]`);
-        if(input){
+        const input = form.querySelector(`[name="${fieldName}"]`);
+        if (input) {
             let val = input.value;
             if (fieldName === 'tipo_financiamiento' && window.LeadService) {
                 val = window.LeadService.formatFinanciamiento(val);
             }
-            el.textContent=val || 'No proporcionado';
+            el.textContent = val || 'No proporcionado';
         }
     });
 }
 
 // Real-time validation
-const inputs=form.querySelectorAll('input, textarea');
-inputs.forEach(input=>{
-    input.addEventListener('input',()=>{
+const inputs = form.querySelectorAll('input, textarea');
+inputs.forEach(input => {
+    input.addEventListener('input', () => {
         validateField(input);
     });
-    input.addEventListener('blur',()=>{
+    input.addEventListener('blur', () => {
         validateField(input);
     });
 });
 
-function validateField(input){
-    const field=input.closest('.field') || input.parentElement;
-    const successIcon=field.querySelector('.field-icon.success');
-    const errorIcon=field.querySelector('.field-icon.error');
-    
-    let isValid=false;
-    
-    if(input.type==='email'){
-        const emailRegex=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        isValid=emailRegex.test(input.value);
-    }else{
-        isValid=input.value.trim().length>0;
+function validateField(input) {
+    const field = input.closest('.field') || input.parentElement;
+    const successIcon = field.querySelector('.field-icon.success');
+    const errorIcon = field.querySelector('.field-icon.error');
+
+    let isValid = false;
+
+    if (input.type === 'email') {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        isValid = emailRegex.test(input.value);
+    } else {
+        isValid = input.value.trim().length > 0;
     }
-    
-    if(input.value.trim().length===0){
-        input.classList.remove('valid','invalid');
-        if(successIcon)successIcon.style.display='none';
-        if(errorIcon)errorIcon.style.display='none';
-    }else if(isValid){
+
+    if (input.value.trim().length === 0) {
+        input.classList.remove('valid', 'invalid');
+        if (successIcon) successIcon.style.display = 'none';
+        if (errorIcon) errorIcon.style.display = 'none';
+    } else if (isValid) {
         input.classList.add('valid');
         input.classList.remove('invalid');
-        if(successIcon)successIcon.style.display='block';
-        if(errorIcon)errorIcon.style.display='none';
-    }else{
+        if (successIcon) successIcon.style.display = 'block';
+        if (errorIcon) errorIcon.style.display = 'none';
+    } else {
         input.classList.add('invalid');
         input.classList.remove('valid');
-        if(successIcon)successIcon.style.display='none';
-        if(errorIcon)errorIcon.style.display='block';
+        if (successIcon) successIcon.style.display = 'none';
+        if (errorIcon) errorIcon.style.display = 'block';
     }
-    
+
     return isValid;
 }
 
-form.addEventListener("submit", async (e)=>{
+form.addEventListener("submit", async (e) => {
     e.preventDefault();
-    
+
     // Get form data
     const formData = new FormData(form);
     const nombre = formData.get('nombre');
@@ -1179,17 +1181,17 @@ form.addEventListener("submit", async (e)=>{
             const cleanTel = (telefono || '').replace(/[^0-9]/g, '');
             waSuccessBtn.href = `https://wa.me/5215554077643?text=${encodeURIComponent('Hola VOX, mi nombre es ' + nombre + ' y me interesa información sobre ' + servicio + '.')}`;
         }
-        
+
         // Show success message
-        form.setAttribute("hidden","");
+        form.setAttribute("hidden", "");
         success.removeAttribute("hidden");
-        
+
         // Add extra pulse elements for better animation
-        const ring=success.querySelector('.success-ring');
-        if(ring && ring.children.length<=1){
-            ring.innerHTML='<span class="pulse"></span><span class="pulse"></span><span class="pulse"></span><span class="check-big"><i data-lucide="check"></i></span>';
+        const ring = success.querySelector('.success-ring');
+        if (ring && ring.children.length <= 1) {
+            ring.innerHTML = '<span class="pulse"></span><span class="pulse"></span><span class="pulse"></span><span class="check-big"><i data-lucide="check"></i></span>';
         }
-        
+
         if (window.lucide) lucide.createIcons();
 
     } catch (err) {
@@ -1202,27 +1204,27 @@ form.addEventListener("submit", async (e)=>{
         }
     }
 });
-document.getElementById("resetBtn").addEventListener("click",()=>{
+document.getElementById("resetBtn").addEventListener("click", () => {
     form.reset();
-    inputs.forEach(input=>{
-        input.classList.remove('valid','invalid');
-        const field=input.parentElement;
-        const successIcon=field.querySelector('.field-icon.success');
-        const errorIcon=field.querySelector('.field-icon.error');
-        if(successIcon)successIcon.style.display='none';
-        if(errorIcon)errorIcon.style.display='none';
+    inputs.forEach(input => {
+        input.classList.remove('valid', 'invalid');
+        const field = input.parentElement;
+        const successIcon = field.querySelector('.field-icon.success');
+        const errorIcon = field.querySelector('.field-icon.error');
+        if (successIcon) successIcon.style.display = 'none';
+        if (errorIcon) errorIcon.style.display = 'none';
     });
-    
+
     // Remove chips and servicioInput references (no longer exist in wizard)
     // chips.querySelectorAll(".chip").forEach(x=>x.classList.remove("active"));
     // servicioInput.value="";
-    
-    success.setAttribute("hidden","");
+
+    success.setAttribute("hidden", "");
     form.removeAttribute("hidden");
-    
+
     // Reset wizard to step 1
     goToStep(1);
-    
+
     // Reinitialize icons
     lucide.createIcons();
 });
