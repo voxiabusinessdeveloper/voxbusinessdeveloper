@@ -1361,39 +1361,73 @@ img {
     margin-bottom: 32px;
 }
 
-.clients-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 0;
+.clients-marquee {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    padding: 10px 0;
+    mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+    -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+}
+
+.clients-track {
+    display: flex;
+    width: max-content;
+    gap: 24px;
     align-items: center;
+    animation: clientsMarquee 28s linear infinite;
+    will-change: transform;
+}
+
+.clients-marquee:hover .clients-track {
+    animation-play-state: paused;
+}
+
+@keyframes clientsMarquee {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(calc(-50% - 12px));
+    }
 }
 
 .client-logo {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 24px;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    transition: all .2s var(--ease);
+    width: 220px;
+    height: 110px;
+    padding: 20px 28px;
+    flex-shrink: 0;
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    transition: transform .3s var(--ease), background .3s var(--ease), border-color .3s var(--ease), box-shadow .3s var(--ease);
 }
 
 .client-logo:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, .1);
+    transform: translateY(-4px) scale(1.02);
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.22);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, .35);
 }
 
 .client-logo img {
-    width: 150px;
-    height: 80px;
+    max-width: 100%;
+    max-height: 100%;
     object-fit: contain;
-    opacity: 0.6;
-    transition: opacity 0.2s;
+    opacity: 0.72;
+    filter: grayscale(20%);
+    transition: opacity 0.3s, filter 0.3s, transform 0.3s;
 }
 
 .client-logo:hover img {
     opacity: 1;
+    filter: grayscale(0%);
+    transform: scale(1.05);
 }
 
 /* ===== ABOUT TIMELINE ===== */
@@ -4150,18 +4184,23 @@ img {
         margin: 32px 0;
     }
 
-    .clients-grid {
-        grid-template-columns: repeat(2, 1fr);
+    .clients-marquee {
+        padding: 6px 0;
+    }
+
+    .clients-track {
         gap: 16px;
+        animation-duration: 22s;
+    }
+
+    .client-logo {
+        width: 170px;
+        height: 90px;
+        padding: 14px 18px;
     }
 
     .clients-title {
         font-size: 20px;
-    }
-
-    .client-logo img {
-        max-width: 80px;
-        max-height: 40px;
     }
 
     .about-timeline::before {
