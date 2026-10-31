@@ -3447,10 +3447,14 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
+        // Filtrar sitios y sesiones que hayan sido eliminados por el administrador
+        const deletedSites = new Set(JSON.parse(localStorage.getItem('vox_deleted_radar_sites') || '[]'));
+        const deletedSessions = new Set(JSON.parse(localStorage.getItem('vox_deleted_radar_sessions') || '[]'));
+
         // Combinar sin duplicados por site_key / session_id / id
         const sitiosMap = new Map();
         [...localSitios, ...cloudSitios].forEach(s => {
-            if (s && s.site_key && s.site_key !== 'vox_site_official') {
+            if (s && s.site_key && s.site_key !== 'vox_site_official' && !deletedSites.has(s.site_key)) {
                 sitiosMap.set(s.site_key, s);
             }
         });
@@ -3459,6 +3463,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const sessionsMap = new Map();
         [...cloudSessions, ...localSessions].forEach(s => {
             if (!s || !s.session_id) return;
+            if (deletedSessions.has(s.session_id) || deletedSites.has(s.site_key)) return;
             const prev = sessionsMap.get(s.session_id);
             if (!prev || new Date(s.last_seen_at || 0) >= new Date(prev.last_seen_at || 0)) {
                 sessionsMap.set(s.session_id, { ...(prev || {}), ...s });
@@ -3471,6 +3476,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const eventsMap = new Map();
         [...cloudEvents, ...localEvents].forEach(ev => {
             if (!ev) return;
+            if (deletedSessions.has(ev.session_id) || deletedSites.has(ev.site_key)) return;
             const key = ev.id || `${ev.session_id}_${ev.event_type}_${ev.created_at}`;
             if (!eventsMap.has(key)) {
                 eventsMap.set(key, ev);
@@ -3521,20 +3527,23 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function getAvailableRadarSiteCards() {
+        const deletedSites = new Set(JSON.parse(localStorage.getItem('vox_deleted_radar_sites') || '[]'));
         const cards = [
             {
                 site_key: 'all',
                 name: 'Consolidado Global',
                 domain: 'Todas las páginas conectadas',
                 badge: 'GLOBAL',
-                initials: '🌐'
+                initials: '🌐',
+                removable: false
             },
             {
                 site_key: 'vox_site_official',
                 name: 'VOX Business Developer',
                 domain: 'voxbusinessdeveloper.com',
                 badge: 'OFICIAL',
-                initials: 'VX'
+                initials: 'VX',
+                removable: false
             }
         ];
 
@@ -3542,7 +3551,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (state.radar.sitios && state.radar.sitios.length > 0) {
             state.radar.sitios.forEach(s => {
-                if (!s || !s.site_key || seenKeys.has(s.site_key)) return;
+                if (!s || !s.site_key || seenKeys.has(s.site_key) || deletedSites.has(s.site_key)) return;
                 seenKeys.add(s.site_key);
                 const cleanDom = (s.dominio_url || '').replace(/^https?:\/\//, '').replace(/\/$/, '');
                 const initials = (s.nombre_sitio || 'ST').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
@@ -3551,14 +3560,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     name: s.nombre_sitio || 'Sitio Monitoreado',
                     domain: cleanDom || s.cliente_nombre || s.site_key,
                     badge: 'RADAR',
-                    initials
+                    initials,
+                    removable: true
                 });
             });
         }
 
         if (state.creditos && state.creditos.length > 0) {
             state.creditos.forEach(c => {
-                if (!c || !c.site_key || seenKeys.has(c.site_key)) return;
+                if (!c || !c.site_key || seenKeys.has(c.site_key) || deletedSites.has(c.site_key)) return;
                 seenKeys.add(c.site_key);
                 const cleanDom = (c.dominio_url || '').replace(/^https?:\/\//, '').replace(/\/$/, '');
                 const initials = (c.cliente_nombre || 'CR').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
@@ -3567,12 +3577,130 @@ document.addEventListener('DOMContentLoaded', () => {
                     name: c.cliente_nombre || 'Cliente Crédito',
                     domain: cleanDom || c.site_key,
                     badge: 'CRÉDITO',
-                    initials
+                    initials,
+                    removable: true
                 });
             });
         }
 
         return cards;
+    }
+
+    async function deleteRadarSiteByKey(siteKey, siteName = 'Página') {
+        if (!siteKey || siteKey === 'all' || siteKey === 'vox_site_official') {
+            showToast('El sitio principal de VOX no puede eliminarse, pero puedes limpiar sus registros.', 'info', 'Sitio Principal');
+            return;
+        }
+        if (!window.confirm(`¿Estás seguro de eliminar la página "${siteName}" y todos sus registros de clientes/visitantes?`)) {
+            return;
+        }
+
+        // 1. Guardar en lista de sitios eliminados para que no reaparezca si era semilla demo
+        const deletedSites = new Set(JSON.parse(localStorage.getItem('vox_deleted_radar_sites') || '[]'));
+        deletedSites.add(siteKey);
+        localStorage.setItem('vox_deleted_radar_sites', JSON.stringify(Array.from(deletedSites)));
+
+        // 2. Eliminar de estado local y caches
+        state.radar.sitios = state.radar.sitios.filter(s => s.site_key !== siteKey);
+        state.radar.sesiones = state.radar.sesiones.filter(s => s.site_key !== siteKey);
+        state.radar.eventos = state.radar.eventos.filter(ev => ev.site_key !== siteKey);
+
+        localStorage.setItem(LOCAL_SITIOS_CACHE, JSON.stringify(state.radar.sitios));
+        localStorage.setItem(LOCAL_SESSIONS_CACHE, JSON.stringify(state.radar.sesiones));
+        localStorage.setItem(LOCAL_EVENTS_CACHE, JSON.stringify(state.radar.eventos));
+
+        // 3. Eliminar también en Supabase si está configurado
+        const isConfigured = window.VOX_SUPABASE && window.VOX_SUPABASE.isConfigured();
+        if (isConfigured) {
+            try {
+                await Promise.all([
+                    window.VOX_SUPABASE.client.from('telemetria_sitios').delete().eq('site_key', siteKey),
+                    window.VOX_SUPABASE.client.from('telemetria_sesiones').delete().eq('site_key', siteKey),
+                    window.VOX_SUPABASE.client.from('telemetria_eventos').delete().eq('site_key', siteKey)
+                ]);
+            } catch (e) {}
+        }
+
+        if (state.radar.siteFilter === siteKey) {
+            state.radar.siteFilter = 'all';
+        }
+
+        populateRadarSiteSelector();
+        applyRadarFilters();
+        showVercelProjectsGrid();
+        showToast(`La página "${siteName}" y sus registros fueron eliminados.`, 'success', 'Página Eliminada');
+    }
+
+    async function deleteRadarSessionById(sessionId, visitorLabel = 'Registro') {
+        if (!sessionId) return;
+
+        const deletedSessions = new Set(JSON.parse(localStorage.getItem('vox_deleted_radar_sessions') || '[]'));
+        deletedSessions.add(sessionId);
+        localStorage.setItem('vox_deleted_radar_sessions', JSON.stringify(Array.from(deletedSessions)));
+
+        state.radar.sesiones = state.radar.sesiones.filter(s => s.session_id !== sessionId);
+        state.radar.eventos = state.radar.eventos.filter(ev => ev.session_id !== sessionId);
+
+        localStorage.setItem(LOCAL_SESSIONS_CACHE, JSON.stringify(state.radar.sesiones));
+        localStorage.setItem(LOCAL_EVENTS_CACHE, JSON.stringify(state.radar.eventos));
+
+        const isConfigured = window.VOX_SUPABASE && window.VOX_SUPABASE.isConfigured();
+        if (isConfigured) {
+            try {
+                await Promise.all([
+                    window.VOX_SUPABASE.client.from('telemetria_sesiones').delete().eq('session_id', sessionId),
+                    window.VOX_SUPABASE.client.from('telemetria_eventos').delete().eq('session_id', sessionId)
+                ]);
+            } catch (e) {}
+        }
+
+        renderRadarSitesDeck();
+        applyRadarFilters();
+        showToast(`Registro de "${visitorLabel}" eliminado correctamente.`, 'success', 'Registro Eliminado');
+    }
+
+    async function clearSiteSessionsRecords(siteKey) {
+        const targetKey = siteKey || state.radar.siteFilter || 'all';
+        const siteLabel = targetKey === 'all' ? 'todas las páginas' : getSiteDisplayName(targetKey);
+        if (!window.confirm(`¿Deseas eliminar todos los registros de clientes y visitantes de ${siteLabel}?`)) {
+            return;
+        }
+
+        const deletedSessions = new Set(JSON.parse(localStorage.getItem('vox_deleted_radar_sessions') || '[]'));
+        const toRemoveIds = [];
+
+        state.radar.sesiones.forEach(s => {
+            if (targetKey === 'all' || s.site_key === targetKey) {
+                deletedSessions.add(s.session_id);
+                toRemoveIds.push(s.session_id);
+            }
+        });
+        localStorage.setItem('vox_deleted_radar_sessions', JSON.stringify(Array.from(deletedSessions)));
+
+        if (targetKey === 'all') {
+            state.radar.sesiones = [];
+            state.radar.eventos = [];
+        } else {
+            state.radar.sesiones = state.radar.sesiones.filter(s => s.site_key !== targetKey);
+            state.radar.eventos = state.radar.eventos.filter(ev => ev.site_key !== targetKey);
+        }
+
+        localStorage.setItem(LOCAL_SESSIONS_CACHE, JSON.stringify(state.radar.sesiones));
+        localStorage.setItem(LOCAL_EVENTS_CACHE, JSON.stringify(state.radar.eventos));
+
+        const isConfigured = window.VOX_SUPABASE && window.VOX_SUPABASE.isConfigured();
+        if (isConfigured && targetKey !== 'all') {
+            try {
+                await Promise.all([
+                    window.VOX_SUPABASE.client.from('telemetria_sesiones').delete().eq('site_key', targetKey),
+                    window.VOX_SUPABASE.client.from('telemetria_eventos').delete().eq('site_key', targetKey)
+                ]);
+            } catch (e) {}
+        }
+
+        renderRadarSitesDeck();
+        applyRadarFilters();
+        showToast(`Se vaciaron ${toRemoveIds.length} registros de clientes/visitantes de ${siteLabel}.`, 'success', 'Registros Limpiados');
     }
 
     function buildSparklineSvg(pointsCount = 7, isOnline = false) {
@@ -3624,6 +3752,11 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
         }
 
+        const btnDeleteSiteEl = document.getElementById('btnDeleteActiveRadarSite');
+        if (btnDeleteSiteEl) {
+            btnDeleteSiteEl.style.display = cardInfo.removable ? 'inline-flex' : 'none';
+        }
+
         applyRadarFilters();
         if (window.lucide) window.lucide.createIcons();
     }
@@ -3648,7 +3781,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const totalOnlineAll = state.radar.sesiones.filter(s => isSessionOnline(s)).length;
 
         if (globalSummaryText) {
-            globalSummaryText.textContent = `${totalOnlineAll} Online ahora · ${allCards.length - 1} páginas conectadas`;
+            globalSummaryText.textContent = `${totalOnlineAll} Online ahora · ${Math.max(0, allCards.length - 1)} páginas conectadas`;
         }
         if (activeIndicator) {
             activeIndicator.textContent = `${cards.length} proyecto${cards.length === 1 ? '' : 's'} disponible${cards.length === 1 ? '' : 's'}`;
@@ -3675,8 +3808,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 : 'Esperando primera sesión de telemetría...';
             const latestTime = latestSess ? formatRelativeTime(latestSess.last_seen_at) : 'Sin actividad';
 
-            const cardEl = document.createElement('button');
-            cardEl.type = 'button';
+            const cardEl = document.createElement('div');
+            cardEl.setAttribute('role', 'button');
+            cardEl.setAttribute('tabindex', '0');
             cardEl.className = `vercel-project-card ${isSelected ? 'active' : ''}`;
             cardEl.setAttribute('data-site-card-key', cardInfo.site_key);
 
@@ -3690,9 +3824,16 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>
                     </div>
                     <div class="v-card-sparkline-wrap">
-                        <span class="v-status-badge ${onlineCount > 0 ? 'is-live' : ''}">
-                            ${onlineCount > 0 ? `<span class="mini-live-dot"></span> ${onlineCount} Online` : escapeHtml(cardInfo.badge)}
-                        </span>
+                        <div style="display:flex;align-items:center;gap:6px;">
+                            <span class="v-status-badge ${onlineCount > 0 ? 'is-live' : ''}">
+                                ${onlineCount > 0 ? `<span class="mini-live-dot"></span> ${onlineCount} Online` : escapeHtml(cardInfo.badge)}
+                            </span>
+                            ${cardInfo.removable ? `
+                                <button type="button" class="v-card-delete-btn" title="Eliminar página y sus registros" data-del-site-key="${escapeHtml(cardInfo.site_key)}">
+                                    <i data-lucide="trash-2" style="width:13px;height:13px;"></i>
+                                </button>
+                            ` : ''}
+                        </div>
                         ${buildSparklineSvg(7, onlineCount > 0)}
                     </div>
                 </div>
@@ -3724,12 +3865,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             `;
 
+            const delBtn = cardEl.querySelector('.v-card-delete-btn');
+            if (delBtn) {
+                delBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    deleteRadarSiteByKey(cardInfo.site_key, cardInfo.name);
+                });
+            }
+
             cardEl.addEventListener('click', () => {
                 openVercelProjectWorkspace(cardInfo);
             });
 
             deckGrid.appendChild(cardEl);
         });
+        if (window.lucide) window.lucide.createIcons();
     }
 
     function applyRadarFilters() {
@@ -3923,7 +4073,12 @@ document.addEventListener('DOMContentLoaded', () => {
                             <span class="visitor-sub-domain">${escapeHtml(sess.dominio || getSiteDisplayName(sess.site_key))} · ${escapeHtml(sess.current_url || sess.entry_url || '/')}</span>
                         </div>
                     </div>
-                    <span class="radar-session-time ${online ? 'online-now' : ''}">${formatRelativeTime(sess.last_seen_at)}</span>
+                    <div style="display:flex;align-items:center;gap:6px;">
+                        <span class="radar-session-time ${online ? 'online-now' : ''}">${formatRelativeTime(sess.last_seen_at)}</span>
+                        <button type="button" class="session-delete-mini-btn" title="Eliminar registro de este cliente/visitante">
+                            <i data-lucide="trash-2" style="width:12px;height:12px;"></i>
+                        </button>
+                    </div>
                 </div>
 
                 <div class="radar-session-meta">
@@ -3948,6 +4103,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     ${sess.form_interacted && !sess.converted_to_lead ? `<span class="radar-mini-tag tag-form">📝 Tocó Formulario</span>` : ''}
                 </div>
             `;
+
+            const delSessionBtn = card.querySelector('.session-delete-mini-btn');
+            if (delSessionBtn) {
+                delSessionBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    deleteRadarSessionById(sess.session_id, displayName);
+                });
+            }
 
             card.addEventListener('click', () => {
                 state.radar.activeSessionId = sess.session_id;
@@ -4022,6 +4185,10 @@ document.addEventListener('DOMContentLoaded', () => {
                             <span>Abrir Ficha Lead CRM</span>
                         </button>
                     ` : ''}
+                    <button type="button" class="vercel-btn vercel-btn-danger-ghost" id="btnDeleteActiveRadarSession" title="Eliminar registro de este cliente">
+                        <i data-lucide="trash-2" style="width:13px;height:13px;"></i>
+                        <span>Eliminar Registro</span>
+                    </button>
                 </div>
             </div>
 
@@ -4054,6 +4221,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 openLeadModal(matchedLead.id);
             });
         }
+
+        document.getElementById('btnDeleteActiveRadarSession')?.addEventListener('click', () => {
+            deleteRadarSessionById(sess.session_id, titleName);
+        });
 
         // Filtrar los eventos cronológicos de esta sesión
         const sessionEvents = state.radar.eventos.filter(ev => ev.session_id === sess.session_id);
@@ -4679,6 +4850,82 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="email-draft-preview-box" id="radarExecutiveEmailDraftBox">${escapeHtml(emailDraft)}</div>
             `;
         }
+
+        // 6. Tabla de Registros Individuales de Clientes & Visitantes en el Periodo (con opción de eliminar)
+        const clientsTableBody = document.getElementById('radarPeriodClientsTableBody');
+        if (clientsTableBody) {
+            if (currentSessions.length === 0) {
+                clientsTableBody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--text-tertiary);">No hay registros de clientes o visitantes en este periodo</td></tr>`;
+            } else {
+                clientsTableBody.innerHTML = currentSessions.map(sess => {
+                    const online = isSessionOnline(sess);
+                    const shortVid = (sess.visitor_id || 'anon').slice(-6).toUpperCase();
+                    const clientLabel = sess.lead_nombre
+                        ? sess.lead_nombre
+                        : `Visitante #${shortVid}`;
+                    const clientSub = sess.lead_correo
+                        ? sess.lead_correo
+                        : `${escapeHtml(sess.os || sess.device_type || 'Web')} · ${formatDuration(sess.duration_seconds)}`;
+                    return `
+                        <tr>
+                            <td>
+                                <div style="display:flex;align-items:center;gap:8px;">
+                                    <span class="${online ? 'status-dot-live' : 'status-dot-offline'}"></span>
+                                    <div>
+                                        <strong style="display:block;color:#ededed;">${escapeHtml(clientLabel)}</strong>
+                                        <small style="color:#888888;font-size:0.74rem;">${escapeHtml(clientSub)}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span style="color:#ededed;font-size:0.8rem;">${formatRelativeTime(sess.last_seen_at)}</span>
+                            </td>
+                            <td>
+                                <strong style="color:#ededed;">${escapeHtml(sess.referrer || 'Directo')}</strong>
+                                <small style="display:block;color:#888888;font-family:monospace;">${escapeHtml(sess.current_url || '/')}</small>
+                            </td>
+                            <td>
+                                <div style="display:flex;gap:4px;flex-wrap:wrap;">
+                                    <span class="radar-mini-tag tag-site">${sess.max_scroll_pct || 0}% Scroll</span>
+                                    ${(sess.whatsapp_clicks || 0) > 0 ? `<span class="radar-mini-tag tag-wa">💬 WA (${sess.whatsapp_clicks})</span>` : ''}
+                                    ${sess.converted_to_lead ? `<span class="radar-mini-tag tag-lead">🔥 Lead</span>` : ''}
+                                </div>
+                            </td>
+                            <td style="text-align:right;">
+                                <div style="display:inline-flex;align-items:center;gap:6px;">
+                                    <button type="button" class="vercel-btn vercel-btn-ghost" data-inspect-session="${escapeHtml(sess.session_id)}" style="height:26px;padding:0 8px;font-size:0.74rem;" title="Ver recorrido paso a paso">
+                                        <span>Ver</span>
+                                    </button>
+                                    <button type="button" class="session-delete-mini-btn" data-delete-session="${escapeHtml(sess.session_id)}" data-delete-label="${escapeHtml(clientLabel)}" title="Eliminar registro de este cliente">
+                                        <i data-lucide="trash-2" style="width:12px;height:12px;"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+
+                clientsTableBody.querySelectorAll('[data-inspect-session]').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const sid = btn.getAttribute('data-inspect-session');
+                        state.radar.activeSessionId = sid;
+                        state.radar.activeTab = 'sessions';
+                        const btnRadarTabPeriodsEl = document.getElementById('btnRadarTabPeriods');
+                        [btnRadarTabSessions, btnRadarTabHeatmap, btnRadarTabPeriodsEl].forEach(b => b?.classList.remove('active'));
+                        if (btnRadarTabSessions) btnRadarTabSessions.classList.add('active');
+                        renderRadar();
+                    });
+                });
+
+                clientsTableBody.querySelectorAll('[data-delete-session]').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const sid = btn.getAttribute('data-delete-session');
+                        const lbl = btn.getAttribute('data-delete-label') || 'Cliente';
+                        deleteRadarSessionById(sid, lbl);
+                    });
+                });
+            }
+        }
     }
 
     function exportRadarPeriodCsv() {
@@ -4785,6 +5032,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.getElementById('btnBackToVercelProjects')?.addEventListener('click', showVercelProjectsGrid);
     document.getElementById('btnSwitchProjectQuick')?.addEventListener('click', showVercelProjectsGrid);
+
+    document.getElementById('btnDeleteActiveRadarSite')?.addEventListener('click', () => {
+        const activeKey = state.radar.siteFilter;
+        if (!activeKey || activeKey === 'all') return;
+        deleteRadarSiteByKey(activeKey, getSiteDisplayName(activeKey));
+    });
+
+    document.getElementById('btnClearSiteSessions')?.addEventListener('click', () => {
+        clearSiteSessionsRecords(state.radar.siteFilter || 'all');
+    });
+
+    document.getElementById('btnClearPeriodSiteRecords')?.addEventListener('click', () => {
+        clearSiteSessionsRecords(state.radar.siteFilter || 'all');
+    });
 
     const btnRadarTabPeriods = document.getElementById('btnRadarTabPeriods');
     [btnRadarTabSessions, btnRadarTabHeatmap, btnRadarTabPeriods].forEach(btn => {

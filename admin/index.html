@@ -507,7 +507,8 @@
                     <div class="vercel-section-heading">
                         <div>
                             <h2>Proyectos & Páginas Monitoreadas</h2>
-                            <p>Selecciona la tarjeta de cualquier página (ej. <strong>Buffalo Manufactura</strong>) para abrir su consola de Analytics, Sesiones en Vivo y Mapa de Calor.</p>
+                            <p>Selecciona la tarjeta de cualquier página (ej. <strong>Buffalo Manufactura</strong>) para
+                                abrir su consola de Analytics, Sesiones en Vivo y Mapa de Calor.</p>
                         </div>
                         <span class="vercel-mono-tag" id="radarActiveSiteIndicatorText">VOX Web Analytics Engine</span>
                     </div>
@@ -542,6 +543,16 @@
                                 <i data-lucide="terminal"></i>
                                 <span>Script Snippet</span>
                             </button>
+                            <button type="button" class="vercel-btn-ghost" id="btnClearSiteSessions"
+                                title="Eliminar todos los registros de clientes/visitantes de esta página">
+                                <i data-lucide="eraser"></i>
+                                <span>Limpiar Registros</span>
+                            </button>
+                            <button type="button" class="vercel-btn-danger-ghost" id="btnDeleteActiveRadarSite"
+                                title="Eliminar esta página/proyecto del Radar">
+                                <i data-lucide="trash-2"></i>
+                                <span>Eliminar Página</span>
+                            </button>
                             <button type="button" class="vercel-btn-ghost" id="btnSwitchProjectQuick"
                                 title="Volver al Grid de Proyectos">
                                 <i data-lucide="layout-grid"></i>
@@ -553,15 +564,18 @@
                     <!-- Sub-navegación Horizontal estilo Vercel (Analytics | Sesiones | Heatmap) + Filtros -->
                     <div class="vercel-subnav-bar">
                         <div class="vercel-underline-tabs">
-                            <button type="button" class="radar-tab-btn vercel-tab active" id="btnRadarTabPeriods" data-radar-tab="periods">
+                            <button type="button" class="radar-tab-btn vercel-tab active" id="btnRadarTabPeriods"
+                                data-radar-tab="periods">
                                 <i data-lucide="bar-chart-2"></i>
                                 <span>Web Analytics (7d / 15d / 30d)</span>
                             </button>
-                            <button type="button" class="radar-tab-btn vercel-tab" id="btnRadarTabSessions" data-radar-tab="sessions">
+                            <button type="button" class="radar-tab-btn vercel-tab" id="btnRadarTabSessions"
+                                data-radar-tab="sessions">
                                 <i data-lucide="activity"></i>
                                 <span>Real-Time & Sesiones</span>
                             </button>
-                            <button type="button" class="radar-tab-btn vercel-tab" id="btnRadarTabHeatmap" data-radar-tab="heatmap">
+                            <button type="button" class="radar-tab-btn vercel-tab" id="btnRadarTabHeatmap"
+                                data-radar-tab="heatmap">
                                 <i data-lucide="mouse-pointer-click"></i>
                                 <span>Click Heatmap (X%, Y%)</span>
                             </button>
@@ -573,15 +587,17 @@
                                 <button type="button" class="radar-pill pill-online" data-visitor-filter="online">
                                     <span class="mini-live-dot"></span> Online
                                 </button>
-                                <button type="button" class="radar-pill pill-lead" data-visitor-filter="lead">Leads</button>
-                                <button type="button" class="radar-pill pill-wa" data-visitor-filter="whatsapp">WhatsApp</button>
-                                <button type="button" class="radar-pill pill-form" data-visitor-filter="form">Form</button>
+                                <button type="button" class="radar-pill pill-lead"
+                                    data-visitor-filter="lead">Leads</button>
+                                <button type="button" class="radar-pill pill-wa"
+                                    data-visitor-filter="whatsapp">WhatsApp</button>
+                                <button type="button" class="radar-pill pill-form"
+                                    data-visitor-filter="form">Form</button>
                             </div>
 
                             <div class="radar-search-mini">
                                 <i data-lucide="search"></i>
-                                <input type="text" id="radarSearchInput"
-                                    placeholder="Filtrar sesiones o rutas..." />
+                                <input type="text" id="radarSearchInput" placeholder="Filtrar sesiones o rutas..." />
                             </div>
 
                             <select id="radarPeriodSelect" class="select-control sm radar-period-select"
@@ -669,317 +685,356 @@
                                 <small class="radar-kpi-sub" id="kpiRadarScrollSub">0% profundidad de scroll</small>
                             </div>
                             <div class="radar-kpi-bar">
-                                <div class="radar-kpi-bar-fill fill-purple" id="kpiRadarScrollBarFill" style="width: 50%;">
+                                <div class="radar-kpi-bar-fill fill-purple" id="kpiRadarScrollBarFill"
+                                    style="width: 50%;">
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                <!-- ==================================================== -->
-                <!-- SUB-TAB 1: SESIONES Y LÍNEA DE TIEMPO PASO A PASO -->
-                <!-- ==================================================== -->
-                <div class="radar-master-detail" id="radarSessionsTab">
-                    <!-- Columna Izquierda: Directorio de Visitantes -->
-                    <div class="radar-sessions-panel glass-panel">
-                        <div class="radar-panel-header">
-                            <div>
-                                <h3><i data-lucide="users"></i> Directorio de Visitantes</h3>
-                                <small class="muted" id="radarSessionsCountLabel">Selecciona una persona para ver su
-                                    expediente</small>
-                            </div>
-                            <span class="radar-live-indicator-pill">
-                                <span class="mini-live-dot"></span> AUTO-SYNC
-                            </span>
-                        </div>
-
-                        <div class="radar-sessions-list" id="radarSessionsList">
-                            <!-- Inyectado dinámicamente -->
-                        </div>
-
-                        <div class="empty-state" id="emptyRadarSessions" style="display: none; padding: 36px 20px;">
-                            <i data-lucide="activity"></i>
-                            <h3>Sin sesiones para este filtro</h3>
-                            <p>Navega por la página web o instala el script en un sitio externo para ver los movimientos
-                                en tiempo real.</p>
-                        </div>
-                    </div>
-
-                    <!-- Columna Derecha: Expediente Cronológico del Visitante -->
-                    <div class="radar-timeline-panel glass-panel" id="radarTimelinePanel">
-                        <div class="radar-timeline-header" id="radarVisitorDetailHeader">
-                            <!-- Inyectado dinámicamente con los datos del visitante activo -->
-                        </div>
-
-                        <div class="radar-timeline-subheader">
-                            <span><i data-lucide="git-commit"></i> LÍNEA DE TIEMPO CRONOLÓGICA DE MOVIMIENTOS</span>
-                            <small id="radarEventsCountBadge">0 eventos registrados</small>
-                        </div>
-
-                        <div class="radar-timeline-body" id="radarVisitorTimelineBody">
-                            <!-- Línea de tiempo paso a paso inyectada dinámicamente -->
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ==================================================== -->
-                <!-- SUB-TAB 2: MAPA DE COORDENADAS DE CLICS & RANKING -->
-                <!-- ==================================================== -->
-                <div class="radar-heatmap-layout" id="radarHeatmapTab" style="display: none;">
-                    <!-- Lienzo de Mapa de Coordenadas de Clics tipo Browser Mockup -->
-                    <div class="radar-heatmap-card glass-panel">
-                        <div class="radar-heatmap-header">
-                            <div>
-                                <h3><i data-lucide="crosshair"></i> Mapa de Atención y Coordenadas de Clics (X%, Y%)
-                                </h3>
-                                <small class="muted">Pasa el cursor sobre cualquier punto luminoso para ver en qué botón
-                                    o sección hicieron clic</small>
-                            </div>
-                            <div class="radar-heatmap-controls">
-                                <select id="heatmapPageSelect" class="select-control sm">
-                                    <option value="all">📄 Todas las Páginas</option>
-                                </select>
-                                <select id="heatmapDeviceSelect" class="select-control sm">
-                                    <option value="all">🖥️ Todos los Dispositivos</option>
-                                    <option value="desktop">💻 Escritorio (PC)</option>
-                                    <option value="mobile">📱 Smartphone (Móvil)</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="heatmap-legend">
-                            <span class="legend-item"><span class="legend-dot click"></span> Clic de Interés /
-                                Navegación</span>
-                            <span class="legend-item"><span class="legend-dot whatsapp"></span> Clic en WhatsApp /
-                                Teléfono</span>
-                            <span class="legend-item"><span class="legend-dot form"></span> Formulario / Conversión a
-                                Lead</span>
-                            <span class="legend-count-pill" id="heatmapPointsCountBadge">0 clics mapeados</span>
-                        </div>
-
-                        <!-- Mockup de Ventana de Navegador Web -->
-                        <div class="heatmap-stage-wrapper">
-                            <div class="heatmap-browser-topbar">
-                                <div class="browser-dots">
-                                    <span class="b-dot red"></span>
-                                    <span class="b-dot yellow"></span>
-                                    <span class="b-dot green"></span>
-                                </div>
-                                <div class="browser-url-bar" id="heatmapBrowserUrlDisplay">
-                                    <i data-lucide="lock" style="width:11px;height:11px;"></i>
-                                    <span>https://voxbusinessdeveloper.com/*</span>
-                                </div>
-                                <div class="browser-scale-tag">Escala Proporcional 0–100%</div>
-                            </div>
-
-                            <div class="heatmap-canvas-stage" id="heatmapCanvasStage">
-                                <!-- Wireframe sutil de referencia de la página -->
-                                <div class="heatmap-zone-guide zone-header">
-                                    <div class="zone-wireframe-bar"></div>
-                                    <span>0% - 25% · HERO & NAVEGACIÓN PRINCIPAL</span>
-                                </div>
-                                <div class="heatmap-zone-guide zone-upper">
-                                    <div class="zone-wireframe-cards"><i></i><i></i><i></i></div>
-                                    <span>25% - 50% · SERVICIOS Y PROPUESTA DE VALOR</span>
-                                </div>
-                                <div class="heatmap-zone-guide zone-lower">
-                                    <div class="zone-wireframe-cards"><i></i><i></i></div>
-                                    <span>50% - 75% · PORTAFOLIO, METODOLOGÍA & EQUIPO</span>
-                                </div>
-                                <div class="heatmap-zone-guide zone-footer">
-                                    <div class="zone-wireframe-bar"></div>
-                                    <span>75% - 100% · FORMULARIO DE CONTACTO, WHATSAPP & FOOTER</span>
-                                </div>
-                                <!-- Puntos de clic (dots) inyectados dinámicamente -->
-                                <div id="heatmapDotsContainer"></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Tablas de Ranking Visual con Barras de Progreso -->
-                    <div class="radar-rankings-col">
-                        <div class="glass-panel radar-ranking-card">
+                    <!-- ==================================================== -->
+                    <!-- SUB-TAB 1: SESIONES Y LÍNEA DE TIEMPO PASO A PASO -->
+                    <!-- ==================================================== -->
+                    <div class="radar-master-detail" id="radarSessionsTab">
+                        <!-- Columna Izquierda: Directorio de Visitantes -->
+                        <div class="radar-sessions-panel glass-panel">
                             <div class="radar-panel-header">
                                 <div>
-                                    <h3><i data-lucide="eye"></i> Páginas & Secciones Más Vistas</h3>
-                                    <small class="muted">Dónde pasan más tiempo los visitantes</small>
+                                    <h3><i data-lucide="users"></i> Directorio de Visitantes</h3>
+                                    <small class="muted" id="radarSessionsCountLabel">Selecciona una persona para ver su
+                                        expediente</small>
                                 </div>
-                            </div>
-                            <div class="table-responsive">
-                                <table class="leads-table compact-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Ruta / Sección</th>
-                                            <th>Vistas</th>
-                                            <th>Impacto</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="radarTopPagesBody"></tbody>
-                                </table>
-                            </div>
-                        </div>
-
-                        <div class="glass-panel radar-ranking-card">
-                            <div class="radar-panel-header">
-                                <div>
-                                    <h3><i data-lucide="zap"></i> Botones & Elementos Más Clicados</h3>
-                                    <small class="muted">Llamados a la acción con mayor respuesta</small>
-                                </div>
-                            </div>
-                            <div class="table-responsive">
-                                <table class="leads-table compact-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Elemento / Acción</th>
-                                            <th>Categoría</th>
-                                            <th>Clics</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="radarTopElementsBody"></tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ==================================================== -->
-                <!-- SUB-TAB 3: ANÁLISIS SEMANAL, QUINCENAL Y MENSUAL     -->
-                <!-- ==================================================== -->
-                <div class="radar-periods-layout" id="radarPeriodsTab" style="display: none;">
-
-                    <!-- Banner Dinámico de la Página Seleccionada + Corte Temporal -->
-                    <div class="radar-period-header glass-panel" id="radarPeriodHeroBanner">
-                        <div class="radar-period-site-spotlight" id="radarPeriodSiteSpotlight">
-                            <!-- Inyectado dinámicamente con el nombre, dominio y estado en vivo de la Card seleccionada -->
-                        </div>
-
-                        <div class="radar-period-controls-bar">
-                            <div class="radar-period-header-left">
-                                <div class="period-segmented-control" id="radarAnalysisPeriodControl">
-                                    <button type="button" class="period-seg-btn" data-analysis-period="7d">
-                                        <i data-lucide="calendar"></i>
-                                        <span>Semanal (7 Días)</span>
-                                    </button>
-                                    <button type="button" class="period-seg-btn active" data-analysis-period="15d">
-                                        <i data-lucide="calendar-days"></i>
-                                        <span>Quincenal (15 Días)</span>
-                                    </button>
-                                    <button type="button" class="period-seg-btn" data-analysis-period="30d">
-                                        <i data-lucide="calendar-range"></i>
-                                        <span>Mensual (30 Días)</span>
-                                    </button>
-                                </div>
-                                <div class="period-range-meta">
-                                    <span class="period-range-badge" id="radarPeriodRangeBadge">Cargando rango...</span>
-                                    <small class="muted" id="radarPeriodSiteSubtitle">Comparado automáticamente contra el
-                                        periodo inmediato anterior</small>
-                                </div>
+                                <span class="radar-live-indicator-pill">
+                                    <span class="mini-live-dot"></span> AUTO-SYNC
+                                </span>
                             </div>
 
-                            <div class="radar-period-header-actions">
-                                <button type="button" class="btn btn-outline btn-sm" id="btnExportRadarPeriodCsv"
-                                    title="Descargar datos del corte en CSV / Excel">
-                                    <i data-lucide="download"></i>
-                                    <span>Exportar Excel (CSV)</span>
-                                </button>
-                                <button type="button" class="btn btn-outline btn-sm" id="btnPrintRadarPeriodReport"
-                                    title="Imprimir o guardar reporte ejecutivo en PDF">
-                                    <i data-lucide="printer"></i>
-                                    <span>Imprimir / PDF</span>
-                                </button>
-                                <button type="button" class="btn btn-primary btn-sm" id="btnPreviewGmailReport"
-                                    title="Enviar este corte ejecutivo por correo a Gmail">
-                                    <i data-lucide="send"></i>
-                                    <span>Enviar Reporte a Gmail</span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 4 Tarjetas Comparativas (Periodo Actual vs. Periodo Anterior) -->
-                    <div class="radar-period-compare-grid" id="radarPeriodCompareGrid">
-                        <!-- Inyectado dinámicamente por renderRadarPeriodAnalysis() -->
-                    </div>
-
-                    <!-- Fila Central: Gráfica Diaria de Evolución + Embudo de Conversión -->
-                    <div class="radar-period-charts-grid">
-                        <!-- Evolución Día por Día -->
-                        <div class="glass-panel radar-period-card">
-                            <div class="radar-panel-header">
-                                <div>
-                                    <h3><i data-lucide="bar-chart-3"></i> Evolución Diaria de Tráfico e Intención</h3>
-                                    <small class="muted" id="radarDailyChartSubtitle">Comportamiento día por día durante
-                                        el corte seleccionado</small>
-                                </div>
-                                <div class="period-chart-legend">
-                                    <span><i class="dot-visitors"></i> Sesiones</span>
-                                    <span><i class="dot-intent"></i> WhatsApp / Leads</span>
-                                </div>
-                            </div>
-                            <div class="radar-daily-chart-stage" id="radarDailyChartStage">
-                                <!-- Barras diarias generadas dinámicamente -->
-                            </div>
-                        </div>
-
-                        <!-- Embudo de Conversión del Periodo -->
-                        <div class="glass-panel radar-period-card">
-                            <div class="radar-panel-header">
-                                <div>
-                                    <h3><i data-lucide="filter"></i> Embudo de Conversión del Periodo</h3>
-                                    <small class="muted">De visitante anónimo a prospecto calificado</small>
-                                </div>
-                                <span class="badge badge-accent" id="radarFunnelRateBadge">0% Conv.</span>
-                            </div>
-                            <div class="radar-funnel-container" id="radarFunnelContainer">
-                                <!-- Etapas del embudo generadas dinámicamente -->
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Fila Inferior: Canales de Adquisición + Diagnóstico Ejecutivo Automático -->
-                    <div class="radar-period-bottom-grid">
-                        <!-- Rendimiento por Canal / Origen y Dispositivos -->
-                        <div class="glass-panel radar-period-card">
-                            <div class="radar-panel-header">
-                                <div>
-                                    <h3><i data-lucide="share-2"></i> Canales de Adquisición & Dispositivos</h3>
-                                    <small class="muted">Qué fuente trajo más visitas y prospectos en este corte</small>
-                                </div>
-                            </div>
-                            <div class="table-responsive">
-                                <table class="leads-table compact-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Canal / Origen</th>
-                                            <th>Sesiones</th>
-                                            <th>Scroll Medio</th>
-                                            <th>Intención / Leads</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="radarPeriodChannelsBody"></tbody>
-                                </table>
-                            </div>
-                        </div>
-
-                        <!-- Diagnóstico Ejecutivo Automático & Borrador de Reporte para Correo -->
-                        <div class="glass-panel radar-period-card">
-                            <div class="radar-panel-header">
-                                <div>
-                                    <h3><i data-lucide="sparkles"></i> Diagnóstico Ejecutivo & Borrador de Reporte</h3>
-                                    <small class="muted">Conclusiones automáticas del corte listas para compartir o
-                                        enviar por Gmail</small>
-                                </div>
-                                <button type="button" class="btn btn-outline btn-sm" id="btnCopyExecutiveReportText">
-                                    <i data-lucide="copy"></i>
-                                    <span>Copiar Resumen</span>
-                                </button>
-                            </div>
-                            <div class="radar-period-insights-body" id="radarPeriodInsightsBody">
+                            <div class="radar-sessions-list" id="radarSessionsList">
                                 <!-- Inyectado dinámicamente -->
                             </div>
+
+                            <div class="empty-state" id="emptyRadarSessions" style="display: none; padding: 36px 20px;">
+                                <i data-lucide="activity"></i>
+                                <h3>Sin sesiones para este filtro</h3>
+                                <p>Navega por la página web o instala el script en un sitio externo para ver los
+                                    movimientos
+                                    en tiempo real.</p>
+                            </div>
+                        </div>
+
+                        <!-- Columna Derecha: Expediente Cronológico del Visitante -->
+                        <div class="radar-timeline-panel glass-panel" id="radarTimelinePanel">
+                            <div class="radar-timeline-header" id="radarVisitorDetailHeader">
+                                <!-- Inyectado dinámicamente con los datos del visitante activo -->
+                            </div>
+
+                            <div class="radar-timeline-subheader">
+                                <span><i data-lucide="git-commit"></i> LÍNEA DE TIEMPO CRONOLÓGICA DE MOVIMIENTOS</span>
+                                <small id="radarEventsCountBadge">0 eventos registrados</small>
+                            </div>
+
+                            <div class="radar-timeline-body" id="radarVisitorTimelineBody">
+                                <!-- Línea de tiempo paso a paso inyectada dinámicamente -->
+                            </div>
                         </div>
                     </div>
 
-                </div>
+                    <!-- ==================================================== -->
+                    <!-- SUB-TAB 2: MAPA DE COORDENADAS DE CLICS & RANKING -->
+                    <!-- ==================================================== -->
+                    <div class="radar-heatmap-layout" id="radarHeatmapTab" style="display: none;">
+                        <!-- Lienzo de Mapa de Coordenadas de Clics tipo Browser Mockup -->
+                        <div class="radar-heatmap-card glass-panel">
+                            <div class="radar-heatmap-header">
+                                <div>
+                                    <h3><i data-lucide="crosshair"></i> Mapa de Atención y Coordenadas de Clics (X%, Y%)
+                                    </h3>
+                                    <small class="muted">Pasa el cursor sobre cualquier punto luminoso para ver en qué
+                                        botón
+                                        o sección hicieron clic</small>
+                                </div>
+                                <div class="radar-heatmap-controls">
+                                    <select id="heatmapPageSelect" class="select-control sm">
+                                        <option value="all">📄 Todas las Páginas</option>
+                                    </select>
+                                    <select id="heatmapDeviceSelect" class="select-control sm">
+                                        <option value="all">🖥️ Todos los Dispositivos</option>
+                                        <option value="desktop">💻 Escritorio (PC)</option>
+                                        <option value="mobile">📱 Smartphone (Móvil)</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="heatmap-legend">
+                                <span class="legend-item"><span class="legend-dot click"></span> Clic de Interés /
+                                    Navegación</span>
+                                <span class="legend-item"><span class="legend-dot whatsapp"></span> Clic en WhatsApp /
+                                    Teléfono</span>
+                                <span class="legend-item"><span class="legend-dot form"></span> Formulario / Conversión
+                                    a
+                                    Lead</span>
+                                <span class="legend-count-pill" id="heatmapPointsCountBadge">0 clics mapeados</span>
+                            </div>
+
+                            <!-- Mockup de Ventana de Navegador Web -->
+                            <div class="heatmap-stage-wrapper">
+                                <div class="heatmap-browser-topbar">
+                                    <div class="browser-dots">
+                                        <span class="b-dot red"></span>
+                                        <span class="b-dot yellow"></span>
+                                        <span class="b-dot green"></span>
+                                    </div>
+                                    <div class="browser-url-bar" id="heatmapBrowserUrlDisplay">
+                                        <i data-lucide="lock" style="width:11px;height:11px;"></i>
+                                        <span>https://voxbusinessdeveloper.com/*</span>
+                                    </div>
+                                    <div class="browser-scale-tag">Escala Proporcional 0–100%</div>
+                                </div>
+
+                                <div class="heatmap-canvas-stage" id="heatmapCanvasStage">
+                                    <!-- Wireframe sutil de referencia de la página -->
+                                    <div class="heatmap-zone-guide zone-header">
+                                        <div class="zone-wireframe-bar"></div>
+                                        <span>0% - 25% · HERO & NAVEGACIÓN PRINCIPAL</span>
+                                    </div>
+                                    <div class="heatmap-zone-guide zone-upper">
+                                        <div class="zone-wireframe-cards"><i></i><i></i><i></i></div>
+                                        <span>25% - 50% · SERVICIOS Y PROPUESTA DE VALOR</span>
+                                    </div>
+                                    <div class="heatmap-zone-guide zone-lower">
+                                        <div class="zone-wireframe-cards"><i></i><i></i></div>
+                                        <span>50% - 75% · PORTAFOLIO, METODOLOGÍA & EQUIPO</span>
+                                    </div>
+                                    <div class="heatmap-zone-guide zone-footer">
+                                        <div class="zone-wireframe-bar"></div>
+                                        <span>75% - 100% · FORMULARIO DE CONTACTO, WHATSAPP & FOOTER</span>
+                                    </div>
+                                    <!-- Puntos de clic (dots) inyectados dinámicamente -->
+                                    <div id="heatmapDotsContainer"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tablas de Ranking Visual con Barras de Progreso -->
+                        <div class="radar-rankings-col">
+                            <div class="glass-panel radar-ranking-card">
+                                <div class="radar-panel-header">
+                                    <div>
+                                        <h3><i data-lucide="eye"></i> Páginas & Secciones Más Vistas</h3>
+                                        <small class="muted">Dónde pasan más tiempo los visitantes</small>
+                                    </div>
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="leads-table compact-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Ruta / Sección</th>
+                                                <th>Vistas</th>
+                                                <th>Impacto</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="radarTopPagesBody"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <div class="glass-panel radar-ranking-card">
+                                <div class="radar-panel-header">
+                                    <div>
+                                        <h3><i data-lucide="zap"></i> Botones & Elementos Más Clicados</h3>
+                                        <small class="muted">Llamados a la acción con mayor respuesta</small>
+                                    </div>
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="leads-table compact-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Elemento / Acción</th>
+                                                <th>Categoría</th>
+                                                <th>Clics</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="radarTopElementsBody"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ==================================================== -->
+                    <!-- SUB-TAB 3: ANÁLISIS SEMANAL, QUINCENAL Y MENSUAL     -->
+                    <!-- ==================================================== -->
+                    <div class="radar-periods-layout" id="radarPeriodsTab" style="display: none;">
+
+                        <!-- Banner Dinámico de la Página Seleccionada + Corte Temporal -->
+                        <div class="radar-period-header glass-panel" id="radarPeriodHeroBanner">
+                            <div class="radar-period-site-spotlight" id="radarPeriodSiteSpotlight">
+                                <!-- Inyectado dinámicamente con el nombre, dominio y estado en vivo de la Card seleccionada -->
+                            </div>
+
+                            <div class="radar-period-controls-bar">
+                                <div class="radar-period-header-left">
+                                    <div class="period-segmented-control" id="radarAnalysisPeriodControl">
+                                        <button type="button" class="period-seg-btn" data-analysis-period="7d">
+                                            <i data-lucide="calendar"></i>
+                                            <span>Semanal (7 Días)</span>
+                                        </button>
+                                        <button type="button" class="period-seg-btn active" data-analysis-period="15d">
+                                            <i data-lucide="calendar-days"></i>
+                                            <span>Quincenal (15 Días)</span>
+                                        </button>
+                                        <button type="button" class="period-seg-btn" data-analysis-period="30d">
+                                            <i data-lucide="calendar-range"></i>
+                                            <span>Mensual (30 Días)</span>
+                                        </button>
+                                    </div>
+                                    <div class="period-range-meta">
+                                        <span class="period-range-badge" id="radarPeriodRangeBadge">Cargando
+                                            rango...</span>
+                                        <small class="muted" id="radarPeriodSiteSubtitle">Comparado automáticamente
+                                            contra el
+                                            periodo inmediato anterior</small>
+                                    </div>
+                                </div>
+
+                                <div class="radar-period-header-actions">
+                                    <button type="button" class="btn btn-outline btn-sm" id="btnExportRadarPeriodCsv"
+                                        title="Descargar datos del corte en CSV / Excel">
+                                        <i data-lucide="download"></i>
+                                        <span>Exportar Excel (CSV)</span>
+                                    </button>
+                                    <button type="button" class="btn btn-outline btn-sm" id="btnPrintRadarPeriodReport"
+                                        title="Imprimir o guardar reporte ejecutivo en PDF">
+                                        <i data-lucide="printer"></i>
+                                        <span>Imprimir / PDF</span>
+                                    </button>
+                                    <button type="button" class="btn btn-primary btn-sm" id="btnPreviewGmailReport"
+                                        title="Enviar este corte ejecutivo por correo a Gmail">
+                                        <i data-lucide="send"></i>
+                                        <span>Enviar Reporte a Gmail</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 4 Tarjetas Comparativas (Periodo Actual vs. Periodo Anterior) -->
+                        <div class="radar-period-compare-grid" id="radarPeriodCompareGrid">
+                            <!-- Inyectado dinámicamente por renderRadarPeriodAnalysis() -->
+                        </div>
+
+                        <!-- Fila Central: Gráfica Diaria de Evolución + Embudo de Conversión -->
+                        <div class="radar-period-charts-grid">
+                            <!-- Evolución Día por Día -->
+                            <div class="glass-panel radar-period-card">
+                                <div class="radar-panel-header">
+                                    <div>
+                                        <h3><i data-lucide="bar-chart-3"></i> Evolución Diaria de Tráfico e Intención
+                                        </h3>
+                                        <small class="muted" id="radarDailyChartSubtitle">Comportamiento día por día
+                                            durante
+                                            el corte seleccionado</small>
+                                    </div>
+                                    <div class="period-chart-legend">
+                                        <span><i class="dot-visitors"></i> Sesiones</span>
+                                        <span><i class="dot-intent"></i> WhatsApp / Leads</span>
+                                    </div>
+                                </div>
+                                <div class="radar-daily-chart-stage" id="radarDailyChartStage">
+                                    <!-- Barras diarias generadas dinámicamente -->
+                                </div>
+                            </div>
+
+                            <!-- Embudo de Conversión del Periodo -->
+                            <div class="glass-panel radar-period-card">
+                                <div class="radar-panel-header">
+                                    <div>
+                                        <h3><i data-lucide="filter"></i> Embudo de Conversión del Periodo</h3>
+                                        <small class="muted">De visitante anónimo a prospecto calificado</small>
+                                    </div>
+                                    <span class="badge badge-accent" id="radarFunnelRateBadge">0% Conv.</span>
+                                </div>
+                                <div class="radar-funnel-container" id="radarFunnelContainer">
+                                    <!-- Etapas del embudo generadas dinámicamente -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Fila Inferior: Canales de Adquisición + Diagnóstico Ejecutivo Automático -->
+                        <div class="radar-period-bottom-grid">
+                            <!-- Rendimiento por Canal / Origen y Dispositivos -->
+                            <div class="glass-panel radar-period-card">
+                                <div class="radar-panel-header">
+                                    <div>
+                                        <h3><i data-lucide="share-2"></i> Canales de Adquisición & Dispositivos</h3>
+                                        <small class="muted">Qué fuente trajo más visitas y prospectos en este
+                                            corte</small>
+                                    </div>
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="leads-table compact-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Canal / Origen</th>
+                                                <th>Sesiones</th>
+                                                <th>Scroll Medio</th>
+                                                <th>Intención / Leads</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="radarPeriodChannelsBody"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <!-- Diagnóstico Ejecutivo Automático & Borrador de Reporte para Correo -->
+                            <div class="glass-panel radar-period-card">
+                                <div class="radar-panel-header">
+                                    <div>
+                                        <h3><i data-lucide="sparkles"></i> Diagnóstico Ejecutivo & Borrador de Reporte
+                                        </h3>
+                                        <small class="muted">Conclusiones automáticas del corte listas para compartir o
+                                            enviar por Gmail</small>
+                                    </div>
+                                    <button type="button" class="btn btn-outline btn-sm"
+                                        id="btnCopyExecutiveReportText">
+                                        <i data-lucide="copy"></i>
+                                        <span>Copiar Resumen</span>
+                                    </button>
+                                </div>
+                                <div class="radar-period-insights-body" id="radarPeriodInsightsBody">
+                                    <!-- Inyectado dinámicamente -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Directorio de Registros de Clientes / Visitantes del Periodo con Opción de Eliminar -->
+                        <div class="glass-panel radar-period-card">
+                            <div class="radar-panel-header">
+                                <div>
+                                    <h3><i data-lucide="user-check"></i> Registros de Clientes & Visitantes en este Corte</h3>
+                                    <small class="muted">Inspecciona o elimina registros individuales de clientes y sesiones de esta página</small>
+                                </div>
+                                <button type="button" class="vercel-btn-danger-ghost" id="btnClearPeriodSiteRecords">
+                                    <i data-lucide="trash-2"></i>
+                                    <span>Vaciar Registros de esta Página</span>
+                                </button>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="leads-table compact-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Cliente / Visitante</th>
+                                            <th>Fecha / Estado</th>
+                                            <th>Origen & Ruta</th>
+                                            <th>Interacción</th>
+                                            <th style="text-align: right;">Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="radarPeriodClientsTableBody"></tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                    </div>
                 </div><!-- /#vercelProjectWorkspaceView -->
 
             </section>
@@ -1841,7 +1896,8 @@
                 <div style="flex: 1;">
                     <span class="badge badge-accent" id="modalReportePeriodBadge">Corte Quincenal</span>
                     <h2 style="font-size: 1.15rem; margin-top: 2px;">Enviar Reporte Ejecutivo a Gmail</h2>
-                    <p class="modal-header-desc" id="modalReporteSiteDesc">Despacho vía Resend / Gmail con tabla comparativa y embudo.</p>
+                    <p class="modal-header-desc" id="modalReporteSiteDesc">Despacho vía Resend / Gmail con tabla
+                        comparativa y embudo.</p>
                 </div>
                 <button class="btn-close" id="closeEnviarReporteModalBtn" aria-label="Cerrar modal">
                     <i data-lucide="x"></i>
@@ -1856,8 +1912,7 @@
                         </label>
                         <div class="input-with-icon">
                             <i data-lucide="mail"></i>
-                            <input type="email" id="reporteDestinatarioInput"
-                                value="vox.iabusinessdeveloper@gmail.com"
+                            <input type="email" id="reporteDestinatarioInput" value="vox.iabusinessdeveloper@gmail.com"
                                 placeholder="vox.iabusinessdeveloper@gmail.com" required />
                         </div>
                     </div>
@@ -1874,7 +1929,8 @@
                         <label>
                             <span>Vista Previa del Resumen que se Enviará</span>
                         </label>
-                        <div class="email-draft-preview-box" id="modalReportePreviewBox" style="max-height: 155px;"></div>
+                        <div class="email-draft-preview-box" id="modalReportePreviewBox" style="max-height: 155px;">
+                        </div>
                     </div>
                 </div>
 

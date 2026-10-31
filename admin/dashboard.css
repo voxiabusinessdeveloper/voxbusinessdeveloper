@@ -5053,3 +5053,87 @@ input:focus,
 .radar-dynamic-refresh {
     animation: radarCardSwitchFade 0.28s cubic-bezier(0.16, 1, 0.3, 1);
 }
+
+/* Botones de Eliminación de Páginas y Registros estilo Vercel */
+.vercel-btn-danger-ghost {
+    background: rgba(239, 68, 68, 0.08);
+    color: #f87171;
+    border: 1px solid rgba(239, 68, 68, 0.28);
+    border-radius: 8px;
+    height: 36px;
+    padding: 0 13px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    transition: all 0.18s ease;
+    font-family: inherit;
+}
+
+.vercel-btn-danger-ghost:hover {
+    background: rgba(239, 68, 68, 0.18);
+    border-color: #ef4444;
+    color: #fecaca;
+}
+
+.vercel-btn-danger-ghost svg,
+.vercel-btn-danger-ghost i {
+    width: 14px;
+    height: 14px;
+}
+
+.v-card-delete-btn {
+    background: #141414;
+    border: 1px solid #292929;
+    color: #888888;
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    padding: 0;
+}
+
+.v-card-delete-btn:hover {
+    background: rgba(239, 68, 68, 0.18);
+    border-color: #ef4444;
+    color: #f87171;
+}
+
+.v-card-delete-btn svg,
+.v-card-delete-btn i {
+    width: 13px;
+    height: 13px;
+}
+
+.session-delete-mini-btn {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: #888888;
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    padding: 0;
+}
+
+.session-delete-mini-btn:hover {
+    background: rgba(239, 68, 68, 0.16);
+    border-color: #ef4444;
+    color: #f87171;
+}
+
+.session-delete-mini-btn svg,
+.session-delete-mini-btn i {
+    width: 13px;
+    height: 13px;
+}
