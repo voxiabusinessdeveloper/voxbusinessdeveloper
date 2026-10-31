@@ -3575,17 +3575,83 @@ document.addEventListener('DOMContentLoaded', () => {
         return cards;
     }
 
+    function buildSparklineSvg(pointsCount = 7, isOnline = false) {
+        const strokeColor = isOnline ? '#10b981' : '#52525b';
+        const pts = [18, 14, 16, 9, 13, 6, 4].slice(0, pointsCount);
+        const d = pts.map((y, idx) => `${idx === 0 ? 'M' : 'L'} ${idx * 12} ${y}`).join(' ');
+        return `
+            <svg width="74" height="22" viewBox="0 0 74 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="${d}" stroke="${strokeColor}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        `;
+    }
+
+    function showVercelProjectsGrid() {
+        const gridView = document.getElementById('vercelProjectsGridView');
+        const workspaceView = document.getElementById('vercelProjectWorkspaceView');
+        if (gridView) gridView.style.display = 'flex';
+        if (workspaceView) workspaceView.style.display = 'none';
+        renderRadarSitesDeck();
+        if (window.lucide) window.lucide.createIcons();
+    }
+
+    function openVercelProjectWorkspace(cardInfo) {
+        state.radar.siteFilter = cardInfo.site_key;
+        if (radarSiteSelect) radarSiteSelect.value = cardInfo.site_key;
+
+        // Por defecto abrir en Web Analytics (7d / 15d / 30d) para ver los análisis del proyecto seleccionado
+        state.radar.activeTab = 'periods';
+        const btnRadarTabPeriodsEl = document.getElementById('btnRadarTabPeriods');
+        [btnRadarTabSessions, btnRadarTabHeatmap, btnRadarTabPeriodsEl].forEach(b => b?.classList.remove('active'));
+        if (btnRadarTabPeriodsEl) btnRadarTabPeriodsEl.classList.add('active');
+
+        const gridView = document.getElementById('vercelProjectsGridView');
+        const workspaceView = document.getElementById('vercelProjectWorkspaceView');
+        if (gridView) gridView.style.display = 'none';
+        if (workspaceView) {
+            workspaceView.style.display = 'flex';
+            workspaceView.classList.remove('radar-dynamic-refresh');
+            void workspaceView.offsetWidth;
+            workspaceView.classList.add('radar-dynamic-refresh');
+        }
+
+        const headerPill = document.getElementById('vercelActiveProjectHeader');
+        if (headerPill) {
+            headerPill.innerHTML = `
+                <div class="v-card-avatar" style="width:28px;height:28px;font-size:0.72rem;">${escapeHtml(cardInfo.initials)}</div>
+                <strong style="color:#ededed;font-size:0.95rem;">${escapeHtml(cardInfo.name)}</strong>
+                <span class="vercel-mono-tag">${escapeHtml(cardInfo.domain)}</span>
+            `;
+        }
+
+        applyRadarFilters();
+        if (window.lucide) window.lucide.createIcons();
+    }
+
     function renderRadarSitesDeck() {
         const deckGrid = document.getElementById('radarSitesCardsGrid');
         const activeIndicator = document.getElementById('radarActiveSiteIndicatorText');
+        const globalSummaryText = document.getElementById('vercelGlobalLiveSummaryText');
+        const projectSearchTerm = (document.getElementById('vercelProjectSearchInput')?.value || '').trim().toLowerCase();
         if (!deckGrid) return;
 
-        const cards = getAvailableRadarSiteCards();
-        const activeKey = state.radar.siteFilter || 'all';
-        const activeCardObj = cards.find(c => c.site_key === activeKey) || cards[0];
+        const allCards = getAvailableRadarSiteCards();
+        const cards = projectSearchTerm
+            ? allCards.filter(c =>
+                c.name.toLowerCase().includes(projectSearchTerm) ||
+                c.domain.toLowerCase().includes(projectSearchTerm) ||
+                c.badge.toLowerCase().includes(projectSearchTerm)
+            )
+            : allCards;
 
-        if (activeIndicator && activeCardObj) {
-            activeIndicator.innerHTML = `Página seleccionada: <strong style="color:var(--gold-primary);">${escapeHtml(activeCardObj.name)}</strong> (${escapeHtml(activeCardObj.domain)})`;
+        const activeKey = state.radar.siteFilter || 'all';
+        const totalOnlineAll = state.radar.sesiones.filter(s => isSessionOnline(s)).length;
+
+        if (globalSummaryText) {
+            globalSummaryText.textContent = `${totalOnlineAll} Online ahora · ${allCards.length - 1} páginas conectadas`;
+        }
+        if (activeIndicator) {
+            activeIndicator.textContent = `${cards.length} proyecto${cards.length === 1 ? '' : 's'} disponible${cards.length === 1 ? '' : 's'}`;
         }
 
         deckGrid.innerHTML = '';
@@ -3601,60 +3667,65 @@ document.addEventListener('DOMContentLoaded', () => {
             const totalWa = siteSessions.reduce((acc, s) => acc + (parseInt(s.whatsapp_clicks || 0, 10)), 0);
             const totalLeads = siteSessions.filter(s => s.converted_to_lead).length;
 
+            const latestSess = siteSessions[0];
+            const latestDesc = latestSess
+                ? (latestSess.lead_nombre
+                    ? `Lead: ${latestSess.lead_nombre} (${latestSess.current_url || '/'})`
+                    : `Visita desde ${latestSess.referrer || 'Directo'} → ${latestSess.current_url || '/'}`)
+                : 'Esperando primera sesión de telemetría...';
+            const latestTime = latestSess ? formatRelativeTime(latestSess.last_seen_at) : 'Sin actividad';
+
             const cardEl = document.createElement('button');
             cardEl.type = 'button';
-            cardEl.className = `radar-site-card ${isSelected ? 'active' : ''}`;
+            cardEl.className = `vercel-project-card ${isSelected ? 'active' : ''}`;
             cardEl.setAttribute('data-site-card-key', cardInfo.site_key);
 
             cardEl.innerHTML = `
-                <div class="site-card-top">
-                    <div class="site-card-brand">
-                        <div class="site-card-icon">${escapeHtml(cardInfo.initials)}</div>
-                        <div class="site-card-titles">
-                            <span class="site-card-name">${escapeHtml(cardInfo.name)}</span>
-                            <span class="site-card-domain">${escapeHtml(cardInfo.domain)}</span>
+                <div class="v-card-header">
+                    <div class="v-card-identity">
+                        <div class="v-card-avatar">${escapeHtml(cardInfo.initials)}</div>
+                        <div class="v-card-titles">
+                            <span class="v-card-name">${escapeHtml(cardInfo.name)}</span>
+                            <span class="v-card-domain">${escapeHtml(cardInfo.domain)}</span>
                         </div>
                     </div>
-                    <span class="site-card-live-pill ${onlineCount > 0 ? 'has-online' : ''}">
-                        ${onlineCount > 0 ? `<span class="mini-live-dot"></span> ${onlineCount} Online` : escapeHtml(cardInfo.badge)}
-                    </span>
+                    <div class="v-card-sparkline-wrap">
+                        <span class="v-status-badge ${onlineCount > 0 ? 'is-live' : ''}">
+                            ${onlineCount > 0 ? `<span class="mini-live-dot"></span> ${onlineCount} Online` : escapeHtml(cardInfo.badge)}
+                        </span>
+                        ${buildSparklineSvg(7, onlineCount > 0)}
+                    </div>
                 </div>
 
-                <div class="site-card-metrics-row">
-                    <div class="site-card-metric">
-                        <strong>${totalSess}</strong>
-                        <small>Sesiones</small>
+                <div class="v-card-activity">
+                    <span class="v-activity-line">${escapeHtml(latestDesc)}</span>
+                    <div class="v-activity-meta">
+                        <span>main · telemetry</span>
+                        <span>${escapeHtml(latestTime)}</span>
                     </div>
-                    <div class="site-card-metric">
-                        <strong style="color:#25D366;">${totalWa}</strong>
-                        <small>WhatsApp</small>
+                </div>
+
+                <div class="v-card-footer">
+                    <div class="v-card-stats">
+                        <div class="v-stat-item">
+                            <strong>${totalSess}</strong>
+                            <small>Sesiones</small>
+                        </div>
+                        <div class="v-stat-item">
+                            <strong style="color:#10b981;">${totalWa}</strong>
+                            <small>WhatsApp</small>
+                        </div>
+                        <div class="v-stat-item">
+                            <strong style="color:#f59e0b;">${totalLeads}</strong>
+                            <small>Leads</small>
+                        </div>
                     </div>
-                    <div class="site-card-metric">
-                        <strong style="color:var(--gold-primary);">${totalLeads}</strong>
-                        <small>Leads</small>
-                    </div>
+                    <span class="v-open-arrow">Abrir Analytics →</span>
                 </div>
             `;
 
             cardEl.addEventListener('click', () => {
-                state.radar.siteFilter = cardInfo.site_key;
-                if (radarSiteSelect) radarSiteSelect.value = cardInfo.site_key;
-
-                // Efecto dinámico visual al cargar los datos de la página seleccionada
-                [
-                    document.querySelector('.radar-kpi-grid'),
-                    document.getElementById('radarSessionsTab'),
-                    document.getElementById('radarHeatmapTab'),
-                    document.getElementById('radarPeriodsTab')
-                ].forEach(el => {
-                    if (!el) return;
-                    el.classList.remove('radar-dynamic-refresh');
-                    void el.offsetWidth;
-                    el.classList.add('radar-dynamic-refresh');
-                });
-
-                renderRadarSitesDeck();
-                applyRadarFilters();
+                openVercelProjectWorkspace(cardInfo);
             });
 
             deckGrid.appendChild(cardEl);
@@ -4704,6 +4775,16 @@ document.addEventListener('DOMContentLoaded', () => {
             applyRadarFilters();
         });
     }
+
+    const vercelProjectSearchInput = document.getElementById('vercelProjectSearchInput');
+    if (vercelProjectSearchInput) {
+        vercelProjectSearchInput.addEventListener('input', () => {
+            renderRadarSitesDeck();
+        });
+    }
+
+    document.getElementById('btnBackToVercelProjects')?.addEventListener('click', showVercelProjectsGrid);
+    document.getElementById('btnSwitchProjectQuick')?.addEventListener('click', showVercelProjectsGrid);
 
     const btnRadarTabPeriods = document.getElementById('btnRadarTabPeriods');
     [btnRadarTabSessions, btnRadarTabHeatmap, btnRadarTabPeriods].forEach(btn => {

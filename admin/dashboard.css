@@ -4432,200 +4432,546 @@ input:focus,
 }
 
 /* ==========================================================================
-   8. DECK INTERACTIVO DE TARJETAS POR PÁGINA (SELECTOR VISUAL DINÁMICO)
+   8. ESTÉTICA VERCEL DASHBOARD (GEIST DARK) — EXCLUSIVO PARA RADAR & TRÁFICO
    ========================================================================== */
-.radar-sites-deck-section {
-    padding: 16px 0 6px 0;
-    border-top: 1px solid rgba(255, 255, 255, 0.06);
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
+.vercel-radar-theme {
+    --v-bg: #000000;
+    --v-card: #0a0a0a;
+    --v-card-hover: #111111;
+    --v-border: #262626;
+    --v-border-hover: #484848;
+    --v-text: #ededed;
+    --v-muted: #888888;
+    --v-subtle: #666666;
+    --v-emerald: #10b981;
+    --v-blue: #0070f3;
+    font-variant-numeric: tabular-nums;
 }
 
-.radar-sites-deck-header {
+.vercel-radar-theme .glass-panel,
+.vercel-radar-theme .radar-kpi-card,
+.vercel-radar-theme .period-compare-card,
+.vercel-radar-theme .radar-period-card,
+.vercel-radar-theme .radar-sessions-panel,
+.vercel-radar-theme .radar-timeline-panel,
+.vercel-radar-theme .radar-heatmap-card,
+.vercel-radar-theme .radar-ranking-card {
+    background: #0a0a0a !important;
+    border: 1px solid #242424 !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    border-radius: 10px !important;
+}
+
+.vercel-radar-theme .glass-panel:hover,
+.vercel-radar-theme .radar-kpi-card:hover,
+.vercel-radar-theme .period-compare-card:hover {
+    border-color: #3a3a3a !important;
+}
+
+/* NIVEL 1: HOME DE PROYECTOS ESTILO VERCEL */
+.vercel-projects-home {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.vercel-top-toolbar {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+
+.vercel-search-box {
+    flex: 1;
+    min-width: 280px;
+    background: #0a0a0a;
+    border: 1px solid #262626;
+    border-radius: 8px;
+    padding: 0 14px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.vercel-search-box:focus-within {
+    border-color: #ededed;
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.08);
+}
+
+.vercel-search-box svg,
+.vercel-search-box i {
+    width: 16px;
+    height: 16px;
+    color: #777777;
+    flex-shrink: 0;
+}
+
+.vercel-search-box input {
+    background: transparent;
+    border: none;
+    outline: none;
+    color: #ededed;
+    font-size: 0.86rem;
+    width: 100%;
+    font-family: inherit;
+}
+
+.vercel-search-box input::placeholder {
+    color: #666666;
+}
+
+.vercel-kbd {
+    background: #171717;
+    border: 1px solid #2e2e2e;
+    border-radius: 5px;
+    padding: 2px 7px;
+    font-size: 0.7rem;
+    color: #888888;
+    font-family: monospace;
+}
+
+.vercel-toolbar-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.vercel-live-summary-pill {
+    background: #0a0a0a;
+    border: 1px solid #262626;
+    border-radius: 8px;
+    height: 42px;
+    padding: 0 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: #a1a1aa;
+}
+
+.vercel-btn-primary {
+    background: #ededed;
+    color: #000000;
+    border: 1px solid #ededed;
+    border-radius: 8px;
+    height: 42px;
+    padding: 0 16px;
+    font-size: 0.84rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: background 0.18s ease, transform 0.15s ease;
+    font-family: inherit;
+}
+
+.vercel-btn-primary:hover {
+    background: #ffffff;
+    transform: translateY(-1px);
+}
+
+.vercel-btn-primary svg,
+.vercel-btn-primary i {
+    width: 16px;
+    height: 16px;
+}
+
+.vercel-btn-ghost {
+    background: #0a0a0a;
+    color: #ededed;
+    border: 1px solid #262626;
+    border-radius: 8px;
+    height: 36px;
+    padding: 0 13px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    transition: all 0.18s ease;
+    font-family: inherit;
+}
+
+.vercel-btn-ghost:hover {
+    background: #171717;
+    border-color: #444444;
+}
+
+.vercel-btn-ghost svg,
+.vercel-btn-ghost i {
+    width: 14px;
+    height: 14px;
+    color: #888888;
+}
+
+.vercel-section-heading {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.vercel-section-heading h2 {
+    margin: 0;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #ededed;
+    letter-spacing: -0.02em;
+}
+
+.vercel-section-heading p {
+    margin: 4px 0 0 0;
+    font-size: 0.82rem;
+    color: #888888;
+}
+
+.vercel-mono-tag {
+    font-family: monospace;
+    font-size: 0.72rem;
+    color: #888888;
+    background: #0a0a0a;
+    border: 1px solid #262626;
+    padding: 4px 10px;
+    border-radius: 99px;
+}
+
+/* GRID DE TARJETAS DE PROYECTOS ESTILO VERCEL */
+.vercel-projects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+    gap: 16px;
+}
+
+.vercel-project-card {
+    background: #0a0a0a;
+    border: 1px solid #262626;
+    border-radius: 10px;
+    padding: 20px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 16px;
+    transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+    text-align: left;
+    position: relative;
+    overflow: hidden;
+}
+
+.vercel-project-card:hover {
+    border-color: #666666;
+    background: #0e0e0e;
+    transform: translateY(-2px);
+}
+
+.vercel-project-card.active {
+    border-color: #ededed;
+}
+
+.v-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.v-card-identity {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.v-card-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: #171717;
+    border: 1px solid #2e2e2e;
+    color: #ededed;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.82rem;
+    flex-shrink: 0;
+}
+
+.v-card-titles {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.v-card-name {
+    font-size: 0.96rem;
+    font-weight: 600;
+    color: #ededed;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    letter-spacing: -0.01em;
+}
+
+.v-card-domain {
+    font-size: 0.78rem;
+    color: #888888;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.v-card-sparkline-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 5px;
+    flex-shrink: 0;
+}
+
+.v-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.68rem;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 99px;
+    background: #141414;
+    border: 1px solid #262626;
+    color: #a1a1aa;
+}
+
+.v-status-badge.is-live {
+    background: rgba(16, 185, 129, 0.12);
+    border-color: rgba(16, 185, 129, 0.35);
+    color: #10b981;
+}
+
+.v-card-activity {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 10px 12px;
+    background: #050505;
+    border: 1px solid #1c1c1c;
+    border-radius: 7px;
+    font-size: 0.76rem;
+    color: #888888;
+}
+
+.v-activity-line {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: #d4d4d8;
+    font-weight: 500;
+}
+
+.v-activity-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.7rem;
+    color: #666666;
+    font-family: monospace;
+}
+
+.v-card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 12px;
+    border-top: 1px solid #1f1f1f;
+    gap: 10px;
+}
+
+.v-card-stats {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.v-stat-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.v-stat-item strong {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #ededed;
+}
+
+.v-stat-item small {
+    font-size: 0.66rem;
+    color: #777777;
+}
+
+.v-open-arrow {
+    font-size: 0.76rem;
+    font-weight: 600;
+    color: #888888;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: color 0.18s ease, transform 0.18s ease;
+}
+
+.vercel-project-card:hover .v-open-arrow {
+    color: #ededed;
+    transform: translateX(3px);
+}
+
+/* NIVEL 2: CONSOLA DEL PROYECTO SELECCIONADO (VERCEL WORKSPACE) */
+.vercel-project-workspace {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.vercel-workspace-header {
+    background: #0a0a0a;
+    border: 1px solid #242424;
+    border-radius: 10px;
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.vercel-breadcrumb-left {
+    display: flex;
+    align-items: center;
     gap: 10px;
     flex-wrap: wrap;
 }
 
-.radar-sites-deck-label {
+.vercel-back-btn {
+    background: #141414;
+    border: 1px solid #292929;
+    color: #a1a1aa;
+    height: 34px;
+    padding: 0 12px;
+    border-radius: 7px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    font-size: 0.7rem;
-    font-weight: 800;
-    letter-spacing: 0.08em;
-    color: var(--gold-primary);
-    text-transform: uppercase;
+    gap: 6px;
+    transition: all 0.18s ease;
+    font-family: inherit;
 }
 
-.radar-sites-deck-label svg,
-.radar-sites-deck-label i {
+.vercel-back-btn:hover {
+    background: #1f1f1f;
+    color: #ededed;
+    border-color: #484848;
+}
+
+.vercel-back-btn svg,
+.vercel-back-btn i {
     width: 14px;
     height: 14px;
 }
 
-.radar-sites-cards-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(235px, 1fr));
-    gap: 12px;
+.vercel-breadcrumb-slash {
+    color: #444444;
+    font-size: 1.1rem;
+    font-weight: 300;
+    user-select: none;
 }
 
-.radar-site-card {
-    background: linear-gradient(145deg, rgba(22, 27, 34, 0.92) 0%, rgba(13, 16, 21, 0.96) 100%);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 12px;
-    padding: 14px 16px;
-    cursor: pointer;
+.vercel-active-project-pill {
     display: flex;
-    flex-direction: column;
+    align-items: center;
     gap: 10px;
-    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-    position: relative;
-    overflow: hidden;
-    text-align: left;
+    flex-wrap: wrap;
 }
 
-.radar-site-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: transparent;
-    transition: background 0.25s ease;
-}
-
-.radar-site-card:hover {
-    transform: translateY(-3px);
-    border-color: rgba(201, 168, 106, 0.45);
-    box-shadow: 0 10px 26px -10px rgba(0, 0, 0, 0.7);
-}
-
-.radar-site-card.active {
-    background:
-        radial-gradient(circle at 95% 0%, rgba(255, 106, 0, 0.16), transparent 60%),
-        linear-gradient(145deg, rgba(30, 35, 45, 0.96) 0%, rgba(16, 20, 26, 0.98) 100%);
-    border-color: var(--gold-primary);
-    box-shadow: 0 12px 30px -10px rgba(201, 168, 106, 0.32), inset 0 0 0 1px rgba(201, 168, 106, 0.25);
-    transform: translateY(-2px);
-}
-
-.radar-site-card.active::before {
-    background: linear-gradient(90deg, var(--gold-primary), #ff6a00);
-}
-
-.site-card-top {
+.vercel-workspace-actions {
     display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
+    align-items: center;
     gap: 8px;
+    flex-wrap: wrap;
 }
 
-.site-card-brand {
+/* Sub-navegación Horizontal con Underline Blanco estilo Vercel */
+.vercel-subnav-bar {
+    background: #0a0a0a;
+    border: 1px solid #242424;
+    border-radius: 10px;
+    padding: 0 18px;
     display: flex;
     align-items: center;
-    gap: 10px;
-    min-width: 0;
+    justify-content: space-between;
+    gap: 14px;
+    flex-wrap: wrap;
 }
 
-.site-card-icon {
-    width: 36px;
-    height: 36px;
-    border-radius: 9px;
-    background: rgba(201, 168, 106, 0.12);
-    border: 1px solid rgba(201, 168, 106, 0.28);
-    color: var(--gold-primary);
+.vercel-underline-tabs {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 800;
-    font-size: 0.78rem;
-    flex-shrink: 0;
-}
-
-.radar-site-card.active .site-card-icon {
-    background: linear-gradient(135deg, var(--gold-primary), #ff6a00);
-    color: #0b0e12;
-    border-color: transparent;
-    box-shadow: 0 4px 12px rgba(255, 106, 0, 0.35);
-}
-
-.site-card-titles {
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-}
-
-.site-card-name {
-    font-size: 0.86rem;
-    font-weight: 800;
-    color: var(--text-primary);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.site-card-domain {
-    font-size: 0.7rem;
-    color: var(--text-tertiary);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.site-card-live-pill {
-    font-size: 0.64rem;
-    font-weight: 800;
-    padding: 2px 7px;
-    border-radius: 99px;
-    display: inline-flex;
     align-items: center;
     gap: 4px;
-    background: rgba(255, 255, 255, 0.05);
-    color: var(--text-tertiary);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    flex-shrink: 0;
 }
 
-.site-card-live-pill.has-online {
-    background: rgba(46, 204, 113, 0.15);
-    color: #2ecc71;
-    border-color: rgba(46, 204, 113, 0.35);
+.vercel-underline-tabs .radar-tab-btn.vercel-tab {
+    background: transparent !important;
+    border: none !important;
+    border-bottom: 2px solid transparent !important;
+    border-radius: 0 !important;
+    padding: 14px 14px !important;
+    color: #888888 !important;
+    font-size: 0.83rem !important;
+    font-weight: 500 !important;
+    box-shadow: none !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
 }
 
-.site-card-metrics-row {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 6px;
-    background: rgba(8, 10, 14, 0.6);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    border-radius: 8px;
-    padding: 7px 9px;
+.vercel-underline-tabs .radar-tab-btn.vercel-tab svg,
+.vercel-underline-tabs .radar-tab-btn.vercel-tab i {
+    width: 15px !important;
+    height: 15px !important;
+    color: #777777 !important;
 }
 
-.site-card-metric {
+.vercel-underline-tabs .radar-tab-btn.vercel-tab:hover {
+    color: #ededed !important;
+}
+
+.vercel-underline-tabs .radar-tab-btn.vercel-tab.active {
+    color: #ededed !important;
+    font-weight: 600 !important;
+    border-bottom-color: #ededed !important;
+}
+
+.vercel-underline-tabs .radar-tab-btn.vercel-tab.active svg,
+.vercel-underline-tabs .radar-tab-btn.vercel-tab.active i {
+    color: #ededed !important;
+}
+
+.vercel-subnav-filters {
     display: flex;
-    flex-direction: column;
     align-items: center;
-    text-align: center;
-}
-
-.site-card-metric strong {
-    font-size: 0.84rem;
-    font-weight: 800;
-    color: var(--text-primary);
-    line-height: 1.1;
-}
-
-.site-card-metric small {
-    font-size: 0.62rem;
-    color: var(--text-tertiary);
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
+    gap: 10px;
+    padding: 8px 0;
+    flex-wrap: wrap;
 }
 
 /* Spotlight de la Página Activa dentro de Análisis Semanal / Quincenal / Mensual */
@@ -4643,7 +4989,7 @@ input:focus,
     gap: 16px;
     flex-wrap: wrap;
     padding-bottom: 14px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    border-bottom: 1px solid #222222;
 }
 
 .spotlight-left {
@@ -4653,25 +4999,24 @@ input:focus,
 }
 
 .spotlight-badge-avatar {
-    width: 46px;
-    height: 46px;
-    border-radius: 12px;
-    background: linear-gradient(135deg, rgba(201, 168, 106, 0.22), rgba(255, 106, 0, 0.18));
-    border: 1px solid rgba(201, 168, 106, 0.45);
-    color: var(--gold-primary);
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: #171717;
+    border: 1px solid #333333;
+    color: #ededed;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: 800;
-    font-size: 1rem;
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+    font-weight: 700;
+    font-size: 0.92rem;
 }
 
 .spotlight-titles h3 {
     margin: 0;
-    font-size: 1.15rem;
-    font-weight: 800;
-    color: var(--text-primary);
+    font-size: 1.08rem;
+    font-weight: 700;
+    color: #ededed;
     display: flex;
     align-items: center;
     gap: 10px;
@@ -4681,7 +5026,7 @@ input:focus,
 .spotlight-titles p {
     margin: 3px 0 0 0;
     font-size: 0.78rem;
-    color: var(--text-secondary);
+    color: #888888;
 }
 
 .radar-period-controls-bar {
@@ -4706,5 +5051,5 @@ input:focus,
 }
 
 .radar-dynamic-refresh {
-    animation: radarCardSwitchFade 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+    animation: radarCardSwitchFade 0.28s cubic-bezier(0.16, 1, 0.3, 1);
 }
