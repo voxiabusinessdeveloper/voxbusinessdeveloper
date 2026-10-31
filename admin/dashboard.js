@@ -3113,6 +3113,78 @@ document.addEventListener('DOMContentLoaded', () => {
             localStorage.setItem(LOCAL_SESSIONS_CACHE, JSON.stringify(demoSessions));
             localStorage.setItem(LOCAL_EVENTS_CACHE, JSON.stringify(demoEvents));
         } catch (e) {}
+
+        // Semilla histórica para Análisis Semanal (7d), Quincenal (15d) y Mensual (30d)
+        try {
+            const PERIOD_SEED_KEY = 'vox_telemetry_seed_periods_v1';
+            if (!localStorage.getItem(PERIOD_SEED_KEY)) {
+                const now = Date.now();
+                const DAY_MS = 24 * 3600 * 1000;
+                const currentSessions = JSON.parse(localStorage.getItem(LOCAL_SESSIONS_CACHE) || '[]');
+                const existingIds = new Set(currentSessions.map(s => s.session_id));
+
+                const historicalConfig = [
+                    { dayOffset: 1, site: 'vox_site_official', dom: 'voxbusinessdeveloper.com', ref: 'Instagram', dev: 'mobile', os: 'iOS', dur: 210, scroll: 100, wa: 1, form: true, lead: true, name: 'Valeria Castañeda', mail: 'vcastaneda@luxehomes.mx', url: '/servicios/interiorismo.html' },
+                    { dayOffset: 1, site: 'vox_site_official', dom: 'voxbusinessdeveloper.com', ref: 'Google Search', dev: 'desktop', os: 'Windows', dur: 145, scroll: 75, wa: 1, form: false, lead: false, url: '/servicios/desarrollo.html' },
+                    { dayOffset: 2, site: 'vox_site_official', dom: 'voxbusinessdeveloper.com', ref: 'Facebook', dev: 'mobile', os: 'Android', dur: 98, scroll: 50, wa: 0, form: true, lead: false, url: '/servicios/marketing.html' },
+                    { dayOffset: 3, site: 'vox_site_official', dom: 'voxbusinessdeveloper.com', ref: 'Instagram', dev: 'mobile', os: 'iOS', dur: 240, scroll: 100, wa: 2, form: true, lead: true, name: 'Rodrigo Santillán', mail: 'rsantillan@grupoaltus.com', url: '/servicios/arquitectura.html' },
+                    { dayOffset: 4, site: 'vox_site_9f8a2b3c4d5e6f7a', dom: 'dentalmendoza.com', ref: 'Google Search', dev: 'mobile', os: 'iOS', dur: 175, scroll: 100, wa: 1, form: true, lead: true, name: 'Mariana Téllez', mail: 'mtellez@gmail.com', url: '/#citas' },
+                    { dayOffset: 5, site: 'vox_site_official', dom: 'voxbusinessdeveloper.com', ref: 'Directo', dev: 'desktop', os: 'macOS', dur: 165, scroll: 75, wa: 1, form: false, lead: false, url: '/servicios/juridico.html' },
+                    { dayOffset: 6, site: 'vox_mon_torreaura2026', dom: 'torreaura.mx', ref: 'Instagram', dev: 'mobile', os: 'iOS', dur: 190, scroll: 100, wa: 1, form: true, lead: false, url: '/#preventa' },
+                    { dayOffset: 8, site: 'vox_site_official', dom: 'voxbusinessdeveloper.com', ref: 'Google Search', dev: 'desktop', os: 'Windows', dur: 130, scroll: 75, wa: 0, form: true, lead: false, url: '/servicios/branding.html' },
+                    { dayOffset: 9, site: 'vox_site_official', dom: 'voxbusinessdeveloper.com', ref: 'Instagram', dev: 'mobile', os: 'Android', dur: 205, scroll: 100, wa: 1, form: true, lead: true, name: 'Carlos Ibarra', mail: 'cibarra@constructoraib.mx', url: '/servicios/arquitectura.html' },
+                    { dayOffset: 11, site: 'vox_site_official', dom: 'voxbusinessdeveloper.com', ref: 'LinkedIn', dev: 'desktop', os: 'macOS', dur: 260, scroll: 100, wa: 1, form: true, lead: true, name: 'Fernanda Ríos', mail: 'frios@corporativorios.mx', url: '/servicios/financiero.html' },
+                    { dayOffset: 12, site: 'vox_site_9f8a2b3c4d5e6f7a', dom: 'dentalmendoza.com', ref: 'Facebook', dev: 'mobile', os: 'Android', dur: 115, scroll: 75, wa: 1, form: false, lead: false, url: '/' },
+                    { dayOffset: 13, site: 'vox_site_official', dom: 'voxbusinessdeveloper.com', ref: 'Google Search', dev: 'desktop', os: 'Windows', dur: 88, scroll: 50, wa: 0, form: false, lead: false, url: '/' },
+                    { dayOffset: 14, site: 'vox_mon_torreaura2026', dom: 'torreaura.mx', ref: 'Instagram', dev: 'mobile', os: 'iOS', dur: 225, scroll: 100, wa: 2, form: true, lead: true, name: 'Patricio Elizondo', mail: 'pelizondo@inversiones.mx', url: '/#departamentos' },
+                    { dayOffset: 17, site: 'vox_site_official', dom: 'voxbusinessdeveloper.com', ref: 'Instagram', dev: 'mobile', os: 'iOS', dur: 150, scroll: 75, wa: 1, form: false, lead: false, url: '/servicios/marketing.html' },
+                    { dayOffset: 19, site: 'vox_site_official', dom: 'voxbusinessdeveloper.com', ref: 'Google Search', dev: 'desktop', os: 'Windows', dur: 195, scroll: 100, wa: 1, form: true, lead: true, name: 'Daniela Villarreal', mail: 'dvillarreal@dvstudio.mx', url: '/servicios/branding.html' },
+                    { dayOffset: 22, site: 'vox_site_official', dom: 'voxbusinessdeveloper.com', ref: 'Directo', dev: 'desktop', os: 'macOS', dur: 110, scroll: 50, wa: 0, form: false, lead: false, url: '/servicios/desarrollo.html' },
+                    { dayOffset: 25, site: 'vox_site_9f8a2b3c4d5e6f7a', dom: 'dentalmendoza.com', ref: 'Instagram', dev: 'mobile', os: 'iOS', dur: 140, scroll: 75, wa: 1, form: false, lead: false, url: '/#citas' },
+                    { dayOffset: 28, site: 'vox_site_official', dom: 'voxbusinessdeveloper.com', ref: 'Google Search', dev: 'desktop', os: 'Windows', dur: 175, scroll: 100, wa: 1, form: true, lead: false, url: '/servicios/juridico.html' },
+                    { dayOffset: 34, site: 'vox_site_official', dom: 'voxbusinessdeveloper.com', ref: 'Facebook', dev: 'mobile', os: 'Android', dur: 120, scroll: 50, wa: 1, form: false, lead: false, url: '/' },
+                    { dayOffset: 39, site: 'vox_site_official', dom: 'voxbusinessdeveloper.com', ref: 'Google Search', dev: 'desktop', os: 'Windows', dur: 160, scroll: 75, wa: 0, form: true, lead: true, name: 'Héctor Lozano', mail: 'hlozano@lozanoasoc.com', url: '/servicios/contabilidad.html' }
+                ];
+
+                historicalConfig.forEach((h, idx) => {
+                    const sid = `vsess_hist_period_${idx + 1}`;
+                    if (existingIds.has(sid)) return;
+                    const ts = new Date(now - h.dayOffset * DAY_MS - (idx * 1800 * 1000)).toISOString();
+                    currentSessions.push({
+                        session_id: sid,
+                        visitor_id: `vusr_hist_${idx + 10}`,
+                        site_key: h.site,
+                        dominio: h.dom,
+                        started_at: ts,
+                        last_seen_at: ts,
+                        duration_seconds: h.dur,
+                        max_scroll_pct: h.scroll,
+                        entry_url: '/',
+                        current_url: h.url,
+                        referrer: h.ref,
+                        utm_source: h.ref.toLowerCase().replace(/\s+/g, '_'),
+                        utm_medium: 'organic',
+                        utm_campaign: 'crecimiento_2026',
+                        device_type: h.dev,
+                        os: h.os,
+                        browser: h.os === 'iOS' ? 'Safari' : 'Chrome',
+                        screen_res: h.dev === 'mobile' ? '390x844' : '1920x1080',
+                        language: 'es-MX',
+                        timezone: 'America/Mexico_City',
+                        page_views_count: h.scroll >= 75 ? 3 : 2,
+                        clicks_count: (h.wa || 0) + (h.form ? 3 : 1),
+                        whatsapp_clicks: h.wa,
+                        form_interacted: h.form,
+                        converted_to_lead: h.lead,
+                        lead_nombre: h.name || '',
+                        lead_correo: h.mail || ''
+                    });
+                });
+
+                localStorage.setItem(LOCAL_SESSIONS_CACHE, JSON.stringify(currentSessions));
+                localStorage.setItem(PERIOD_SEED_KEY, '1');
+            }
+        } catch (e) {}
     }
 
     async function fetchRadarData() {
@@ -3228,6 +3300,8 @@ document.addEventListener('DOMContentLoaded', () => {
             list = list.filter(s => (now - new Date(s.last_seen_at || s.started_at).getTime()) <= 24 * 3600 * 1000);
         } else if (state.radar.periodFilter === '7d') {
             list = list.filter(s => (now - new Date(s.last_seen_at || s.started_at).getTime()) <= 7 * 24 * 3600 * 1000);
+        } else if (state.radar.periodFilter === '15d') {
+            list = list.filter(s => (now - new Date(s.last_seen_at || s.started_at).getTime()) <= 15 * 24 * 3600 * 1000);
         } else if (state.radar.periodFilter === '30d') {
             list = list.filter(s => (now - new Date(s.last_seen_at || s.started_at).getTime()) <= 30 * 24 * 3600 * 1000);
         }
@@ -3333,13 +3407,21 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderRadar() {
+        const radarPeriodsTab = document.getElementById('radarPeriodsTab');
         if (state.radar.activeTab === 'heatmap') {
             if (radarSessionsTab) radarSessionsTab.style.display = 'none';
             if (radarHeatmapTab) radarHeatmapTab.style.display = 'grid';
+            if (radarPeriodsTab) radarPeriodsTab.style.display = 'none';
             renderRadarHeatmapAndRankings();
+        } else if (state.radar.activeTab === 'periods') {
+            if (radarSessionsTab) radarSessionsTab.style.display = 'none';
+            if (radarHeatmapTab) radarHeatmapTab.style.display = 'none';
+            if (radarPeriodsTab) radarPeriodsTab.style.display = 'flex';
+            renderRadarPeriodAnalysis();
         } else {
             if (radarSessionsTab) radarSessionsTab.style.display = 'grid';
             if (radarHeatmapTab) radarHeatmapTab.style.display = 'none';
+            if (radarPeriodsTab) radarPeriodsTab.style.display = 'none';
             renderRadarSessionsAndTimeline();
         }
         if (window.lucide) window.lucide.createIcons();
@@ -3780,6 +3862,390 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // =========================================================================
+    // SUB-TAB 3: ANÁLISIS SEMANAL (7d), QUINCENAL (15d) Y MENSUAL (30d)
+    // =========================================================================
+    if (!state.radar.analysisPeriod) {
+        state.radar.analysisPeriod = '15d';
+    }
+
+    function computePeriodStats(sessionsList) {
+        const totalSessions = sessionsList.length;
+        const uniqueVisitors = new Set(sessionsList.map(s => s.visitor_id)).size;
+        const waClicks = sessionsList.reduce((acc, s) => acc + (parseInt(s.whatsapp_clicks || 0, 10)), 0);
+        const formCount = sessionsList.filter(s => s.form_interacted).length;
+        const leadsCount = sessionsList.filter(s => s.converted_to_lead).length;
+        const highScrollCount = sessionsList.filter(s => (parseInt(s.max_scroll_pct || 0, 10)) >= 50).length;
+        const intentSessionsCount = sessionsList.filter(s => (parseInt(s.whatsapp_clicks || 0, 10)) > 0 || s.form_interacted || s.converted_to_lead).length;
+        const avgDuration = totalSessions > 0
+            ? Math.round(sessionsList.reduce((acc, s) => acc + (parseInt(s.duration_seconds || 0, 10)), 0) / totalSessions)
+            : 0;
+        const avgScroll = totalSessions > 0
+            ? Math.round(sessionsList.reduce((acc, s) => acc + (parseInt(s.max_scroll_pct || 0, 10)), 0) / totalSessions)
+            : 0;
+        const convRate = totalSessions > 0 ? Math.round((leadsCount / totalSessions) * 1000) / 10 : 0;
+
+        return {
+            totalSessions,
+            uniqueVisitors,
+            waClicks,
+            formCount,
+            leadsCount,
+            highScrollCount,
+            intentSessionsCount,
+            avgDuration,
+            avgScroll,
+            convRate
+        };
+    }
+
+    function formatDeltaBadge(currVal, prevVal, suffix = '') {
+        if (prevVal === 0 && currVal === 0) {
+            return `<span class="period-delta-pill neutral">= 0% vs. previo</span>`;
+        }
+        if (prevVal === 0 && currVal > 0) {
+            return `<span class="period-delta-pill up">▲ +100%${suffix} vs. previo</span>`;
+        }
+        const diffPct = Math.round(((currVal - prevVal) / prevVal) * 100);
+        if (diffPct > 0) {
+            return `<span class="period-delta-pill up">▲ +${diffPct}%${suffix}</span>`;
+        }
+        if (diffPct < 0) {
+            return `<span class="period-delta-pill down">▼ ${diffPct}%${suffix}</span>`;
+        }
+        return `<span class="period-delta-pill neutral">= Sin cambio</span>`;
+    }
+
+    function getAnalysisWindowConfig(periodCode) {
+        if (periodCode === '7d') {
+            return { days: 7, label: 'Corte Semanal (Últimos 7 Días)', prevLabel: 'Semana Anterior' };
+        }
+        if (periodCode === '30d') {
+            return { days: 30, label: 'Corte Mensual (Últimos 30 Días)', prevLabel: 'Mes Anterior' };
+        }
+        return { days: 15, label: 'Corte Quincenal (Últimos 15 Días)', prevLabel: 'Quincena Anterior' };
+    }
+
+    function renderRadarPeriodAnalysis() {
+        const periodCode = state.radar.analysisPeriod || '15d';
+        const cfg = getAnalysisWindowConfig(periodCode);
+        const now = Date.now();
+        const DAY_MS = 24 * 3600 * 1000;
+        const windowMs = cfg.days * DAY_MS;
+
+        // Sincronizar botones del control segmentado
+        document.querySelectorAll('#radarAnalysisPeriodControl .period-seg-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.getAttribute('data-analysis-period') === periodCode);
+        });
+
+        // Filtrar sesiones por el sitio seleccionado (o todos)
+        const baseSiteSessions = state.radar.siteFilter === 'all'
+            ? state.radar.sesiones
+            : state.radar.sesiones.filter(s => s.site_key === state.radar.siteFilter);
+
+        const currStart = now - windowMs;
+        const prevStart = now - (windowMs * 2);
+
+        const currentSessions = baseSiteSessions.filter(s => {
+            const t = new Date(s.last_seen_at || s.started_at).getTime();
+            return t >= currStart && t <= now;
+        });
+
+        const prevSessions = baseSiteSessions.filter(s => {
+            const t = new Date(s.last_seen_at || s.started_at).getTime();
+            return t >= prevStart && t < currStart;
+        });
+
+        const curr = computePeriodStats(currentSessions);
+        const prev = computePeriodStats(prevSessions);
+
+        // Actualizar cabecera de rango de fechas
+        const rangeBadge = document.getElementById('radarPeriodRangeBadge');
+        const siteSub = document.getElementById('radarPeriodSiteSubtitle');
+        const fmtDate = (ms) => new Date(ms).toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' });
+        if (rangeBadge) {
+            rangeBadge.textContent = `${cfg.label}: ${fmtDate(currStart)} — ${fmtDate(now)}`;
+        }
+        if (siteSub) {
+            const siteName = state.radar.siteFilter === 'all'
+                ? 'Todos los Sitios Conectados'
+                : getSiteDisplayName(state.radar.siteFilter);
+            siteSub.textContent = `Sitio: ${siteName} · Comparado contra ${cfg.prevLabel} (${fmtDate(prevStart)} al ${fmtDate(currStart)})`;
+        }
+
+        // 1. Renderizar las 4 tarjetas comparativas (Periodo Actual vs Periodo Previo)
+        const compareGrid = document.getElementById('radarPeriodCompareGrid');
+        if (compareGrid) {
+            compareGrid.innerHTML = `
+                <div class="glass-panel period-compare-card">
+                    <div class="period-compare-top">
+                        <span class="period-compare-lbl">Tráfico del Periodo</span>
+                        ${formatDeltaBadge(curr.totalSessions, prev.totalSessions)}
+                    </div>
+                    <h4 class="period-compare-val">${curr.totalSessions} <small style="font-size:0.85rem;font-weight:600;color:var(--text-secondary);">sesiones</small></h4>
+                    <div class="period-compare-prev">
+                        <span>${curr.uniqueVisitors} visitantes únicos</span>
+                        <span>${cfg.prevLabel}: <strong>${prev.totalSessions}</strong></span>
+                    </div>
+                </div>
+
+                <div class="glass-panel period-compare-card">
+                    <div class="period-compare-top">
+                        <span class="period-compare-lbl">Clics a WhatsApp</span>
+                        ${formatDeltaBadge(curr.waClicks, prev.waClicks)}
+                    </div>
+                    <h4 class="period-compare-val" style="color:#25D366;">${curr.waClicks} <small style="font-size:0.85rem;font-weight:600;color:var(--text-secondary);">contactos</small></h4>
+                    <div class="period-compare-prev">
+                        <span>${curr.formCount} tocaron formulario</span>
+                        <span>${cfg.prevLabel}: <strong>${prev.waClicks}</strong></span>
+                    </div>
+                </div>
+
+                <div class="glass-panel period-compare-card">
+                    <div class="period-compare-top">
+                        <span class="period-compare-lbl">Leads Convertidos</span>
+                        ${formatDeltaBadge(curr.leadsCount, prev.leadsCount)}
+                    </div>
+                    <h4 class="period-compare-val" style="color:var(--gold-primary);">${curr.leadsCount} <small style="font-size:0.85rem;font-weight:600;color:var(--text-secondary);">(${curr.convRate}% conv.)</small></h4>
+                    <div class="period-compare-prev">
+                        <span>Tasa previa: ${prev.convRate}%</span>
+                        <span>${cfg.prevLabel}: <strong>${prev.leadsCount}</strong></span>
+                    </div>
+                </div>
+
+                <div class="glass-panel period-compare-card">
+                    <div class="period-compare-top">
+                        <span class="period-compare-lbl">Retención & Lectura</span>
+                        ${formatDeltaBadge(curr.avgDuration, prev.avgDuration)}
+                    </div>
+                    <h4 class="period-compare-val">${formatDuration(curr.avgDuration)} <small style="font-size:0.85rem;font-weight:600;color:#bc8cff;">(${curr.avgScroll}% scroll)</small></h4>
+                    <div class="period-compare-prev">
+                        <span>Scroll previo: ${prev.avgScroll}%</span>
+                        <span>${cfg.prevLabel}: <strong>${formatDuration(prev.avgDuration)}</strong></span>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 2. Renderizar Gráfica de Evolución Diaria
+        const dailyStage = document.getElementById('radarDailyChartStage');
+        const dailySubtitle = document.getElementById('radarDailyChartSubtitle');
+        if (dailySubtitle) {
+            dailySubtitle.textContent = `Desglose día por día de los últimos ${cfg.days} días (${curr.totalSessions} sesiones en total)`;
+        }
+        if (dailyStage) {
+            const buckets = [];
+            for (let i = cfg.days - 1; i >= 0; i--) {
+                const dayStart = new Date(now - i * DAY_MS);
+                dayStart.setHours(0, 0, 0, 0);
+                const dayEnd = new Date(dayStart.getTime() + DAY_MS - 1);
+                const label = dayStart.toLocaleDateString('es-MX', { day: '2-digit', month: 'short' });
+
+                const daySessions = currentSessions.filter(s => {
+                    const t = new Date(s.last_seen_at || s.started_at).getTime();
+                    return t >= dayStart.getTime() && t <= dayEnd.getTime();
+                });
+                const sCount = daySessions.length;
+                const iCount = daySessions.filter(s => (s.whatsapp_clicks || 0) > 0 || s.converted_to_lead || s.form_interacted).length;
+                buckets.push({ label, sCount, iCount });
+            }
+
+            const maxDayVal = Math.max(4, ...buckets.map(b => Math.max(b.sCount, b.iCount)));
+            dailyStage.innerHTML = buckets.map(b => {
+                const sHeight = Math.max(4, Math.round((b.sCount / maxDayVal) * 180));
+                const iHeight = b.iCount > 0 ? Math.max(4, Math.round((b.iCount / maxDayVal) * 180)) : 2;
+                return `
+                    <div class="daily-bar-col" title="${b.label}: ${b.sCount} sesiones · ${b.iCount} señales de intención/leads">
+                        <span class="daily-bar-val-top">${b.sCount > 0 ? b.sCount : ''}</span>
+                        <div class="daily-bar-pair">
+                            <div class="daily-bar-visitors" style="height:${sHeight}px;"></div>
+                            <div class="daily-bar-intent" style="height:${iHeight}px;"></div>
+                        </div>
+                        <span class="daily-bar-lbl">${escapeHtml(b.label)}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 3. Renderizar Embudo de Conversión de 4 Etapas
+        const funnelContainer = document.getElementById('radarFunnelContainer');
+        const funnelRateBadge = document.getElementById('radarFunnelRateBadge');
+        if (funnelRateBadge) {
+            funnelRateBadge.textContent = `${curr.convRate}% Conversión a Lead`;
+        }
+        if (funnelContainer) {
+            const base = Math.max(1, curr.totalSessions);
+            const pctScroll = Math.round((curr.highScrollCount / base) * 100);
+            const pctIntent = Math.round((curr.intentSessionsCount / base) * 100);
+            const pctLead = Math.round((curr.leadsCount / base) * 100);
+
+            funnelContainer.innerHTML = `
+                <div class="funnel-step-row">
+                    <div class="funnel-step-top">
+                        <span class="funnel-step-name">1. Sesiones Totales del Periodo</span>
+                        <span class="funnel-step-stats"><strong>${curr.totalSessions}</strong> (100%)</span>
+                    </div>
+                    <div class="funnel-track">
+                        <div class="funnel-fill" style="width:100%; background:linear-gradient(90deg, #388bfd, #58a6ff);"></div>
+                    </div>
+                </div>
+
+                <div class="funnel-step-row">
+                    <div class="funnel-step-top">
+                        <span class="funnel-step-name">2. Lectura Activa (Scroll ≥ 50%)</span>
+                        <span class="funnel-step-stats"><strong>${curr.highScrollCount}</strong> (${pctScroll}%)</span>
+                    </div>
+                    <div class="funnel-track">
+                        <div class="funnel-fill" style="width:${Math.max(6, pctScroll)}%; background:linear-gradient(90deg, #a371f7, #bc8cff);"></div>
+                    </div>
+                </div>
+
+                <div class="funnel-step-row">
+                    <div class="funnel-step-top">
+                        <span class="funnel-step-name">3. Intención Comercial (WhatsApp / Formulario)</span>
+                        <span class="funnel-step-stats"><strong>${curr.intentSessionsCount}</strong> (${pctIntent}%)</span>
+                    </div>
+                    <div class="funnel-track">
+                        <div class="funnel-fill" style="width:${Math.max(6, pctIntent)}%; background:linear-gradient(90deg, #2ecc71, #25D366);"></div>
+                    </div>
+                </div>
+
+                <div class="funnel-step-row">
+                    <div class="funnel-step-top">
+                        <span class="funnel-step-name">4. Prospectos Convertidos (Leads en CRM)</span>
+                        <span class="funnel-step-stats"><strong>${curr.leadsCount}</strong> (${pctLead}%)</span>
+                    </div>
+                    <div class="funnel-track">
+                        <div class="funnel-fill" style="width:${Math.max(6, pctLead)}%; background:linear-gradient(90deg, var(--gold-primary), #ff6a00);"></div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 4. Tabla de Canales de Adquisición y Dispositivos del Periodo
+        const channelsBody = document.getElementById('radarPeriodChannelsBody');
+        const channelMap = {};
+        currentSessions.forEach(s => {
+            const ch = s.referrer || 'Directo';
+            if (!channelMap[ch]) {
+                channelMap[ch] = { count: 0, scrollSum: 0, wa: 0, leads: 0 };
+            }
+            channelMap[ch].count += 1;
+            channelMap[ch].scrollSum += parseInt(s.max_scroll_pct || 0, 10);
+            channelMap[ch].wa += parseInt(s.whatsapp_clicks || 0, 10);
+            if (s.converted_to_lead) channelMap[ch].leads += 1;
+        });
+
+        const sortedChannels = Object.entries(channelMap).sort((a, b) => b[1].count - a[1].count);
+        if (channelsBody) {
+            if (sortedChannels.length === 0) {
+                channelsBody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:var(--text-tertiary);">Sin sesiones en este corte temporal</td></tr>`;
+            } else {
+                const maxChCount = sortedChannels[0][1].count || 1;
+                channelsBody.innerHTML = sortedChannels.map(([chName, data]) => {
+                    const avgChScroll = Math.round(data.scrollSum / data.count);
+                    const barW = Math.round((data.count / maxChCount) * 100);
+                    return `
+                        <tr>
+                            <td>
+                                <strong>${escapeHtml(chName)}</strong>
+                                <div class="ranking-mini-bar"><div class="ranking-mini-bar-fill" style="width:${barW}%;"></div></div>
+                            </td>
+                            <td><strong>${data.count}</strong></td>
+                            <td>${avgChScroll}%</td>
+                            <td>
+                                <span class="badge badge-accent">${data.wa} WA · ${data.leads} Leads</span>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+        }
+
+        // 5. Diagnóstico Ejecutivo Automático & Borrador listo para Gmail
+        const insightsBody = document.getElementById('radarPeriodInsightsBody');
+        const topChannel = sortedChannels.length > 0 ? sortedChannels[0][0] : 'Directo';
+        const topChannelCount = sortedChannels.length > 0 ? sortedChannels[0][1].count : 0;
+        const mobileCount = currentSessions.filter(s => s.device_type === 'mobile').length;
+        const mobilePct = curr.totalSessions > 0 ? Math.round((mobileCount / curr.totalSessions) * 100) : 0;
+        const siteLabel = state.radar.siteFilter === 'all'
+            ? 'Todos los Sitios Conectados'
+            : getSiteDisplayName(state.radar.siteFilter);
+
+        const emailDraft = [
+            `ASUNTO: Reporte ${cfg.label} — ${siteLabel}`,
+            `PERIODO: ${fmtDate(currStart)} al ${fmtDate(now)}`,
+            `--------------------------------------------------`,
+            `• Sesiones Totales: ${curr.totalSessions} (${curr.uniqueVisitors} visitantes únicos | Previo: ${prev.totalSessions})`,
+            `• Clics a WhatsApp Directo: ${curr.waClicks} (Previo: ${prev.waClicks})`,
+            `• Leads Convertidos en CRM: ${curr.leadsCount} (Tasa de conversión: ${curr.convRate}%)`,
+            `• Retención Media: ${formatDuration(curr.avgDuration)} por visita | Profundidad de lectura: ${curr.avgScroll}%`,
+            `• Principal Canal de Tráfico: ${topChannel} (${topChannelCount} sesiones) | Tráfico Móvil: ${mobilePct}%`
+        ].join('\n');
+
+        state.radar.lastExecutiveDraft = emailDraft;
+
+        if (insightsBody) {
+            insightsBody.innerHTML = `
+                <div class="insight-bullet-card">
+                    📈 <strong>Rendimiento vs. ${escapeHtml(cfg.prevLabel)}:</strong> Se registraron <strong>${curr.totalSessions} sesiones</strong> frente a ${prev.totalSessions} del periodo anterior, logrando <strong>${curr.waClicks} clics a WhatsApp</strong> y <strong>${curr.leadsCount} conversiones a Lead</strong> (${curr.convRate}%).
+                </div>
+                <div class="insight-bullet-card">
+                    🎯 <strong>Canal Ganador & Dispositivos:</strong> La fuente principal en este corte fue <strong>${escapeHtml(topChannel)}</strong> (${topChannelCount} visitas). El <strong>${mobilePct}%</strong> de los usuarios navegó desde teléfono móvil con una lectura promedio del <strong>${curr.avgScroll}%</strong>.
+                </div>
+                <div class="email-draft-preview-box" id="radarExecutiveEmailDraftBox">${escapeHtml(emailDraft)}</div>
+            `;
+        }
+    }
+
+    function exportRadarPeriodCsv() {
+        const periodCode = state.radar.analysisPeriod || '15d';
+        const cfg = getAnalysisWindowConfig(periodCode);
+        const now = Date.now();
+        const currStart = now - cfg.days * 24 * 3600 * 1000;
+
+        const baseSiteSessions = state.radar.siteFilter === 'all'
+            ? state.radar.sesiones
+            : state.radar.sesiones.filter(s => s.site_key === state.radar.siteFilter);
+
+        const rows = baseSiteSessions.filter(s => {
+            const t = new Date(s.last_seen_at || s.started_at).getTime();
+            return t >= currStart && t <= now;
+        });
+
+        const headers = ['Fecha', 'Sitio', 'Visitante_o_Lead', 'Correo', 'Origen', 'Dispositivo', 'SO', 'Duracion_Seg', 'Scroll_Pct', 'Clics_WhatsApp', 'Formulario', 'Convertido_Lead'];
+        const csvLines = [headers.join(',')];
+
+        rows.forEach(s => {
+            const line = [
+                `"${new Date(s.last_seen_at || s.started_at).toLocaleString('es-MX')}"`,
+                `"${(s.dominio || s.site_key || '').replace(/"/g, '""')}"`,
+                `"${(s.lead_nombre || s.visitor_id || '').replace(/"/g, '""')}"`,
+                `"${(s.lead_correo || '').replace(/"/g, '""')}"`,
+                `"${(s.referrer || 'Directo').replace(/"/g, '""')}"`,
+                `"${s.device_type || 'desktop'}"`,
+                `"${s.os || 'Web'}"`,
+                s.duration_seconds || 0,
+                s.max_scroll_pct || 0,
+                s.whatsapp_clicks || 0,
+                s.form_interacted ? 'SI' : 'NO',
+                s.converted_to_lead ? 'SI' : 'NO'
+            ];
+            csvLines.push(line.join(','));
+        });
+
+        const blob = new Blob(['\uFEFF' + csvLines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `VOX_Radar_Reporte_${periodCode}_${new Date().toISOString().slice(0, 10)}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showToast(`Reporte ${cfg.label} descargado en formato CSV / Excel.`, 'success', 'Reporte Exportado');
+    }
+
     // Eventos de controles del Radar
     if (radarSiteSelect) {
         radarSiteSelect.addEventListener('change', (e) => {
@@ -3791,6 +4257,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (radarPeriodSelect) {
         radarPeriodSelect.addEventListener('change', (e) => {
             state.radar.periodFilter = e.target.value;
+            if (['7d', '15d', '30d'].includes(e.target.value)) {
+                state.radar.analysisPeriod = e.target.value;
+            }
             applyRadarFilters();
         });
     }
@@ -3824,14 +4293,46 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    [btnRadarTabSessions, btnRadarTabHeatmap].forEach(btn => {
+    const btnRadarTabPeriods = document.getElementById('btnRadarTabPeriods');
+    [btnRadarTabSessions, btnRadarTabHeatmap, btnRadarTabPeriods].forEach(btn => {
         if (!btn) return;
         btn.addEventListener('click', () => {
-            [btnRadarTabSessions, btnRadarTabHeatmap].forEach(b => b?.classList.remove('active'));
+            [btnRadarTabSessions, btnRadarTabHeatmap, btnRadarTabPeriods].forEach(b => b?.classList.remove('active'));
             btn.classList.add('active');
             state.radar.activeTab = btn.getAttribute('data-radar-tab') || 'sessions';
             renderRadar();
         });
+    });
+
+    document.querySelectorAll('#radarAnalysisPeriodControl .period-seg-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const pVal = btn.getAttribute('data-analysis-period') || '15d';
+            state.radar.analysisPeriod = pVal;
+            state.radar.periodFilter = pVal;
+            if (radarPeriodSelect) radarPeriodSelect.value = pVal;
+            applyRadarFilters();
+        });
+    });
+
+    document.getElementById('btnExportRadarPeriodCsv')?.addEventListener('click', exportRadarPeriodCsv);
+
+    document.getElementById('btnPrintRadarPeriodReport')?.addEventListener('click', () => {
+        window.print();
+    });
+
+    document.getElementById('btnCopyExecutiveReportText')?.addEventListener('click', () => {
+        if (state.radar.lastExecutiveDraft) {
+            navigator.clipboard.writeText(state.radar.lastExecutiveDraft).then(() => {
+                showToast('Borrador ejecutivo copiado al portapapeles.', 'success', 'Resumen Copiado');
+            });
+        }
+    });
+
+    document.getElementById('btnPreviewGmailReport')?.addEventListener('click', () => {
+        if (state.radar.lastExecutiveDraft) {
+            navigator.clipboard.writeText(state.radar.lastExecutiveDraft).catch(() => {});
+        }
+        showToast('Resumen ejecutivo generado y copiado. Listo para conectar con envío automático por Gmail en el siguiente paso.', 'info', 'Preparado para Gmail');
     });
 
     if (heatmapPageSelect) {
