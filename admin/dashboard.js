@@ -796,6 +796,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if (creditosViewContainer) creditosViewContainer.style.display = 'none';
         if (radarViewContainer) radarViewContainer.style.display = 'none';
 
+        const leadsKpiGrid = document.getElementById('leadsKpiGrid');
+        const leadsFilterBar = document.getElementById('leadsFilterBar');
+        if (leadsKpiGrid) {
+            leadsKpiGrid.style.display = (viewName === 'radar' || viewName === 'creditos') ? 'none' : '';
+        }
+        if (leadsFilterBar) {
+            leadsFilterBar.style.display = (viewName === 'radar') ? 'none' : '';
+        }
+
         if (viewName === 'pipeline') {
             if (btnViewKanban) btnViewKanban.classList.add('active');
             document.querySelector('.sidebar-nav .nav-item[data-view="pipeline"]')?.classList.add('active');
@@ -3234,9 +3243,10 @@ document.addEventListener('DOMContentLoaded', () => {
             list = list.filter(s => s.form_interacted);
         }
 
-        // 4. Filtro por caja de búsqueda superior
-        if (state.searchTerm) {
-            const term = state.searchTerm.toLowerCase();
+        // 4. Filtro por caja de búsqueda del Radar o superior
+        const activeRadarTerm = (state.radar.searchQuery || state.searchTerm || '').trim().toLowerCase();
+        if (activeRadarTerm) {
+            const term = activeRadarTerm;
             list = list.filter(s =>
                 (s.lead_nombre && s.lead_nombre.toLowerCase().includes(term)) ||
                 (s.lead_correo && s.lead_correo.toLowerCase().includes(term)) ||
@@ -3301,6 +3311,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (elIntentSub) elIntentSub.textContent = `${totalWaClicks} WhatsApp · ${totalForm} Form · ${totalConverted} Leads`;
         if (elEngagement) elEngagement.textContent = formatDuration(avgDuration);
         if (elScrollSub) elScrollSub.textContent = `${avgScroll}% profundidad media de scroll`;
+        const elScrollBarFill = document.getElementById('kpiRadarScrollBarFill');
+        if (elScrollBarFill) elScrollBarFill.style.width = `${Math.min(100, Math.max(8, avgScroll))}%`;
     }
 
     function formatDuration(seconds) {
@@ -3361,6 +3373,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 ? `${sess.lead_nombre}`
                 : `Visitante #${shortVid}`;
 
+            const avatarInitials = sess.lead_nombre
+                ? sess.lead_nombre.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
+                : shortVid.slice(0, 2);
+            const avatarClass = sess.converted_to_lead ? 'is-lead' : (online ? 'is-online' : '');
+            const scrollPct = Math.min(100, Math.max(0, parseInt(sess.max_scroll_pct || 0, 10)));
+
             const deviceIcon = sess.device_type === 'mobile' ? 'smartphone' : (sess.device_type === 'tablet' ? 'tablet' : 'monitor');
             const card = document.createElement('div');
             card.className = `radar-session-card ${isSelected ? 'active' : ''}`;
@@ -3368,22 +3386,36 @@ document.addEventListener('DOMContentLoaded', () => {
             card.innerHTML = `
                 <div class="radar-session-top">
                     <div class="radar-visitor-identity">
-                        <span class="${online ? 'status-dot-live' : 'status-dot-offline'}" title="${online ? 'Conectado ahora' : 'Sesión finalizada'}"></span>
-                        <span>${escapeHtml(displayName)}</span>
+                        <div class="visitor-avatar-badge ${avatarClass}">${escapeHtml(avatarInitials)}</div>
+                        <div class="visitor-name-stack">
+                            <span class="visitor-name-main">
+                                <span class="${online ? 'status-dot-live' : 'status-dot-offline'}" title="${online ? 'Conectado ahora' : 'Sesión finalizada'}"></span>
+                                ${escapeHtml(displayName)}
+                            </span>
+                            <span class="visitor-sub-domain">${escapeHtml(sess.dominio || getSiteDisplayName(sess.site_key))} · ${escapeHtml(sess.current_url || sess.entry_url || '/')}</span>
+                        </div>
                     </div>
-                    <span class="radar-session-time">${formatRelativeTime(sess.last_seen_at)}</span>
+                    <span class="radar-session-time ${online ? 'online-now' : ''}">${formatRelativeTime(sess.last_seen_at)}</span>
                 </div>
 
                 <div class="radar-session-meta">
                     <span class="radar-meta-pill"><i data-lucide="${deviceIcon}" style="width:12px;height:12px;"></i> ${escapeHtml(sess.os || sess.device_type || 'Web')}</span>
                     <span class="radar-meta-pill"><i data-lucide="compass" style="width:12px;height:12px;"></i> ${escapeHtml(sess.referrer || 'Directo')}</span>
                     <span class="radar-meta-pill"><i data-lucide="clock" style="width:12px;height:12px;"></i> ${formatDuration(sess.duration_seconds)}</span>
-                    <span class="radar-meta-pill"><i data-lucide="arrow-down-circle" style="width:12px;height:12px;"></i> ${sess.max_scroll_pct || 0}%</span>
+                    <span class="radar-meta-pill"><i data-lucide="layers" style="width:12px;height:12px;"></i> ${sess.page_views_count || 1} pág.</span>
+                </div>
+
+                <div class="session-scroll-strip">
+                    <span class="session-scroll-lbl">Scroll</span>
+                    <div class="session-scroll-track">
+                        <div class="session-scroll-fill" style="width: ${scrollPct}%;"></div>
+                    </div>
+                    <span class="session-scroll-pct">${scrollPct}%</span>
                 </div>
 
                 <div class="radar-session-badges">
                     <span class="radar-mini-tag tag-site">${escapeHtml(sess.dominio || getSiteDisplayName(sess.site_key))}</span>
-                    ${sess.converted_to_lead ? `<span class="radar-mini-tag tag-lead">🔥 Lead CRM</span>` : ''}
+                    ${sess.converted_to_lead ? `<span class="radar-mini-tag tag-lead">🔥 Lead Convertido</span>` : ''}
                     ${(sess.whatsapp_clicks || 0) > 0 ? `<span class="radar-mini-tag tag-wa">💬 WhatsApp (${sess.whatsapp_clicks})</span>` : ''}
                     ${sess.form_interacted && !sess.converted_to_lead ? `<span class="radar-mini-tag tag-form">📝 Tocó Formulario</span>` : ''}
                 </div>
@@ -3497,14 +3529,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Filtrar los eventos cronológicos de esta sesión
         const sessionEvents = state.radar.eventos.filter(ev => ev.session_id === sess.session_id);
+        const eventsCountBadge = document.getElementById('radarEventsCountBadge');
+        if (eventsCountBadge) {
+            eventsCountBadge.textContent = `${ Math.max(1, sessionEvents.length) } evento${ sessionEvents.length === 1 ? '' : 's' }`;
+        }
 
         if (sessionEvents.length === 0) {
             radarVisitorTimelineBody.innerHTML = `
                 <div class="vox-journey-timeline">
                     <div class="journey-step">
-                        <span class="journey-step-dot"></span>
+                        <span class="journey-step-icon-node" style="color:#58a6ff; border-color:#58a6ff;">
+                            <i data-lucide="eye" style="width:14px;height:14px;"></i>
+                        </span>
                         <div class="journey-step-top">
-                            <span class="journey-step-type"><i data-lucide="eye" style="width:13px;height:13px;"></i> Entrada al Sitio</span>
+                            <span class="journey-step-type" style="color:#58a6ff;"><i data-lucide="eye" style="width:13px;height:13px;"></i> Entrada al Sitio</span>
                             <span class="journey-step-time">${new Date(sess.started_at).toLocaleTimeString('es-MX')}</span>
                         </div>
                         <div class="journey-step-desc">Ingresó a <strong>${escapeHtml(sess.entry_url || '/')}</strong> desde ${escapeHtml(sess.referrer || 'Directo')}</div>
@@ -3524,7 +3562,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
             timelineHtml += `
                 <div class="journey-step step-${escapeHtml(ev.event_type)}">
-                    <span class="journey-step-dot"></span>
+                    <span class="journey-step-icon-node" style="color:${meta.color}; border-color:${meta.color};">
+                        <i data-lucide="${meta.icon}" style="width:14px;height:14px;"></i>
+                    </span>
                     <div class="journey-step-top">
                         <span class="journey-step-type" style="color:${meta.color};">
                             <i data-lucide="${meta.icon}" style="width:13px;height:13px;"></i>
@@ -3569,6 +3609,18 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
+        // Actualizar barra de URL del mockup navegador
+        const urlDisplay = document.getElementById('heatmapBrowserUrlDisplay');
+        if (urlDisplay) {
+            const siteLabel = (!state.radar.siteFilter || state.radar.siteFilter === 'all')
+                ? 'voxbusinessdeveloper.com'
+                : getSiteDisplayName(state.radar.siteFilter);
+            const pathLabel = (!state.radar.heatmapPage || state.radar.heatmapPage === 'all')
+                ? '/* (Todas las rutas)'
+                : state.radar.heatmapPage;
+            urlDisplay.textContent = `https://${siteLabel}${pathLabel}`;
+        }
+
         // Filtrar clics con coordenadas para el lienzo (X%, Y%)
         const clickEvents = siteEvents.filter(ev => {
             if (typeof ev.click_x_pct !== 'number' && isNaN(parseFloat(ev.click_x_pct))) return false;
@@ -3579,6 +3631,11 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             return true;
         });
+
+        const pointsBadge = document.getElementById('heatmapPointsCountBadge');
+        if (pointsBadge) {
+            pointsBadge.textContent = `${clickEvents.length} clic${clickEvents.length === 1 ? '' : 's'} mapeado${clickEvents.length === 1 ? '' : 's'}`;
+        }
 
         if (heatmapDotsContainer) {
             heatmapDotsContainer.innerHTML = '';
@@ -3620,8 +3677,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     const pct = Math.round((count / totalViews) * 100);
                     return `
                         <tr>
-                            <td><strong>${escapeHtml(pathName)}</strong></td>
-                            <td>${count}</td>
+                            <td>
+                                <strong>${escapeHtml(pathName)}</strong>
+                                <div class="ranking-mini-bar"><div class="ranking-mini-bar-fill" style="width:${pct}%;"></div></div>
+                            </td>
+                            <td><strong>${count}</strong></td>
                             <td><span class="badge badge-accent">${pct}%</span></td>
                         </tr>
                     `;
@@ -3641,15 +3701,20 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             const sortedEls = Object.entries(elCounts).sort((a, b) => b[1] - a[1]).slice(0, 8);
+            const maxElCount = sortedEls.length > 0 ? sortedEls[0][1] : 1;
             if (sortedEls.length === 0) {
                 radarTopElementsBody.innerHTML = `<tr><td colspan="3" style="text-align:center;color:var(--text-tertiary);">Sin clics registrados aún</td></tr>`;
             } else {
                 radarTopElementsBody.innerHTML = sortedEls.map(([composite, count]) => {
                     const [label, type] = composite.split('|||');
                     const badgeLabel = type === 'cta_whatsapp' ? 'WhatsApp' : (type === 'form_submit' ? 'Lead Form' : 'Clic');
+                    const barPct = Math.round((count / maxElCount) * 100);
                     return `
                         <tr>
-                            <td>${escapeHtml(label)}</td>
+                            <td>
+                                <span>${escapeHtml(label)}</span>
+                                <div class="ranking-mini-bar"><div class="ranking-mini-bar-fill" style="width:${barPct}%;"></div></div>
+                            </td>
                             <td><span class="badge">${badgeLabel}</span></td>
                             <td><strong>${count}</strong></td>
                         </tr>
@@ -3733,6 +3798,28 @@ document.addEventListener('DOMContentLoaded', () => {
     if (radarVisitorFilterSelect) {
         radarVisitorFilterSelect.addEventListener('change', (e) => {
             state.radar.visitorFilter = e.target.value;
+            document.querySelectorAll('#radarVisitorPills .radar-pill').forEach(pill => {
+                pill.classList.toggle('active', pill.getAttribute('data-visitor-filter') === state.radar.visitorFilter);
+            });
+            applyRadarFilters();
+        });
+    }
+
+    document.querySelectorAll('#radarVisitorPills .radar-pill').forEach(pill => {
+        pill.addEventListener('click', () => {
+            const val = pill.getAttribute('data-visitor-filter') || 'all';
+            state.radar.visitorFilter = val;
+            if (radarVisitorFilterSelect) radarVisitorFilterSelect.value = val;
+            document.querySelectorAll('#radarVisitorPills .radar-pill').forEach(p => p.classList.remove('active'));
+            pill.classList.add('active');
+            applyRadarFilters();
+        });
+    });
+
+    const radarSearchInput = document.getElementById('radarSearchInput');
+    if (radarSearchInput) {
+        radarSearchInput.addEventListener('input', (e) => {
+            state.radar.searchQuery = e.target.value;
             applyRadarFilters();
         });
     }

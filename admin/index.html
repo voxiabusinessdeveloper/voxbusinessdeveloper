@@ -215,8 +215,8 @@
                 </div>
             </header>
 
-            <!-- METRIC CARDS / KPIS -->
-            <section class="kpi-grid">
+            <!-- METRIC CARDS / KPIS (Solo Vistas de Leads) -->
+            <section class="kpi-grid" id="leadsKpiGrid">
                 <div class="kpi-card glass-panel">
                     <div class="kpi-icon gold">
                         <i data-lucide="users"></i>
@@ -259,7 +259,7 @@
             </section>
 
             <!-- FILTERS & SEARCH (Solo Search-Box) -->
-            <section class="filter-bar glass-panel">
+            <section class="filter-bar glass-panel" id="leadsFilterBar">
                 <div class="search-box">
                     <i data-lucide="search"></i>
                     <input type="text" id="searchInput"
@@ -470,125 +470,209 @@
             </section>
 
             <!-- ========================================== -->
-            <!-- VISTA 5: RADAR & TRÁFICO WEB MULTI-SITIO -->
+            <!-- VISTA 5: RADAR & TRÁFICO WEB MULTI-SITIO (PREMIUM REDESIGN) -->
             <!-- ========================================== -->
             <section class="radar-view" id="radarViewContainer" style="display: none;">
 
-                <!-- Barra de Control Multi-Sitio y Filtros de Telemetría -->
-                <div class="radar-toolbar glass-panel">
-                    <div class="radar-toolbar-filters">
-                        <div class="radar-filter-group">
-                            <label for="radarSiteSelect"><i data-lucide="globe"></i> Sitio Monitoreado</label>
-                            <select id="radarSiteSelect" class="select-control">
-                                <option value="all">🌐 Todos los Sitios Conectados</option>
-                                <option value="vox_site_official">⚡ VOX Business Developer (Sitio Oficial)</option>
-                            </select>
+                <!-- Command Center Header: Selector de Sitio, Buscador y Acciones -->
+                <div class="radar-command-bar glass-panel">
+                    <div class="radar-command-top">
+                        <div class="radar-brand-status">
+                            <div class="radar-live-orb">
+                                <span class="online-pulse-dot"></span>
+                            </div>
+                            <div>
+                                <div class="radar-overline-row">
+                                    <span class="radar-overline">TELEMETRÍA MULTI-SITIO EN TIEMPO REAL</span>
+                                    <span class="radar-live-tag">VOX RADAR v2.0</span>
+                                </div>
+                                <h2 class="radar-command-title">Monitor de Comportamiento y Movimientos de Usuarios</h2>
+                            </div>
                         </div>
 
-                        <div class="radar-filter-group">
-                            <label for="radarPeriodSelect"><i data-lucide="calendar"></i> Periodo</label>
-                            <select id="radarPeriodSelect" class="select-control">
-                                <option value="all">Todo el Historial</option>
-                                <option value="today">Hoy (Últimas 24h)</option>
-                                <option value="7d">Últimos 7 días</option>
-                                <option value="30d">Últimos 30 días</option>
-                            </select>
-                        </div>
+                        <div class="radar-command-actions">
+                            <div class="radar-site-selector-wrap">
+                                <i data-lucide="globe" class="site-select-icon"></i>
+                                <select id="radarSiteSelect" class="select-control radar-site-select"
+                                    aria-label="Seleccionar sitio monitoreado">
+                                    <option value="all">🌐 Todos los Sitios Conectados</option>
+                                    <option value="vox_site_official">⚡ VOX Business Developer (Sitio Oficial)</option>
+                                </select>
+                            </div>
 
-                        <div class="radar-filter-group">
-                            <label for="radarVisitorFilterSelect"><i data-lucide="filter"></i> Filtrar Visitantes</label>
-                            <select id="radarVisitorFilterSelect" class="select-control">
-                                <option value="all">Todos los Visitantes</option>
-                                <option value="online">🟢 Conectados Ahora (En Vivo)</option>
-                                <option value="lead">🔥 Convertidos en Lead (CRM)</option>
-                                <option value="whatsapp">💬 Tocaron WhatsApp / Contacto</option>
-                                <option value="form">📝 Interactuaron con Formulario</option>
-                            </select>
+                            <button type="button" class="btn btn-outline btn-sm" id="btnRadarViewScript"
+                                title="Obtener el código <script> del sitio seleccionado">
+                                <i data-lucide="code-2"></i>
+                                <span>Código Script</span>
+                            </button>
+                            <button type="button" class="btn btn-primary btn-sm" id="btnOpenNuevoSitioMonitoreoModal">
+                                <i data-lucide="plus-circle"></i>
+                                <span>Conectar Sitio Externo</span>
+                            </button>
                         </div>
                     </div>
 
-                    <div class="radar-toolbar-actions">
-                        <button type="button" class="btn btn-outline btn-sm" id="btnRadarViewScript" title="Obtener el código <script> del sitio seleccionado">
-                            <i data-lucide="code"></i>
-                            <span>Código Script</span>
-                        </button>
-                        <button type="button" class="btn btn-primary btn-sm" id="btnOpenNuevoSitioMonitoreoModal">
-                            <i data-lucide="plus-circle"></i>
-                            <span>Agregar Sitio Externo</span>
-                        </button>
+                    <div class="radar-command-bottom">
+                        <!-- Filtros Rápidos tipo Pill para Segmentos de Visitantes -->
+                        <div class="radar-visitor-pills" id="radarVisitorPills">
+                            <button type="button" class="radar-pill active" data-visitor-filter="all">
+                                <i data-lucide="layers"></i>
+                                <span>Todos</span>
+                            </button>
+                            <button type="button" class="radar-pill pill-online" data-visitor-filter="online">
+                                <span class="mini-live-dot"></span>
+                                <span>Online Ahora</span>
+                            </button>
+                            <button type="button" class="radar-pill pill-lead" data-visitor-filter="lead">
+                                <i data-lucide="flame"></i>
+                                <span>Convertidos en Lead</span>
+                            </button>
+                            <button type="button" class="radar-pill pill-wa" data-visitor-filter="whatsapp">
+                                <i data-lucide="message-circle"></i>
+                                <span>Tocaron WhatsApp</span>
+                            </button>
+                            <button type="button" class="radar-pill pill-form" data-visitor-filter="form">
+                                <i data-lucide="file-text"></i>
+                                <span>Interactuaron con Form</span>
+                            </button>
+                        </div>
+
+                        <!-- Buscador Interno + Selector de Periodo -->
+                        <div class="radar-secondary-filters">
+                            <div class="radar-search-mini">
+                                <i data-lucide="search"></i>
+                                <input type="text" id="radarSearchInput"
+                                    placeholder="Buscar visitante, origen, página o dispositivo..." />
+                            </div>
+
+                            <select id="radarPeriodSelect" class="select-control sm radar-period-select"
+                                aria-label="Filtrar por periodo">
+                                <option value="all">📅 Todo el Historial</option>
+                                <option value="today">⏱️ Hoy (Últimas 24h)</option>
+                                <option value="7d">📆 Últimos 7 días</option>
+                                <option value="30d">🗓️ Últimos 30 días</option>
+                            </select>
+
+                            <!-- Select oculto sincronizado por compatibilidad -->
+                            <select id="radarVisitorFilterSelect" style="display: none;">
+                                <option value="all">Todos</option>
+                                <option value="online">Online</option>
+                                <option value="lead">Lead</option>
+                                <option value="whatsapp">WhatsApp</option>
+                                <option value="form">Form</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Tarjetas KPI del Radar -->
+                <!-- Tarjetas KPI Ejecutivas del Radar -->
                 <div class="radar-kpi-grid">
-                    <div class="kpi-card glass-panel">
-                        <div class="kpi-icon green">
-                            <span class="online-pulse-dot"></span>
+                    <div class="radar-kpi-card kpi-live glass-panel">
+                        <div class="radar-kpi-top">
+                            <div class="kpi-icon green">
+                                <span class="online-pulse-dot"></span>
+                            </div>
+                            <span class="radar-kpi-badge live">TIEMPO REAL</span>
                         </div>
-                        <div class="kpi-data">
-                            <span class="kpi-label">Visitantes Online Ahora</span>
+                        <div class="radar-kpi-body">
                             <h3 class="kpi-value" id="kpiRadarOnline">0</h3>
+                            <span class="kpi-label">Visitantes Online Ahora</span>
                             <small class="radar-kpi-sub" id="kpiRadarOnlineSub">Monitoreo activo en tiempo real</small>
                         </div>
+                        <div class="radar-kpi-bar">
+                            <div class="radar-kpi-bar-fill fill-green" style="width: 100%;"></div>
+                        </div>
                     </div>
 
-                    <div class="kpi-card glass-panel">
-                        <div class="kpi-icon blue">
-                            <i data-lucide="users"></i>
+                    <div class="radar-kpi-card glass-panel">
+                        <div class="radar-kpi-top">
+                            <div class="kpi-icon blue">
+                                <i data-lucide="users"></i>
+                            </div>
+                            <span class="radar-kpi-badge blue">AUDIENCIA</span>
                         </div>
-                        <div class="kpi-data">
-                            <span class="kpi-label">Sesiones & Visitantes</span>
+                        <div class="radar-kpi-body">
                             <h3 class="kpi-value" id="kpiRadarSessions">0</h3>
+                            <span class="kpi-label">Sesiones Registradas</span>
                             <small class="radar-kpi-sub" id="kpiRadarVisitorsSub">0 visitantes únicos</small>
                         </div>
+                        <div class="radar-kpi-bar">
+                            <div class="radar-kpi-bar-fill fill-blue" style="width: 78%;"></div>
+                        </div>
                     </div>
 
-                    <div class="kpi-card glass-panel">
-                        <div class="kpi-icon gold">
-                            <i data-lucide="flame"></i>
+                    <div class="radar-kpi-card glass-panel">
+                        <div class="radar-kpi-top">
+                            <div class="kpi-icon gold">
+                                <i data-lucide="flame"></i>
+                            </div>
+                            <span class="radar-kpi-badge gold">CONVERSIÓN</span>
                         </div>
-                        <div class="kpi-data">
-                            <span class="kpi-label">Intención Comercial</span>
+                        <div class="radar-kpi-body">
                             <h3 class="kpi-value" id="kpiRadarIntent">0</h3>
+                            <span class="kpi-label">Señales de Intención Comercial</span>
                             <small class="radar-kpi-sub" id="kpiRadarIntentSub">0 WhatsApp · 0 Leads</small>
                         </div>
+                        <div class="radar-kpi-bar">
+                            <div class="radar-kpi-bar-fill fill-gold" style="width: 65%;"></div>
+                        </div>
                     </div>
 
-                    <div class="kpi-card glass-panel">
-                        <div class="kpi-icon purple">
-                            <i data-lucide="Compass"></i>
+                    <div class="radar-kpi-card glass-panel">
+                        <div class="radar-kpi-top">
+                            <div class="kpi-icon purple">
+                                <i data-lucide="compass"></i>
+                            </div>
+                            <span class="radar-kpi-badge purple">ATENCIÓN</span>
                         </div>
-                        <div class="kpi-data">
-                            <span class="kpi-label">Engagement Promedio</span>
+                        <div class="radar-kpi-body">
                             <h3 class="kpi-value" id="kpiRadarEngagement">0s</h3>
+                            <span class="kpi-label">Tiempo & Retención Media</span>
                             <small class="radar-kpi-sub" id="kpiRadarScrollSub">0% profundidad de scroll</small>
+                        </div>
+                        <div class="radar-kpi-bar">
+                            <div class="radar-kpi-bar-fill fill-purple" id="kpiRadarScrollBarFill" style="width: 50%;">
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Sub-pestañas del Módulo Radar -->
-                <div class="radar-subtabs-bar">
-                    <button type="button" class="radar-tab-btn active" id="btnRadarTabSessions" data-radar-tab="sessions">
-                        <i data-lucide="footprints"></i>
-                        <span>Sesiones & Recorrido Paso a Paso</span>
-                    </button>
-                    <button type="button" class="radar-tab-btn" id="btnRadarTabHeatmap" data-radar-tab="heatmap">
-                        <i data-lucide="mouse-pointer-click"></i>
-                        <span>Mapa de Coordenadas de Clics & Ranking</span>
-                    </button>
+                <!-- Sub-pestañas de Modo de Visualización -->
+                <div class="radar-subtabs-wrap">
+                    <div class="radar-subtabs-bar">
+                        <button type="button" class="radar-tab-btn active" id="btnRadarTabSessions"
+                            data-radar-tab="sessions">
+                            <i data-lucide="footprints"></i>
+                            <div>
+                                <strong>Inspector de Sesiones & Recorrido</strong>
+                                <small>Sigue paso a paso qué vio y tocó cada persona</small>
+                            </div>
+                        </button>
+                        <button type="button" class="radar-tab-btn" id="btnRadarTabHeatmap" data-radar-tab="heatmap">
+                            <i data-lucide="mouse-pointer-click"></i>
+                            <div>
+                                <strong>Mapa de Calor de Clics & Ranking</strong>
+                                <small>Coordenadas exactas (X%, Y%) y elementos más atractivos</small>
+                            </div>
+                        </button>
+                    </div>
                 </div>
 
                 <!-- ==================================================== -->
                 <!-- SUB-TAB 1: SESIONES Y LÍNEA DE TIEMPO PASO A PASO -->
                 <!-- ==================================================== -->
                 <div class="radar-master-detail" id="radarSessionsTab">
-                    <!-- Columna Izquierda: Lista de Sesiones / Personas -->
+                    <!-- Columna Izquierda: Directorio de Visitantes -->
                     <div class="radar-sessions-panel glass-panel">
                         <div class="radar-panel-header">
                             <div>
-                                <h3><i data-lucide="users"></i> Personas / Sesiones Detectadas</h3>
-                                <small class="muted" id="radarSessionsCountLabel">Selecciona un visitante para inspeccionar cada movimiento</small>
+                                <h3><i data-lucide="users"></i> Directorio de Visitantes</h3>
+                                <small class="muted" id="radarSessionsCountLabel">Selecciona una persona para ver su
+                                    expediente</small>
                             </div>
+                            <span class="radar-live-indicator-pill">
+                                <span class="mini-live-dot"></span> AUTO-SYNC
+                            </span>
                         </div>
 
                         <div class="radar-sessions-list" id="radarSessionsList">
@@ -598,14 +682,20 @@
                         <div class="empty-state" id="emptyRadarSessions" style="display: none; padding: 36px 20px;">
                             <i data-lucide="activity"></i>
                             <h3>Sin sesiones para este filtro</h3>
-                            <p>Navega por la página web o instala el script en un sitio externo para ver los movimientos en tiempo real.</p>
+                            <p>Navega por la página web o instala el script en un sitio externo para ver los movimientos
+                                en tiempo real.</p>
                         </div>
                     </div>
 
-                    <!-- Columna Derecha: Inspector de Recorrido Cronológico -->
+                    <!-- Columna Derecha: Expediente Cronológico del Visitante -->
                     <div class="radar-timeline-panel glass-panel" id="radarTimelinePanel">
                         <div class="radar-timeline-header" id="radarVisitorDetailHeader">
                             <!-- Inyectado dinámicamente con los datos del visitante activo -->
+                        </div>
+
+                        <div class="radar-timeline-subheader">
+                            <span><i data-lucide="git-commit"></i> LÍNEA DE TIEMPO CRONOLÓGICA DE MOVIMIENTOS</span>
+                            <small id="radarEventsCountBadge">0 eventos registrados</small>
                         </div>
 
                         <div class="radar-timeline-body" id="radarVisitorTimelineBody">
@@ -618,57 +708,92 @@
                 <!-- SUB-TAB 2: MAPA DE COORDENADAS DE CLICS & RANKING -->
                 <!-- ==================================================== -->
                 <div class="radar-heatmap-layout" id="radarHeatmapTab" style="display: none;">
-                    <!-- Lienzo de Mapa de Coordenadas de Clics (X%, Y%) -->
+                    <!-- Lienzo de Mapa de Coordenadas de Clics tipo Browser Mockup -->
                     <div class="radar-heatmap-card glass-panel">
                         <div class="radar-heatmap-header">
                             <div>
-                                <h3><i data-lucide="crosshair"></i> Mapa Visual de Coordenadas de Clics (X%, Y%)</h3>
-                                <small class="muted">Distribución proporcional de dónde hacen clic los visitantes dentro de cada página</small>
+                                <h3><i data-lucide="crosshair"></i> Mapa de Atención y Coordenadas de Clics (X%, Y%)
+                                </h3>
+                                <small class="muted">Pasa el cursor sobre cualquier punto luminoso para ver en qué botón
+                                    o sección hicieron clic</small>
                             </div>
                             <div class="radar-heatmap-controls">
                                 <select id="heatmapPageSelect" class="select-control sm">
-                                    <option value="all">Todas las Páginas</option>
+                                    <option value="all">📄 Todas las Páginas</option>
                                 </select>
                                 <select id="heatmapDeviceSelect" class="select-control sm">
-                                    <option value="all">Todos los Dispositivos</option>
+                                    <option value="all">🖥️ Todos los Dispositivos</option>
                                     <option value="desktop">💻 Escritorio (PC)</option>
-                                    <option value="mobile">📱 Móvil</option>
+                                    <option value="mobile">📱 Smartphone (Móvil)</option>
                                 </select>
                             </div>
                         </div>
 
                         <div class="heatmap-legend">
-                            <span class="legend-item"><span class="legend-dot click"></span> Clic de Navegación / Interés</span>
-                            <span class="legend-item"><span class="legend-dot whatsapp"></span> Clic en WhatsApp / Contacto Directo</span>
-                            <span class="legend-item"><span class="legend-dot form"></span> Envío / Interacción de Formulario</span>
+                            <span class="legend-item"><span class="legend-dot click"></span> Clic de Interés /
+                                Navegación</span>
+                            <span class="legend-item"><span class="legend-dot whatsapp"></span> Clic en WhatsApp /
+                                Teléfono</span>
+                            <span class="legend-item"><span class="legend-dot form"></span> Formulario / Conversión a
+                                Lead</span>
+                            <span class="legend-count-pill" id="heatmapPointsCountBadge">0 clics mapeados</span>
                         </div>
 
+                        <!-- Mockup de Ventana de Navegador Web -->
                         <div class="heatmap-stage-wrapper">
+                            <div class="heatmap-browser-topbar">
+                                <div class="browser-dots">
+                                    <span class="b-dot red"></span>
+                                    <span class="b-dot yellow"></span>
+                                    <span class="b-dot green"></span>
+                                </div>
+                                <div class="browser-url-bar" id="heatmapBrowserUrlDisplay">
+                                    <i data-lucide="lock" style="width:11px;height:11px;"></i>
+                                    <span>https://voxbusinessdeveloper.com/*</span>
+                                </div>
+                                <div class="browser-scale-tag">Escala Proporcional 0–100%</div>
+                            </div>
+
                             <div class="heatmap-canvas-stage" id="heatmapCanvasStage">
-                                <!-- Rejilla guía de zonas de la página -->
-                                <div class="heatmap-zone-guide zone-header"><span>ZONA SUPERIOR / NAVBAR & HERO (0% - 25%)</span></div>
-                                <div class="heatmap-zone-guide zone-upper"><span>SECCIONES DE VALOR / SERVICIOS (25% - 50%)</span></div>
-                                <div class="heatmap-zone-guide zone-lower"><span>PORTAFOLIO / METODOLOGÍA / EQUIPO (50% - 75%)</span></div>
-                                <div class="heatmap-zone-guide zone-footer"><span>CONTACTO / FORMULARIO / FOOTER (75% - 100%)</span></div>
+                                <!-- Wireframe sutil de referencia de la página -->
+                                <div class="heatmap-zone-guide zone-header">
+                                    <div class="zone-wireframe-bar"></div>
+                                    <span>0% - 25% · HERO & NAVEGACIÓN PRINCIPAL</span>
+                                </div>
+                                <div class="heatmap-zone-guide zone-upper">
+                                    <div class="zone-wireframe-cards"><i></i><i></i><i></i></div>
+                                    <span>25% - 50% · SERVICIOS Y PROPUESTA DE VALOR</span>
+                                </div>
+                                <div class="heatmap-zone-guide zone-lower">
+                                    <div class="zone-wireframe-cards"><i></i><i></i></div>
+                                    <span>50% - 75% · PORTAFOLIO, METODOLOGÍA & EQUIPO</span>
+                                </div>
+                                <div class="heatmap-zone-guide zone-footer">
+                                    <div class="zone-wireframe-bar"></div>
+                                    <span>75% - 100% · FORMULARIO DE CONTACTO, WHATSAPP & FOOTER</span>
+                                </div>
                                 <!-- Puntos de clic (dots) inyectados dinámicamente -->
                                 <div id="heatmapDotsContainer"></div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Tablas de Ranking: Páginas más vistas y Botones más clicados -->
+                    <!-- Tablas de Ranking Visual con Barras de Progreso -->
                     <div class="radar-rankings-col">
                         <div class="glass-panel radar-ranking-card">
                             <div class="radar-panel-header">
-                                <h3><i data-lucide="file-text"></i> Páginas & Secciones Más Vistas</h3>
+                                <div>
+                                    <h3><i data-lucide="eye"></i> Páginas & Secciones Más Vistas</h3>
+                                    <small class="muted">Dónde pasan más tiempo los visitantes</small>
+                                </div>
                             </div>
                             <div class="table-responsive">
                                 <table class="leads-table compact-table">
                                     <thead>
                                         <tr>
-                                            <th>Página / Sección</th>
+                                            <th>Ruta / Sección</th>
                                             <th>Vistas</th>
-                                            <th>%</th>
+                                            <th>Impacto</th>
                                         </tr>
                                     </thead>
                                     <tbody id="radarTopPagesBody"></tbody>
@@ -678,14 +803,17 @@
 
                         <div class="glass-panel radar-ranking-card">
                             <div class="radar-panel-header">
-                                <h3><i data-lucide="mouse-pointer-click"></i> Botones & Elementos Más Clicados</h3>
+                                <div>
+                                    <h3><i data-lucide="zap"></i> Botones & Elementos Más Clicados</h3>
+                                    <small class="muted">Llamados a la acción con mayor respuesta</small>
+                                </div>
                             </div>
                             <div class="table-responsive">
                                 <table class="leads-table compact-table">
                                     <thead>
                                         <tr>
                                             <th>Elemento / Acción</th>
-                                            <th>Tipo</th>
+                                            <th>Categoría</th>
                                             <th>Clics</th>
                                         </tr>
                                     </thead>
@@ -1322,7 +1450,8 @@
                         </div>
 
                         <!-- Recorrido Web Vinculado (VOX Radar) -->
-                        <h4 class="section-sub" style="margin-top: 20px;"><i data-lucide="activity"></i> Recorrido Web (VOX Radar)</h4>
+                        <h4 class="section-sub" style="margin-top: 20px;"><i data-lucide="activity"></i> Recorrido Web
+                            (VOX Radar)</h4>
                         <div class="lead-radar-journey-box" id="modalLeadRadarBox">
                             <small class="muted">Buscando sesión vinculada...</small>
                         </div>
@@ -1479,7 +1608,8 @@
                         <span class="badge badge-success">Telemetría Multi-Sitio</span>
                     </div>
                     <h2>Agregar Sitio Externo a Monitoreo</h2>
-                    <p class="modal-header-desc">Registra cualquier página web (clientes de contado, landings o portales propios) para rastrear a sus visitantes en tiempo real.</p>
+                    <p class="modal-header-desc">Registra cualquier página web (clientes de contado, landings o portales
+                        propios) para rastrear a sus visitantes en tiempo real.</p>
                 </div>
                 <button class="btn-close" id="closeNuevoSitioMonitoreoBtn" aria-label="Cerrar modal">
                     <i data-lucide="x"></i>
@@ -1494,7 +1624,8 @@
                         </label>
                         <div class="input-with-icon">
                             <i data-lucide="layout"></i>
-                            <input type="text" id="monNombreSitio" placeholder="Ej. Portal Inmobiliario Torre Aura" required />
+                            <input type="text" id="monNombreSitio" placeholder="Ej. Portal Inmobiliario Torre Aura"
+                                required />
                         </div>
                     </div>
 
@@ -1524,7 +1655,8 @@
                         <label for="monNotas">
                             <span>Notas de Monitoreo (Opcional)</span>
                         </label>
-                        <textarea id="monNotas" rows="2" class="textarea-control" placeholder="Campaña activa, objetivo de conversión o detalles del proyecto..."></textarea>
+                        <textarea id="monNotas" rows="2" class="textarea-control"
+                            placeholder="Campaña activa, objetivo de conversión o detalles del proyecto..."></textarea>
                     </div>
                 </div>
 
