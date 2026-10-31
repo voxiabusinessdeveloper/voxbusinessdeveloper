@@ -873,9 +873,9 @@
                                 <span>Imprimir / PDF</span>
                             </button>
                             <button type="button" class="btn btn-primary btn-sm" id="btnPreviewGmailReport"
-                                title="Previsualizar resumen listo para envío por Gmail">
-                                <i data-lucide="mail"></i>
-                                <span>Resumen para Gmail</span>
+                                title="Enviar este corte ejecutivo por correo a Gmail">
+                                <i data-lucide="send"></i>
+                                <span>Enviar Reporte a Gmail</span>
                             </button>
                         </div>
                     </div>
@@ -1007,9 +1007,9 @@
                                 <span>Imprimir / PDF</span>
                             </button>
                             <button type="button" class="btn btn-primary btn-sm" id="btnPreviewGmailReport"
-                                title="Previsualizar resumen listo para envío por Gmail">
-                                <i data-lucide="mail"></i>
-                                <span>Resumen para Gmail</span>
+                                title="Enviar este corte ejecutivo por correo a Gmail">
+                                <i data-lucide="send"></i>
+                                <span>Enviar Reporte a Gmail</span>
                             </button>
                         </div>
                     </div>
@@ -1941,6 +1941,66 @@
                     <button type="submit" class="btn btn-primary" id="saveNuevoSitioMonitoreoBtn">
                         <i data-lucide="code"></i>
                         <span>Registrar y Obtener Script</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- MODAL: ENVIAR REPORTE EJECUTIVO POR CORREO (GMAIL / RESEND) -->
+    <!-- ========================================== -->
+    <div class="modal-overlay" id="enviarReporteCorreoModal" style="display: none;">
+        <div class="modal-card modal-credito-premium" style="max-width: 560px;">
+            <div class="modal-header-premium">
+                <div class="modal-header-icon-box" style="color: var(--gold-primary);">
+                    <i data-lucide="send"></i>
+                </div>
+                <div style="flex: 1;">
+                    <span class="badge badge-accent" id="modalReportePeriodBadge">Corte Quincenal</span>
+                    <h2 style="font-size: 1.15rem; margin-top: 2px;">Enviar Reporte Ejecutivo a Gmail</h2>
+                    <p class="modal-header-desc" id="modalReporteSiteDesc">Despacho vía Resend / Gmail con tabla comparativa y embudo.</p>
+                </div>
+                <button class="btn-close" id="closeEnviarReporteModalBtn" aria-label="Cerrar modal">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+
+            <form id="enviarReporteCorreoForm" class="modal-body-premium">
+                <div class="modal-form-section">
+                    <div class="form-group-premium">
+                        <label for="reporteDestinatarioInput">
+                            <span>Correo Destinatario (Gmail o Corporativo) *</span>
+                        </label>
+                        <div class="input-with-icon">
+                            <i data-lucide="mail"></i>
+                            <input type="email" id="reporteDestinatarioInput"
+                                value="vox.iabusinessdeveloper@gmail.com"
+                                placeholder="vox.iabusinessdeveloper@gmail.com" required />
+                        </div>
+                    </div>
+
+                    <div class="form-group-premium" style="margin-top: 12px;">
+                        <label for="reporteNotaInput">
+                            <span>Nota o Comentario Ejecutivo (Opcional)</span>
+                        </label>
+                        <textarea id="reporteNotaInput" rows="2" class="textarea-control"
+                            placeholder="Ej. Excelente crecimiento en tráfico desde Instagram esta quincena..."></textarea>
+                    </div>
+
+                    <div class="form-group-premium" style="margin-top: 12px;">
+                        <label>
+                            <span>Vista Previa del Resumen que se Enviará</span>
+                        </label>
+                        <div class="email-draft-preview-box" id="modalReportePreviewBox" style="max-height: 155px;"></div>
+                    </div>
+                </div>
+
+                <div class="modal-footer-premium">
+                    <button type="button" class="btn btn-outline" id="cancelEnviarReporteModalBtn">Cancelar</button>
+                    <button type="submit" class="btn btn-primary" id="btnConfirmSendRadarReport">
+                        <i data-lucide="send"></i>
+                        <span id="btnConfirmSendRadarReportText">Enviar Reporte Ahora</span>
                     </button>
                 </div>
             </form>

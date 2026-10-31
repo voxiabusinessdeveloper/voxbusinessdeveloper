@@ -4184,6 +4184,21 @@ document.addEventListener('DOMContentLoaded', () => {
         ].join('\n');
 
         state.radar.lastExecutiveDraft = emailDraft;
+        state.radar.lastPeriodPayload = {
+            periodCode,
+            periodLabel: cfg.label,
+            dateRange: `${fmtDate(currStart)} al ${fmtDate(now)}`,
+            siteLabel,
+            curr,
+            prev,
+            channels: sortedChannels.map(([chName, data]) => ({
+                name: chName,
+                count: data.count,
+                avgScroll: Math.round(data.scrollSum / data.count),
+                wa: data.wa,
+                leads: data.leads
+            }))
+        };
 
         if (insightsBody) {
             insightsBody.innerHTML = `
@@ -4328,12 +4343,128 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    const enviarReporteCorreoModal = document.getElementById('enviarReporteCorreoModal');
+    const enviarReporteCorreoForm = document.getElementById('enviarReporteCorreoForm');
+    const closeEnviarReporteModalBtn = document.getElementById('closeEnviarReporteModalBtn');
+    const cancelEnviarReporteModalBtn = document.getElementById('cancelEnviarReporteModalBtn');
+
+    function closeEnviarReporteModal() {
+        if (enviarReporteCorreoModal) enviarReporteCorreoModal.style.display = 'none';
+    }
+
+    if (closeEnviarReporteModalBtn) closeEnviarReporteModalBtn.addEventListener('click', closeEnviarReporteModal);
+    if (cancelEnviarReporteModalBtn) cancelEnviarReporteModalBtn.addEventListener('click', closeEnviarReporteModal);
+
     document.getElementById('btnPreviewGmailReport')?.addEventListener('click', () => {
-        if (state.radar.lastExecutiveDraft) {
-            navigator.clipboard.writeText(state.radar.lastExecutiveDraft).catch(() => {});
+        if (!state.radar.lastPeriodPayload) {
+            renderRadarPeriodAnalysis();
         }
-        showToast('Resumen ejecutivo generado y copiado. Listo para conectar con envío automático por Gmail en el siguiente paso.', 'info', 'Preparado para Gmail');
+        const payload = state.radar.lastPeriodPayload || {};
+        const badgeEl = document.getElementById('modalReportePeriodBadge');
+        const descEl = document.getElementById('modalReporteSiteDesc');
+        const previewEl = document.getElementById('modalReportePreviewBox');
+
+        if (badgeEl) badgeEl.textContent = payload.periodLabel || 'Corte Ejecutivo';
+        if (descEl) descEl.textContent = `Sitio: ${payload.siteLabel || 'Todos'} · ${payload.dateRange || ''}`;
+        if (previewEl) previewEl.textContent = state.radar.lastExecutiveDraft || '';
+
+        if (enviarReporteCorreoModal) {
+            enviarReporteCorreoModal.style.display = 'flex';
+            if (window.lucide) window.lucide.createIcons();
+        }
     });
+
+    if (enviarReporteCorreoForm) {
+        enviarReporteCorreoForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const toEmail = (document.getElementById('reporteDestinatarioInput')?.value || 'vox.iabusinessdeveloper@gmail.com').trim();
+            const notaAdicional = (document.getElementById('reporteNotaInput')?.value || '').trim();
+            const submitBtn = document.getElementById('btnConfirmSendRadarReport');
+            const submitBtnText = document.getElementById('btnConfirmSendRadarReportText');
+
+            if (!state.radar.lastPeriodPayload) {
+                renderRadarPeriodAnalysis();
+            }
+            const payload = {
+                ...(state.radar.lastPeriodPayload || {}),
+                toEmail,
+                notaAdicional
+            };
+
+            if (submitBtn) submitBtn.disabled = true;
+            if (submitBtnText) submitBtnText.textContent = 'Enviando a Gmail...';
+
+            let sentOk = false;
+
+            // 1. Intentar envío por Serverless Function (/api/radar-report -> Resend + FormSubmit fallback)
+            try {
+                const apiRes = await fetch('/api/radar-report', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (apiRes.ok) {
+                    const data = await apiRes.json();
+                    if (data && data.success) {
+                        sentOk = true;
+                    }
+                }
+            } catch (apiErr) {
+                // Continuar al respaldo directo desde navegador si se ejecuta en servidor estático local
+            }
+
+            // 2. Respaldo directo desde cliente vía FormSubmit AJAX si /api/radar-report no está activo localmente
+            if (!sentOk) {
+                try {
+                    const c = payload.curr || {};
+                    const p = payload.prev || {};
+                    const topCh = (payload.channels || [])
+                        .slice(0, 5)
+                        .map(ch => `${ch.name}: ${ch.count} sesiones (${ch.wa} WA, ${ch.leads} Leads)`)
+                        .join(' | ') || 'Directo';
+
+                    const fsPayload = {
+                        _subject: `📊 Reporte ${payload.periodLabel || 'Ejecutivo'} — ${payload.siteLabel || 'VOX Radar'}`,
+                        _template: 'table',
+                        _captcha: 'false',
+                        'Corte de Análisis': payload.periodLabel || 'Quincenal',
+                        'Rango de Fechas': payload.dateRange || '-',
+                        'Sitio Monitoreado': payload.siteLabel || 'Todos',
+                        'Sesiones del Periodo': `${c.totalSessions || 0} sesiones (${c.uniqueVisitors || 0} únicos) | Previo: ${p.totalSessions || 0}`,
+                        'Clics a WhatsApp': `${c.waClicks || 0} clics | Previo: ${p.waClicks || 0}`,
+                        'Leads Convertidos': `${c.leadsCount || 0} leads (Tasa: ${c.convRate || 0}%) | Previo: ${p.leadsCount || 0}`,
+                        'Retención y Lectura': `${formatDuration(c.avgDuration || 0)} promedio | ${c.avgScroll || 0}% scroll medio`,
+                        'Canales Principales': topCh,
+                        'Nota Ejecutiva': notaAdicional || 'Sin nota adicional'
+                    };
+
+                    const fsRes = await fetch(`https://formsubmit.co/ajax/${encodeURIComponent(toEmail)}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify(fsPayload)
+                    });
+                    if (fsRes.ok) {
+                        sentOk = true;
+                    }
+                } catch (fsErr) {
+                    console.warn('[Radar Client Email Fallback Error]:', fsErr);
+                }
+            }
+
+            if (submitBtn) submitBtn.disabled = false;
+            if (submitBtnText) submitBtnText.textContent = 'Enviar Reporte Ahora';
+
+            if (sentOk) {
+                closeEnviarReporteModal();
+                showToast(`Reporte ${payload.periodLabel || ''} enviado exitosamente a ${toEmail}.`, 'success', 'Correo Enviado');
+            } else {
+                showToast('No fue posible conectar con el servidor de correo. Verifica tu conexión a internet.', 'error', 'Error de Envío');
+            }
+        });
+    }
 
     if (heatmapPageSelect) {
         heatmapPageSelect.addEventListener('change', (e) => {
