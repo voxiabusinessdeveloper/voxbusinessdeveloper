@@ -3184,6 +3184,238 @@ document.addEventListener('DOMContentLoaded', () => {
                 localStorage.setItem(LOCAL_SESSIONS_CACHE, JSON.stringify(currentSessions));
                 localStorage.setItem(PERIOD_SEED_KEY, '1');
             }
+
+            // Semilla para Buffalo Manufactura (ejemplo directo de tarjeta de página industrial)
+            const BUFFALO_SEED_KEY = 'vox_telemetry_seed_buffalo_v1';
+            if (!localStorage.getItem(BUFFALO_SEED_KEY)) {
+                const now = Date.now();
+                const DAY_MS = 24 * 3600 * 1000;
+                const sitiosList = JSON.parse(localStorage.getItem(LOCAL_SITIOS_CACHE) || '[]');
+                if (!sitiosList.some(s => s.site_key === 'vox_mon_buffalo2026')) {
+                    sitiosList.unshift({
+                        id: 'mon_buffalo_1',
+                        site_key: 'vox_mon_buffalo2026',
+                        nombre_sitio: 'Buffalo Manufactura',
+                        dominio_url: 'https://buffalomanufactura.com',
+                        cliente_nombre: 'Grupo Industrial Buffalo',
+                        activo: true,
+                        notas: 'Planta de manufactura, maquinado CNC y proyectos industriales'
+                    });
+                    localStorage.setItem(LOCAL_SITIOS_CACHE, JSON.stringify(sitiosList));
+                }
+
+                const currSess = JSON.parse(localStorage.getItem(LOCAL_SESSIONS_CACHE) || '[]');
+                const currEvs = JSON.parse(localStorage.getItem(LOCAL_EVENTS_CACHE) || '[]');
+                const sessIds = new Set(currSess.map(s => s.session_id));
+
+                const buffaloSessions = [
+                    {
+                        session_id: 'vsess_buffalo_live_1',
+                        visitor_id: 'vusr_buf_ing_01',
+                        site_key: 'vox_mon_buffalo2026',
+                        dominio: 'buffalomanufactura.com',
+                        started_at: new Date(now - 140 * 1000).toISOString(),
+                        last_seen_at: new Date(now - 18 * 1000).toISOString(),
+                        duration_seconds: 185,
+                        max_scroll_pct: 100,
+                        entry_url: '/',
+                        current_url: '/#cotizacion-industrial',
+                        referrer: 'Google Search',
+                        utm_source: 'google',
+                        utm_medium: 'cpc',
+                        utm_campaign: 'maquinado_industrial',
+                        device_type: 'desktop',
+                        os: 'Windows',
+                        browser: 'Chrome',
+                        screen_res: '1920x1080',
+                        language: 'es-MX',
+                        timezone: 'America/Monterrey',
+                        page_views_count: 4,
+                        clicks_count: 6,
+                        whatsapp_clicks: 2,
+                        form_interacted: true,
+                        converted_to_lead: true,
+                        lead_nombre: 'Ing. Roberto Garza (Compras)',
+                        lead_correo: 'rgarza@acerosdelnorte.mx'
+                    },
+                    {
+                        session_id: 'vsess_buffalo_hist_2',
+                        visitor_id: 'vusr_buf_02',
+                        site_key: 'vox_mon_buffalo2026',
+                        dominio: 'buffalomanufactura.com',
+                        started_at: new Date(now - 2 * DAY_MS).toISOString(),
+                        last_seen_at: new Date(now - 2 * DAY_MS).toISOString(),
+                        duration_seconds: 210,
+                        max_scroll_pct: 100,
+                        entry_url: '/',
+                        current_url: '/catalogo-acero',
+                        referrer: 'LinkedIn',
+                        device_type: 'desktop',
+                        os: 'Windows',
+                        browser: 'Edge',
+                        screen_res: '1920x1080',
+                        language: 'es-MX',
+                        timezone: 'America/Monterrey',
+                        page_views_count: 3,
+                        clicks_count: 5,
+                        whatsapp_clicks: 1,
+                        form_interacted: true,
+                        converted_to_lead: true,
+                        lead_nombre: 'Arq. Eugenio Treviño',
+                        lead_correo: 'etrevino@parquesindustriales.mx'
+                    },
+                    {
+                        session_id: 'vsess_buffalo_hist_3',
+                        visitor_id: 'vusr_buf_03',
+                        site_key: 'vox_mon_buffalo2026',
+                        dominio: 'buffalomanufactura.com',
+                        started_at: new Date(now - 5 * DAY_MS).toISOString(),
+                        last_seen_at: new Date(now - 5 * DAY_MS).toISOString(),
+                        duration_seconds: 155,
+                        max_scroll_pct: 75,
+                        entry_url: '/',
+                        current_url: '/#maquinaria',
+                        referrer: 'Instagram',
+                        device_type: 'mobile',
+                        os: 'iOS',
+                        browser: 'Safari',
+                        screen_res: '390x844',
+                        language: 'es-MX',
+                        timezone: 'America/Monterrey',
+                        page_views_count: 2,
+                        clicks_count: 4,
+                        whatsapp_clicks: 1,
+                        form_interacted: false,
+                        converted_to_lead: false,
+                        lead_nombre: '',
+                        lead_correo: ''
+                    },
+                    {
+                        session_id: 'vsess_buffalo_hist_4',
+                        visitor_id: 'vusr_buf_04',
+                        site_key: 'vox_mon_buffalo2026',
+                        dominio: 'buffalomanufactura.com',
+                        started_at: new Date(now - 10 * DAY_MS).toISOString(),
+                        last_seen_at: new Date(now - 10 * DAY_MS).toISOString(),
+                        duration_seconds: 195,
+                        max_scroll_pct: 100,
+                        entry_url: '/',
+                        current_url: '/#cotizacion-industrial',
+                        referrer: 'Google Search',
+                        device_type: 'desktop',
+                        os: 'Windows',
+                        browser: 'Chrome',
+                        screen_res: '1920x1080',
+                        language: 'es-MX',
+                        timezone: 'America/Mexico_City',
+                        page_views_count: 3,
+                        clicks_count: 5,
+                        whatsapp_clicks: 2,
+                        form_interacted: true,
+                        converted_to_lead: true,
+                        lead_nombre: 'Lic. Sofía Mondragón',
+                        lead_correo: 'smondragon@logistica-mty.com'
+                    },
+                    {
+                        session_id: 'vsess_buffalo_hist_5',
+                        visitor_id: 'vusr_buf_05',
+                        site_key: 'vox_mon_buffalo2026',
+                        dominio: 'buffalomanufactura.com',
+                        started_at: new Date(now - 18 * DAY_MS).toISOString(),
+                        last_seen_at: new Date(now - 18 * DAY_MS).toISOString(),
+                        duration_seconds: 130,
+                        max_scroll_pct: 75,
+                        entry_url: '/',
+                        current_url: '/',
+                        referrer: 'Directo',
+                        device_type: 'desktop',
+                        os: 'Windows',
+                        browser: 'Chrome',
+                        screen_res: '1920x1080',
+                        language: 'es-MX',
+                        timezone: 'America/Monterrey',
+                        page_views_count: 2,
+                        clicks_count: 3,
+                        whatsapp_clicks: 1,
+                        form_interacted: false,
+                        converted_to_lead: false,
+                        lead_nombre: '',
+                        lead_correo: ''
+                    }
+                ];
+
+                buffaloSessions.forEach(bs => {
+                    if (!sessIds.has(bs.session_id)) {
+                        currSess.unshift(bs);
+                    }
+                });
+
+                const buffaloEvents = [
+                    {
+                        id: 'ev_buf_1',
+                        created_at: new Date(now - 135 * 1000).toISOString(),
+                        session_id: 'vsess_buffalo_live_1',
+                        visitor_id: 'vusr_buf_ing_01',
+                        site_key: 'vox_mon_buffalo2026',
+                        event_type: 'pageview',
+                        page_path: '/',
+                        page_title: 'Buffalo Manufactura | Soluciones Industriales',
+                        element_text: 'Entró a buffalomanufactura.com desde Google Search'
+                    },
+                    {
+                        id: 'ev_buf_2',
+                        created_at: new Date(now - 95 * 1000).toISOString(),
+                        session_id: 'vsess_buffalo_live_1',
+                        visitor_id: 'vusr_buf_ing_01',
+                        site_key: 'vox_mon_buffalo2026',
+                        event_type: 'click',
+                        page_path: '/catalogo-acero',
+                        section_id: 'maquinaria',
+                        element_tag: 'button',
+                        element_text: 'Descargar Ficha Técnica Maquinado CNC',
+                        click_x_pct: 42.5,
+                        click_y_pct: 46.8
+                    },
+                    {
+                        id: 'ev_buf_3',
+                        created_at: new Date(now - 45 * 1000).toISOString(),
+                        session_id: 'vsess_buffalo_live_1',
+                        visitor_id: 'vusr_buf_ing_01',
+                        site_key: 'vox_mon_buffalo2026',
+                        event_type: 'form_submit',
+                        page_path: '/',
+                        section_id: 'cotizacion-industrial',
+                        element_tag: 'form',
+                        element_text: 'Lead Industrial: Ing. Roberto Garza (Lote 500 pzas)',
+                        click_x_pct: 54.2,
+                        click_y_pct: 83.4
+                    },
+                    {
+                        id: 'ev_buf_4',
+                        created_at: new Date(now - 18 * 1000).toISOString(),
+                        session_id: 'vsess_buffalo_live_1',
+                        visitor_id: 'vusr_buf_ing_01',
+                        site_key: 'vox_mon_buffalo2026',
+                        event_type: 'cta_whatsapp',
+                        page_path: '/',
+                        section_id: 'cotizacion-industrial',
+                        element_tag: 'a',
+                        element_text: 'WhatsApp Ventas Industriales Buffalo',
+                        click_x_pct: 89.4,
+                        click_y_pct: 90.1
+                    }
+                ];
+
+                buffaloEvents.forEach(bev => {
+                    if (!currEvs.some(e => e.id === bev.id)) {
+                        currEvs.push(bev);
+                    }
+                });
+
+                localStorage.setItem(LOCAL_SESSIONS_CACHE, JSON.stringify(currSess));
+                localStorage.setItem(LOCAL_EVENTS_CACHE, JSON.stringify(currEvs));
+                localStorage.setItem(BUFFALO_SEED_KEY, '1');
+            }
         } catch (e) {}
     }
 
@@ -3284,6 +3516,149 @@ document.addEventListener('DOMContentLoaded', () => {
             state.radar.siteFilter = 'all';
             radarSiteSelect.value = 'all';
         }
+
+        renderRadarSitesDeck();
+    }
+
+    function getAvailableRadarSiteCards() {
+        const cards = [
+            {
+                site_key: 'all',
+                name: 'Consolidado Global',
+                domain: 'Todas las páginas conectadas',
+                badge: 'GLOBAL',
+                initials: '🌐'
+            },
+            {
+                site_key: 'vox_site_official',
+                name: 'VOX Business Developer',
+                domain: 'voxbusinessdeveloper.com',
+                badge: 'OFICIAL',
+                initials: 'VX'
+            }
+        ];
+
+        const seenKeys = new Set(['all', 'vox_site_official']);
+
+        if (state.radar.sitios && state.radar.sitios.length > 0) {
+            state.radar.sitios.forEach(s => {
+                if (!s || !s.site_key || seenKeys.has(s.site_key)) return;
+                seenKeys.add(s.site_key);
+                const cleanDom = (s.dominio_url || '').replace(/^https?:\/\//, '').replace(/\/$/, '');
+                const initials = (s.nombre_sitio || 'ST').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+                cards.push({
+                    site_key: s.site_key,
+                    name: s.nombre_sitio || 'Sitio Monitoreado',
+                    domain: cleanDom || s.cliente_nombre || s.site_key,
+                    badge: 'RADAR',
+                    initials
+                });
+            });
+        }
+
+        if (state.creditos && state.creditos.length > 0) {
+            state.creditos.forEach(c => {
+                if (!c || !c.site_key || seenKeys.has(c.site_key)) return;
+                seenKeys.add(c.site_key);
+                const cleanDom = (c.dominio_url || '').replace(/^https?:\/\//, '').replace(/\/$/, '');
+                const initials = (c.cliente_nombre || 'CR').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+                cards.push({
+                    site_key: c.site_key,
+                    name: c.cliente_nombre || 'Cliente Crédito',
+                    domain: cleanDom || c.site_key,
+                    badge: 'CRÉDITO',
+                    initials
+                });
+            });
+        }
+
+        return cards;
+    }
+
+    function renderRadarSitesDeck() {
+        const deckGrid = document.getElementById('radarSitesCardsGrid');
+        const activeIndicator = document.getElementById('radarActiveSiteIndicatorText');
+        if (!deckGrid) return;
+
+        const cards = getAvailableRadarSiteCards();
+        const activeKey = state.radar.siteFilter || 'all';
+        const activeCardObj = cards.find(c => c.site_key === activeKey) || cards[0];
+
+        if (activeIndicator && activeCardObj) {
+            activeIndicator.innerHTML = `Página seleccionada: <strong style="color:var(--gold-primary);">${escapeHtml(activeCardObj.name)}</strong> (${escapeHtml(activeCardObj.domain)})`;
+        }
+
+        deckGrid.innerHTML = '';
+
+        cards.forEach(cardInfo => {
+            const isSelected = cardInfo.site_key === activeKey;
+            const siteSessions = cardInfo.site_key === 'all'
+                ? state.radar.sesiones
+                : state.radar.sesiones.filter(s => s.site_key === cardInfo.site_key);
+
+            const onlineCount = siteSessions.filter(s => isSessionOnline(s)).length;
+            const totalSess = siteSessions.length;
+            const totalWa = siteSessions.reduce((acc, s) => acc + (parseInt(s.whatsapp_clicks || 0, 10)), 0);
+            const totalLeads = siteSessions.filter(s => s.converted_to_lead).length;
+
+            const cardEl = document.createElement('button');
+            cardEl.type = 'button';
+            cardEl.className = `radar-site-card ${isSelected ? 'active' : ''}`;
+            cardEl.setAttribute('data-site-card-key', cardInfo.site_key);
+
+            cardEl.innerHTML = `
+                <div class="site-card-top">
+                    <div class="site-card-brand">
+                        <div class="site-card-icon">${escapeHtml(cardInfo.initials)}</div>
+                        <div class="site-card-titles">
+                            <span class="site-card-name">${escapeHtml(cardInfo.name)}</span>
+                            <span class="site-card-domain">${escapeHtml(cardInfo.domain)}</span>
+                        </div>
+                    </div>
+                    <span class="site-card-live-pill ${onlineCount > 0 ? 'has-online' : ''}">
+                        ${onlineCount > 0 ? `<span class="mini-live-dot"></span> ${onlineCount} Online` : escapeHtml(cardInfo.badge)}
+                    </span>
+                </div>
+
+                <div class="site-card-metrics-row">
+                    <div class="site-card-metric">
+                        <strong>${totalSess}</strong>
+                        <small>Sesiones</small>
+                    </div>
+                    <div class="site-card-metric">
+                        <strong style="color:#25D366;">${totalWa}</strong>
+                        <small>WhatsApp</small>
+                    </div>
+                    <div class="site-card-metric">
+                        <strong style="color:var(--gold-primary);">${totalLeads}</strong>
+                        <small>Leads</small>
+                    </div>
+                </div>
+            `;
+
+            cardEl.addEventListener('click', () => {
+                state.radar.siteFilter = cardInfo.site_key;
+                if (radarSiteSelect) radarSiteSelect.value = cardInfo.site_key;
+
+                // Efecto dinámico visual al cargar los datos de la página seleccionada
+                [
+                    document.querySelector('.radar-kpi-grid'),
+                    document.getElementById('radarSessionsTab'),
+                    document.getElementById('radarHeatmapTab'),
+                    document.getElementById('radarPeriodsTab')
+                ].forEach(el => {
+                    if (!el) return;
+                    el.classList.remove('radar-dynamic-refresh');
+                    void el.offsetWidth;
+                    el.classList.add('radar-dynamic-refresh');
+                });
+
+                renderRadarSitesDeck();
+                applyRadarFilters();
+            });
+
+            deckGrid.appendChild(cardEl);
+        });
     }
 
     function applyRadarFilters() {
@@ -3959,10 +4334,32 @@ document.addEventListener('DOMContentLoaded', () => {
         const curr = computePeriodStats(currentSessions);
         const prev = computePeriodStats(prevSessions);
 
-        // Actualizar cabecera de rango de fechas
+        // Actualizar cabecera de rango de fechas y Spotlight de la Página Activa
         const rangeBadge = document.getElementById('radarPeriodRangeBadge');
         const siteSub = document.getElementById('radarPeriodSiteSubtitle');
+        const spotlightBox = document.getElementById('radarPeriodSiteSpotlight');
         const fmtDate = (ms) => new Date(ms).toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' });
+
+        const cards = getAvailableRadarSiteCards();
+        const activeCardObj = cards.find(c => c.site_key === (state.radar.siteFilter || 'all')) || cards[0];
+        const onlineOnSite = baseSiteSessions.filter(s => isSessionOnline(s)).length;
+
+        if (spotlightBox && activeCardObj) {
+            spotlightBox.innerHTML = `
+                <div class="spotlight-left">
+                    <div class="spotlight-badge-avatar">${escapeHtml(activeCardObj.initials)}</div>
+                    <div class="spotlight-titles">
+                        <h3>
+                            <span>${escapeHtml(activeCardObj.name)}</span>
+                            <span class="badge badge-accent" style="font-size:0.68rem;">${escapeHtml(activeCardObj.domain)}</span>
+                            ${onlineOnSite > 0 ? `<span class="site-card-live-pill has-online"><span class="mini-live-dot"></span> ${onlineOnSite} Online Ahora</span>` : ''}
+                        </h3>
+                        <p>Mostrando diagnóstico exclusivo de <strong>${escapeHtml(activeCardObj.name)}</strong> · Selecciona cualquier otra tarjeta arriba para cambiar de página al instante.</p>
+                    </div>
+                </div>
+            `;
+        }
+
         if (rangeBadge) {
             rangeBadge.textContent = `${cfg.label}: ${fmtDate(currStart)} — ${fmtDate(now)}`;
         }

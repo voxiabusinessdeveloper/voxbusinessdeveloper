@@ -4430,3 +4430,281 @@ input:focus,
         grid-template-columns: 1fr;
     }
 }
+
+/* ==========================================================================
+   8. DECK INTERACTIVO DE TARJETAS POR PÁGINA (SELECTOR VISUAL DINÁMICO)
+   ========================================================================== */
+.radar-sites-deck-section {
+    padding: 16px 0 6px 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.radar-sites-deck-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.radar-sites-deck-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    color: var(--gold-primary);
+    text-transform: uppercase;
+}
+
+.radar-sites-deck-label svg,
+.radar-sites-deck-label i {
+    width: 14px;
+    height: 14px;
+}
+
+.radar-sites-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(235px, 1fr));
+    gap: 12px;
+}
+
+.radar-site-card {
+    background: linear-gradient(145deg, rgba(22, 27, 34, 0.92) 0%, rgba(13, 16, 21, 0.96) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 14px 16px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    overflow: hidden;
+    text-align: left;
+}
+
+.radar-site-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: transparent;
+    transition: background 0.25s ease;
+}
+
+.radar-site-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(201, 168, 106, 0.45);
+    box-shadow: 0 10px 26px -10px rgba(0, 0, 0, 0.7);
+}
+
+.radar-site-card.active {
+    background:
+        radial-gradient(circle at 95% 0%, rgba(255, 106, 0, 0.16), transparent 60%),
+        linear-gradient(145deg, rgba(30, 35, 45, 0.96) 0%, rgba(16, 20, 26, 0.98) 100%);
+    border-color: var(--gold-primary);
+    box-shadow: 0 12px 30px -10px rgba(201, 168, 106, 0.32), inset 0 0 0 1px rgba(201, 168, 106, 0.25);
+    transform: translateY(-2px);
+}
+
+.radar-site-card.active::before {
+    background: linear-gradient(90deg, var(--gold-primary), #ff6a00);
+}
+
+.site-card-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.site-card-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+
+.site-card-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 9px;
+    background: rgba(201, 168, 106, 0.12);
+    border: 1px solid rgba(201, 168, 106, 0.28);
+    color: var(--gold-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 0.78rem;
+    flex-shrink: 0;
+}
+
+.radar-site-card.active .site-card-icon {
+    background: linear-gradient(135deg, var(--gold-primary), #ff6a00);
+    color: #0b0e12;
+    border-color: transparent;
+    box-shadow: 0 4px 12px rgba(255, 106, 0, 0.35);
+}
+
+.site-card-titles {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.site-card-name {
+    font-size: 0.86rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.site-card-domain {
+    font-size: 0.7rem;
+    color: var(--text-tertiary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.site-card-live-pill {
+    font-size: 0.64rem;
+    font-weight: 800;
+    padding: 2px 7px;
+    border-radius: 99px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-tertiary);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    flex-shrink: 0;
+}
+
+.site-card-live-pill.has-online {
+    background: rgba(46, 204, 113, 0.15);
+    color: #2ecc71;
+    border-color: rgba(46, 204, 113, 0.35);
+}
+
+.site-card-metrics-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    background: rgba(8, 10, 14, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    padding: 7px 9px;
+}
+
+.site-card-metric {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.site-card-metric strong {
+    font-size: 0.84rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    line-height: 1.1;
+}
+
+.site-card-metric small {
+    font-size: 0.62rem;
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+/* Spotlight de la Página Activa dentro de Análisis Semanal / Quincenal / Mensual */
+.radar-period-header {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 20px 24px;
+}
+
+.radar-period-site-spotlight {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    padding-bottom: 14px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.spotlight-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.spotlight-badge-avatar {
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(201, 168, 106, 0.22), rgba(255, 106, 0, 0.18));
+    border: 1px solid rgba(201, 168, 106, 0.45);
+    color: var(--gold-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 1rem;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+}
+
+.spotlight-titles h3 {
+    margin: 0;
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.spotlight-titles p {
+    margin: 3px 0 0 0;
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+}
+
+.radar-period-controls-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    width: 100%;
+}
+
+/* Animación suave al cambiar de Card de Página */
+@keyframes radarCardSwitchFade {
+    0% {
+        opacity: 0.35;
+        transform: translateY(6px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.radar-dynamic-refresh {
+    animation: radarCardSwitchFade 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+}

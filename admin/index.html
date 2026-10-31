@@ -491,24 +491,35 @@
                         </div>
 
                         <div class="radar-command-actions">
-                            <div class="radar-site-selector-wrap">
-                                <i data-lucide="globe" class="site-select-icon"></i>
-                                <select id="radarSiteSelect" class="select-control radar-site-select"
-                                    aria-label="Seleccionar sitio monitoreado">
-                                    <option value="all">🌐 Todos los Sitios Conectados</option>
-                                    <option value="vox_site_official">⚡ VOX Business Developer (Sitio Oficial)</option>
-                                </select>
-                            </div>
+                            <!-- Select oculto sincronizado automáticamente al hacer clic en las Cards de cada página -->
+                            <select id="radarSiteSelect" style="display: none;" aria-label="Seleccionar sitio monitoreado">
+                                <option value="all">🌐 Todos los Sitios Conectados</option>
+                                <option value="vox_site_official">⚡ VOX Business Developer (Sitio Oficial)</option>
+                            </select>
 
                             <button type="button" class="btn btn-outline btn-sm" id="btnRadarViewScript"
-                                title="Obtener el código <script> del sitio seleccionado">
+                                title="Obtener el código <script> de la página seleccionada">
                                 <i data-lucide="code-2"></i>
                                 <span>Código Script</span>
                             </button>
                             <button type="button" class="btn btn-primary btn-sm" id="btnOpenNuevoSitioMonitoreoModal">
                                 <i data-lucide="plus-circle"></i>
-                                <span>Conectar Sitio Externo</span>
+                                <span>Conectar Nueva Página</span>
                             </button>
+                        </div>
+                    </div>
+
+                    <!-- NUEVO: Deck Interactivo de Tarjetas por Página (Selecciona una Card para cargar sus datos) -->
+                    <div class="radar-sites-deck-section">
+                        <div class="radar-sites-deck-header">
+                            <span class="radar-sites-deck-label">
+                                <i data-lucide="layout-grid"></i>
+                                <span>PÁGINAS MONITOREADAS — SELECCIONA UNA TARJETA PARA CARGAR SUS DATOS Y ANÁLISIS</span>
+                            </span>
+                            <small class="muted" id="radarActiveSiteIndicatorText">Mostrando: Todos los Sitios Conectados</small>
+                        </div>
+                        <div class="radar-sites-cards-grid" id="radarSitesCardsGrid">
+                            <!-- Tarjetas de cada página (VOX Oficial, Buffalo Manufactura, Clínica Dental, etc.) inyectadas dinámicamente -->
                         </div>
                     </div>
 
@@ -837,180 +848,52 @@
                 <!-- ==================================================== -->
                 <div class="radar-periods-layout" id="radarPeriodsTab" style="display: none;">
 
-                    <!-- Barra Superior de Corte Temporal y Acciones de Reporte -->
-                    <div class="radar-period-header glass-panel">
-                        <div class="radar-period-header-left">
-                            <div class="period-segmented-control" id="radarAnalysisPeriodControl">
-                                <button type="button" class="period-seg-btn" data-analysis-period="7d">
-                                    <i data-lucide="calendar"></i>
-                                    <span>Semanal (7 Días)</span>
-                                </button>
-                                <button type="button" class="period-seg-btn active" data-analysis-period="15d">
-                                    <i data-lucide="calendar-days"></i>
-                                    <span>Quincenal (15 Días)</span>
-                                </button>
-                                <button type="button" class="period-seg-btn" data-analysis-period="30d">
-                                    <i data-lucide="calendar-range"></i>
-                                    <span>Mensual (30 Días)</span>
-                                </button>
-                            </div>
-                            <div class="period-range-meta">
-                                <span class="period-range-badge" id="radarPeriodRangeBadge">Cargando rango...</span>
-                                <small class="muted" id="radarPeriodSiteSubtitle">Comparado automáticamente contra el
-                                    periodo inmediato anterior</small>
-                            </div>
+                    <!-- Banner Dinámico de la Página Seleccionada + Corte Temporal -->
+                    <div class="radar-period-header glass-panel" id="radarPeriodHeroBanner">
+                        <div class="radar-period-site-spotlight" id="radarPeriodSiteSpotlight">
+                            <!-- Inyectado dinámicamente con el nombre, dominio y estado en vivo de la Card seleccionada -->
                         </div>
 
-                        <div class="radar-period-header-actions">
-                            <button type="button" class="btn btn-outline btn-sm" id="btnExportRadarPeriodCsv"
-                                title="Descargar datos del corte en CSV / Excel">
-                                <i data-lucide="download"></i>
-                                <span>Exportar Excel (CSV)</span>
-                            </button>
-                            <button type="button" class="btn btn-outline btn-sm" id="btnPrintRadarPeriodReport"
-                                title="Imprimir o guardar reporte ejecutivo en PDF">
-                                <i data-lucide="printer"></i>
-                                <span>Imprimir / PDF</span>
-                            </button>
-                            <button type="button" class="btn btn-primary btn-sm" id="btnPreviewGmailReport"
-                                title="Enviar este corte ejecutivo por correo a Gmail">
-                                <i data-lucide="send"></i>
-                                <span>Enviar Reporte a Gmail</span>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- 4 Tarjetas Comparativas (Periodo Actual vs. Periodo Anterior) -->
-                    <div class="radar-period-compare-grid" id="radarPeriodCompareGrid">
-                        <!-- Inyectado dinámicamente por renderRadarPeriodAnalysis() -->
-                    </div>
-
-                    <!-- Fila Central: Gráfica Diaria de Evolución + Embudo de Conversión -->
-                    <div class="radar-period-charts-grid">
-                        <!-- Evolución Día por Día -->
-                        <div class="glass-panel radar-period-card">
-                            <div class="radar-panel-header">
-                                <div>
-                                    <h3><i data-lucide="bar-chart-3"></i> Evolución Diaria de Tráfico e Intención</h3>
-                                    <small class="muted" id="radarDailyChartSubtitle">Comportamiento día por día durante
-                                        el corte seleccionado</small>
+                        <div class="radar-period-controls-bar">
+                            <div class="radar-period-header-left">
+                                <div class="period-segmented-control" id="radarAnalysisPeriodControl">
+                                    <button type="button" class="period-seg-btn" data-analysis-period="7d">
+                                        <i data-lucide="calendar"></i>
+                                        <span>Semanal (7 Días)</span>
+                                    </button>
+                                    <button type="button" class="period-seg-btn active" data-analysis-period="15d">
+                                        <i data-lucide="calendar-days"></i>
+                                        <span>Quincenal (15 Días)</span>
+                                    </button>
+                                    <button type="button" class="period-seg-btn" data-analysis-period="30d">
+                                        <i data-lucide="calendar-range"></i>
+                                        <span>Mensual (30 Días)</span>
+                                    </button>
                                 </div>
-                                <div class="period-chart-legend">
-                                    <span><i class="dot-visitors"></i> Sesiones</span>
-                                    <span><i class="dot-intent"></i> WhatsApp / Leads</span>
+                                <div class="period-range-meta">
+                                    <span class="period-range-badge" id="radarPeriodRangeBadge">Cargando rango...</span>
+                                    <small class="muted" id="radarPeriodSiteSubtitle">Comparado automáticamente contra el
+                                        periodo inmediato anterior</small>
                                 </div>
                             </div>
-                            <div class="radar-daily-chart-stage" id="radarDailyChartStage">
-                                <!-- Barras diarias generadas dinámicamente -->
-                            </div>
-                        </div>
 
-                        <!-- Embudo de Conversión del Periodo -->
-                        <div class="glass-panel radar-period-card">
-                            <div class="radar-panel-header">
-                                <div>
-                                    <h3><i data-lucide="filter"></i> Embudo de Conversión del Periodo</h3>
-                                    <small class="muted">De visitante anónimo a prospecto calificado</small>
-                                </div>
-                                <span class="badge badge-accent" id="radarFunnelRateBadge">0% Conv.</span>
-                            </div>
-                            <div class="radar-funnel-container" id="radarFunnelContainer">
-                                <!-- Etapas del embudo generadas dinámicamente -->
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Fila Inferior: Canales de Adquisición + Diagnóstico Ejecutivo Automático -->
-                    <div class="radar-period-bottom-grid">
-                        <!-- Rendimiento por Canal / Origen y Dispositivos -->
-                        <div class="glass-panel radar-period-card">
-                            <div class="radar-panel-header">
-                                <div>
-                                    <h3><i data-lucide="share-2"></i> Canales de Adquisición & Dispositivos</h3>
-                                    <small class="muted">Qué fuente trajo más visitas y prospectos en este corte</small>
-                                </div>
-                            </div>
-                            <div class="table-responsive">
-                                <table class="leads-table compact-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Canal / Origen</th>
-                                            <th>Sesiones</th>
-                                            <th>Scroll Medio</th>
-                                            <th>Intención / Leads</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="radarPeriodChannelsBody"></tbody>
-                                </table>
-                            </div>
-                        </div>
-
-                        <!-- Diagnóstico Ejecutivo Automático & Borrador de Reporte para Correo -->
-                        <div class="glass-panel radar-period-card">
-                            <div class="radar-panel-header">
-                                <div>
-                                    <h3><i data-lucide="sparkles"></i> Diagnóstico Ejecutivo & Borrador de Reporte</h3>
-                                    <small class="muted">Conclusiones automáticas del corte listas para compartir o
-                                        enviar por Gmail</small>
-                                </div>
-                                <button type="button" class="btn btn-outline btn-sm" id="btnCopyExecutiveReportText">
-                                    <i data-lucide="copy"></i>
-                                    <span>Copiar Resumen</span>
+                            <div class="radar-period-header-actions">
+                                <button type="button" class="btn btn-outline btn-sm" id="btnExportRadarPeriodCsv"
+                                    title="Descargar datos del corte en CSV / Excel">
+                                    <i data-lucide="download"></i>
+                                    <span>Exportar Excel (CSV)</span>
+                                </button>
+                                <button type="button" class="btn btn-outline btn-sm" id="btnPrintRadarPeriodReport"
+                                    title="Imprimir o guardar reporte ejecutivo en PDF">
+                                    <i data-lucide="printer"></i>
+                                    <span>Imprimir / PDF</span>
+                                </button>
+                                <button type="button" class="btn btn-primary btn-sm" id="btnPreviewGmailReport"
+                                    title="Enviar este corte ejecutivo por correo a Gmail">
+                                    <i data-lucide="send"></i>
+                                    <span>Enviar Reporte a Gmail</span>
                                 </button>
                             </div>
-                            <div class="radar-period-insights-body" id="radarPeriodInsightsBody">
-                                <!-- Inyectado dinámicamente -->
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-
-                <!-- ==================================================== -->
-                <!-- SUB-TAB 3: ANÁLISIS SEMANAL, QUINCENAL Y MENSUAL     -->
-                <!-- ==================================================== -->
-                <div class="radar-periods-layout" id="radarPeriodsTab" style="display: none;">
-
-                    <!-- Barra Superior de Corte Temporal y Acciones de Reporte -->
-                    <div class="radar-period-header glass-panel">
-                        <div class="radar-period-header-left">
-                            <div class="period-segmented-control" id="radarAnalysisPeriodControl">
-                                <button type="button" class="period-seg-btn" data-analysis-period="7d">
-                                    <i data-lucide="calendar"></i>
-                                    <span>Semanal (7 Días)</span>
-                                </button>
-                                <button type="button" class="period-seg-btn active" data-analysis-period="15d">
-                                    <i data-lucide="calendar-days"></i>
-                                    <span>Quincenal (15 Días)</span>
-                                </button>
-                                <button type="button" class="period-seg-btn" data-analysis-period="30d">
-                                    <i data-lucide="calendar-range"></i>
-                                    <span>Mensual (30 Días)</span>
-                                </button>
-                            </div>
-                            <div class="period-range-meta">
-                                <span class="period-range-badge" id="radarPeriodRangeBadge">Cargando rango...</span>
-                                <small class="muted" id="radarPeriodSiteSubtitle">Comparado automáticamente contra el
-                                    periodo inmediato anterior</small>
-                            </div>
-                        </div>
-
-                        <div class="radar-period-header-actions">
-                            <button type="button" class="btn btn-outline btn-sm" id="btnExportRadarPeriodCsv"
-                                title="Descargar datos del corte en CSV / Excel">
-                                <i data-lucide="download"></i>
-                                <span>Exportar Excel (CSV)</span>
-                            </button>
-                            <button type="button" class="btn btn-outline btn-sm" id="btnPrintRadarPeriodReport"
-                                title="Imprimir o guardar reporte ejecutivo en PDF">
-                                <i data-lucide="printer"></i>
-                                <span>Imprimir / PDF</span>
-                            </button>
-                            <button type="button" class="btn btn-primary btn-sm" id="btnPreviewGmailReport"
-                                title="Enviar este corte ejecutivo por correo a Gmail">
-                                <i data-lucide="send"></i>
-                                <span>Enviar Reporte a Gmail</span>
-                            </button>
                         </div>
                     </div>
 
