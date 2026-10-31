@@ -220,10 +220,10 @@ module.exports = async function handler(req, res) {
     }
 
     // Rate Limiting por IP
-    const clientIp = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || 
-                     req.headers['x-real-ip'] || 
-                     req.socket?.remoteAddress || 
-                     '127.0.0.1';
+    const clientIp = req.headers['x-forwarded-for']?.split(',')[0]?.trim() ||
+        req.headers['x-real-ip'] ||
+        req.socket?.remoteAddress ||
+        '127.0.0.1';
 
     if (isRateLimited(clientIp)) {
         return res.status(429).json({
@@ -455,7 +455,7 @@ module.exports = async function handler(req, res) {
                         'Accept': 'application/json'
                     },
                     body: JSON.stringify(emailFields)
-                }).catch(() => {});
+                }).catch(() => { });
             }
         } catch (emailErr) {
             console.warn('[Email Dispatch Warning]:', emailErr.message);
