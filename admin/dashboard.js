@@ -11,14 +11,27 @@ document.addEventListener('DOMContentLoaded', () => {
         leads: [],
         filteredLeads: [],
         activeLead: null,
-        currentView: 'pipeline', // 'pipeline', 'table', 'creditos', 'analytics'
+        currentView: 'pipeline', // 'pipeline', 'table', 'creditos', 'radar', 'analytics'
         statusFilter: 'all',
         searchTerm: '',
         charts: {},
         creditos: [],
         filteredCreditos: [],
         creditoFilter: 'all',
-        activeCredito: null
+        activeCredito: null,
+        radar: {
+            sitios: [],
+            sesiones: [],
+            eventos: [],
+            filteredSesiones: [],
+            activeSessionId: null,
+            siteFilter: 'all',
+            periodFilter: 'all',
+            visitorFilter: 'all',
+            activeTab: 'sessions',
+            heatmapPage: 'all',
+            heatmapDevice: 'all'
+        }
     };
 
     // DOM Elements - Navigation & Views
@@ -37,12 +50,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const tableViewContainer = document.getElementById('tableViewContainer');
     const analyticsViewContainer = document.getElementById('analyticsViewContainer');
     const creditosViewContainer = document.getElementById('creditosViewContainer');
+    const radarViewContainer = document.getElementById('radarViewContainer');
 
     const btnViewKanban = document.getElementById('btnViewKanban');
     const btnViewTable = document.getElementById('btnViewTable');
     const btnViewCreditos = document.getElementById('btnViewCreditos');
+    const btnViewRadar = document.getElementById('btnViewRadar');
     const btnViewCharts = document.getElementById('btnViewCharts');
     const badgeCreditosAlert = document.getElementById('badgeCreditosAlert');
+    const badgeOnlineNow = document.getElementById('badgeOnlineNow');
 
     // Créditos DOM Elements
     const creditosGrid = document.getElementById('creditosGrid');
@@ -383,6 +399,7 @@ document.addEventListener('DOMContentLoaded', () => {
         updateLastActivity();
         fetchLeads();
         fetchCreditos();
+        fetchRadarData();
         setupRealtimeSubscription();
     }
 
@@ -658,6 +675,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'historial_pagos_credito' }, () => {
                     fetchCreditos();
                 })
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'telemetria_sesiones' }, () => {
+                    fetchRadarData();
+                })
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'telemetria_eventos' }, () => {
+                    fetchRadarData();
+                })
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'telemetria_sitios' }, () => {
+                    fetchRadarData();
+                })
                 .subscribe();
         } catch (err) {
             console.error('Error al iniciar suscripción Realtime:', err);
@@ -749,16 +775,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         applyCreditosFilters();
+        populateRadarSiteSelector();
     }
 
     // -------------------------------------------------------------
-    // 3. CAMBIO DE VISTAS (Kanban, Tabla, Créditos, Gráficos)
+    // 3. CAMBIO DE VISTAS (Kanban, Tabla, Créditos, Radar, Gráficos)
     // -------------------------------------------------------------
     function switchView(viewName) {
         state.currentView = viewName;
 
         // Actualizar botones de topbar
-        [btnViewKanban, btnViewTable, btnViewCreditos, btnViewCharts].forEach(btn => {
+        [btnViewKanban, btnViewTable, btnViewCreditos, btnViewRadar, btnViewCharts].forEach(btn => {
             if (btn) btn.classList.remove('active');
         });
         document.querySelectorAll('.sidebar-nav .nav-item').forEach(item => item.classList.remove('active'));
@@ -767,6 +794,7 @@ document.addEventListener('DOMContentLoaded', () => {
         tableViewContainer.style.display = 'none';
         analyticsViewContainer.style.display = 'none';
         if (creditosViewContainer) creditosViewContainer.style.display = 'none';
+        if (radarViewContainer) radarViewContainer.style.display = 'none';
 
         if (viewName === 'pipeline') {
             if (btnViewKanban) btnViewKanban.classList.add('active');
@@ -786,6 +814,12 @@ document.addEventListener('DOMContentLoaded', () => {
             if (creditosViewContainer) creditosViewContainer.style.display = 'flex';
             currentViewTitle.textContent = 'Créditos & Control de Sitios (Killswitch)';
             renderCreditos();
+        } else if (viewName === 'radar') {
+            if (btnViewRadar) btnViewRadar.classList.add('active');
+            document.querySelector('.sidebar-nav .nav-item[data-view="radar"]')?.classList.add('active');
+            if (radarViewContainer) radarViewContainer.style.display = 'flex';
+            currentViewTitle.textContent = 'Radar & Tráfico Web Multi-Sitio (En Vivo)';
+            renderRadar();
         } else if (viewName === 'analytics') {
             if (btnViewCharts) btnViewCharts.classList.add('active');
             document.querySelector('.sidebar-nav .nav-item[data-view="analytics"]')?.classList.add('active');
@@ -819,6 +853,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnViewKanban) btnViewKanban.addEventListener('click', () => switchView('pipeline'));
     if (btnViewTable) btnViewTable.addEventListener('click', () => switchView('table'));
     if (btnViewCreditos) btnViewCreditos.addEventListener('click', () => switchView('creditos'));
+    if (btnViewRadar) btnViewRadar.addEventListener('click', () => switchView('radar'));
     if (btnViewCharts) btnViewCharts.addEventListener('click', () => switchView('analytics'));
 
     document.querySelectorAll('.sidebar-nav .nav-item').forEach(item => {
@@ -867,6 +902,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (state.currentView === 'pipeline') renderKanban();
         else if (state.currentView === 'table') renderTable();
+        else if (state.currentView === 'creditos') applyCreditosFilters();
+        else if (state.currentView === 'radar') applyRadarFilters();
         else if (state.currentView === 'analytics') renderCharts();
     }
 
@@ -1278,6 +1315,9 @@ document.addEventListener('DOMContentLoaded', () => {
         // Email Link
         modalMailBtn.href = `mailto:${lead.correo}?subject=${encodeURIComponent('Contacto VOX Business Developer - ' + lead.servicio)}`;
 
+        // Renderizar Recorrido Web vinculado al Lead (VOX Radar)
+        renderLeadRadarJourney(lead);
+
         leadModal.style.display = 'flex';
         if (window.lucide) window.lucide.createIcons();
     }
@@ -1417,7 +1457,12 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    refreshBtn.addEventListener('click', () => fetchLeads());
+    refreshBtn.addEventListener('click', () => {
+        fetchLeads();
+        fetchCreditos();
+        fetchRadarData();
+        showToast('Datos de prospectos, créditos y radar actualizados.', 'info', 'Panel Sincronizado');
+    });
 
     // Exportar Excel (.xlsx) con Formato Profesional
     exportCsvBtn.addEventListener('click', () => {
@@ -2650,6 +2695,1176 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+
+    // -------------------------------------------------------------
+    // 11. LÓGICA DEL MÓDULO RADAR & TRÁFICO WEB MULTI-SITIO
+    // -------------------------------------------------------------
+    const radarSiteSelect = document.getElementById('radarSiteSelect');
+    const radarPeriodSelect = document.getElementById('radarPeriodSelect');
+    const radarVisitorFilterSelect = document.getElementById('radarVisitorFilterSelect');
+    const btnRadarViewScript = document.getElementById('btnRadarViewScript');
+    const btnOpenNuevoSitioMonitoreoModal = document.getElementById('btnOpenNuevoSitioMonitoreoModal');
+
+    const nuevoSitioMonitoreoModal = document.getElementById('nuevoSitioMonitoreoModal');
+    const closeNuevoSitioMonitoreoBtn = document.getElementById('closeNuevoSitioMonitoreoBtn');
+    const cancelNuevoSitioMonitoreoBtn = document.getElementById('cancelNuevoSitioMonitoreoBtn');
+    const nuevoSitioMonitoreoForm = document.getElementById('nuevoSitioMonitoreoForm');
+
+    const btnRadarTabSessions = document.getElementById('btnRadarTabSessions');
+    const btnRadarTabHeatmap = document.getElementById('btnRadarTabHeatmap');
+    const radarSessionsTab = document.getElementById('radarSessionsTab');
+    const radarHeatmapTab = document.getElementById('radarHeatmapTab');
+
+    const radarSessionsList = document.getElementById('radarSessionsList');
+    const emptyRadarSessions = document.getElementById('emptyRadarSessions');
+    const radarSessionsCountLabel = document.getElementById('radarSessionsCountLabel');
+    const radarVisitorDetailHeader = document.getElementById('radarVisitorDetailHeader');
+    const radarVisitorTimelineBody = document.getElementById('radarVisitorTimelineBody');
+
+    const heatmapPageSelect = document.getElementById('heatmapPageSelect');
+    const heatmapDeviceSelect = document.getElementById('heatmapDeviceSelect');
+    const heatmapDotsContainer = document.getElementById('heatmapDotsContainer');
+    const radarTopPagesBody = document.getElementById('radarTopPagesBody');
+    const radarTopElementsBody = document.getElementById('radarTopElementsBody');
+
+    const LOCAL_SESSIONS_CACHE = 'vox_telemetry_sessions_cache';
+    const LOCAL_EVENTS_CACHE = 'vox_telemetry_events_cache';
+    const LOCAL_SITIOS_CACHE = 'vox_telemetry_sitios_cache';
+    const ONLINE_THRESHOLD_MS = 2.5 * 60 * 1000; // 2.5 minutos para considerar Online Ahora
+
+    function isSessionOnline(session) {
+        if (!session || !session.last_seen_at) return false;
+        return (Date.now() - new Date(session.last_seen_at).getTime()) <= ONLINE_THRESHOLD_MS;
+    }
+
+    function getSiteDisplayName(siteKey) {
+        if (!siteKey || siteKey === 'vox_site_official') {
+            return 'VOX Oficial (voxbusinessdeveloper.com)';
+        }
+        const matchCred = state.creditos.find(c => c.site_key === siteKey);
+        if (matchCred) {
+            return `${matchCred.cliente_nombre} (${matchCred.dominio_url})`;
+        }
+        const matchMon = state.radar.sitios.find(s => s.site_key === siteKey);
+        if (matchMon) {
+            return `${matchMon.nombre_sitio} (${matchMon.dominio_url})`;
+        }
+        return siteKey;
+    }
+
+    function seedDemoRadarIfNeeded() {
+        try {
+            const existingSessions = JSON.parse(localStorage.getItem(LOCAL_SESSIONS_CACHE) || '[]');
+            if (existingSessions.length > 0) return;
+
+            const now = Date.now();
+            const demoSitios = [
+                {
+                    id: 'mon_demo_1',
+                    site_key: 'vox_mon_torreaura2026',
+                    nombre_sitio: 'Torre Aura Residencial',
+                    dominio_url: 'https://torreaura.mx',
+                    cliente_nombre: 'Desarrollos Aura (Contado)',
+                    activo: true,
+                    notas: 'Landing page de preventa inmobiliaria'
+                }
+            ];
+            localStorage.setItem(LOCAL_SITIOS_CACHE, JSON.stringify(demoSitios));
+
+            const demoSessions = [
+                {
+                    session_id: 'vsess_demo_live_1',
+                    visitor_id: 'vusr_alejandro_01',
+                    site_key: 'vox_site_official',
+                    dominio: 'voxbusinessdeveloper.com',
+                    started_at: new Date(now - 220 * 1000).toISOString(),
+                    last_seen_at: new Date(now - 25 * 1000).toISOString(),
+                    duration_seconds: 195,
+                    max_scroll_pct: 100,
+                    entry_url: '/',
+                    current_url: '/servicios/branding.html',
+                    referrer: 'Instagram',
+                    utm_source: 'instagram',
+                    utm_medium: 'reels',
+                    utm_campaign: 'lanzamiento_vox',
+                    device_type: 'mobile',
+                    os: 'iOS',
+                    browser: 'Safari',
+                    screen_res: '390x844',
+                    language: 'es-MX',
+                    timezone: 'America/Mexico_City',
+                    page_views_count: 3,
+                    clicks_count: 6,
+                    whatsapp_clicks: 1,
+                    form_interacted: true,
+                    converted_to_lead: true,
+                    lead_nombre: 'Alejandro Morales',
+                    lead_correo: 'amorales@vanguardia.mx'
+                },
+                {
+                    session_id: 'vsess_demo_live_2',
+                    visitor_id: 'vusr_arquitectura_89',
+                    site_key: 'vox_site_official',
+                    dominio: 'voxbusinessdeveloper.com',
+                    started_at: new Date(now - 95 * 1000).toISOString(),
+                    last_seen_at: new Date(now - 12 * 1000).toISOString(),
+                    duration_seconds: 83,
+                    max_scroll_pct: 75,
+                    entry_url: '/servicios/arquitectura.html',
+                    current_url: '/servicios/arquitectura.html',
+                    referrer: 'Google Search',
+                    utm_source: 'google',
+                    utm_medium: 'cpc',
+                    utm_campaign: 'renders_3d',
+                    device_type: 'desktop',
+                    os: 'macOS',
+                    browser: 'Chrome',
+                    screen_res: '1728x1117',
+                    language: 'es-MX',
+                    timezone: 'America/Mexico_City',
+                    page_views_count: 2,
+                    clicks_count: 4,
+                    whatsapp_clicks: 1,
+                    form_interacted: true,
+                    converted_to_lead: false,
+                    lead_nombre: '',
+                    lead_correo: ''
+                },
+                {
+                    session_id: 'vsess_demo_ext_3',
+                    visitor_id: 'vusr_dental_44',
+                    site_key: 'vox_site_9f8a2b3c4d5e6f7a',
+                    dominio: 'dentalmendoza.com',
+                    started_at: new Date(now - 1800 * 1000).toISOString(),
+                    last_seen_at: new Date(now - 1650 * 1000).toISOString(),
+                    duration_seconds: 150,
+                    max_scroll_pct: 100,
+                    entry_url: '/',
+                    current_url: '/#citas',
+                    referrer: 'Facebook',
+                    utm_source: 'fb_ads',
+                    utm_medium: 'social',
+                    utm_campaign: 'blanqueamiento',
+                    device_type: 'mobile',
+                    os: 'Android',
+                    browser: 'Chrome',
+                    screen_res: '412x915',
+                    language: 'es-MX',
+                    timezone: 'America/Merida',
+                    page_views_count: 2,
+                    clicks_count: 5,
+                    whatsapp_clicks: 2,
+                    form_interacted: false,
+                    converted_to_lead: false,
+                    lead_nombre: '',
+                    lead_correo: ''
+                },
+                {
+                    session_id: 'vsess_demo_ext_4',
+                    visitor_id: 'vusr_aura_12',
+                    site_key: 'vox_mon_torreaura2026',
+                    dominio: 'torreaura.mx',
+                    started_at: new Date(now - 3400 * 1000).toISOString(),
+                    last_seen_at: new Date(now - 3190 * 1000).toISOString(),
+                    duration_seconds: 210,
+                    max_scroll_pct: 75,
+                    entry_url: '/',
+                    current_url: '/#departamentos',
+                    referrer: 'Google Search',
+                    utm_source: '',
+                    utm_medium: '',
+                    utm_campaign: '',
+                    device_type: 'desktop',
+                    os: 'Windows',
+                    browser: 'Edge',
+                    screen_res: '1920x1080',
+                    language: 'es-MX',
+                    timezone: 'America/Mexico_City',
+                    page_views_count: 2,
+                    clicks_count: 4,
+                    whatsapp_clicks: 1,
+                    form_interacted: true,
+                    converted_to_lead: false,
+                    lead_nombre: '',
+                    lead_correo: ''
+                }
+            ];
+
+            const demoEvents = [
+                // Eventos de Alejandro Morales (Convertido en Lead)
+                {
+                    id: 'ev_101',
+                    created_at: new Date(now - 220 * 1000).toISOString(),
+                    session_id: 'vsess_demo_live_1',
+                    visitor_id: 'vusr_alejandro_01',
+                    site_key: 'vox_site_official',
+                    event_type: 'pageview',
+                    page_url: 'https://voxbusinessdeveloper.com/',
+                    page_path: '/',
+                    page_title: 'VOX Business Developer | Inicio',
+                    section_id: 'inicio',
+                    element_text: 'Entró a página principal (/) desde Instagram',
+                    scroll_pct: 0
+                },
+                {
+                    id: 'ev_102',
+                    created_at: new Date(now - 190 * 1000).toISOString(),
+                    session_id: 'vsess_demo_live_1',
+                    visitor_id: 'vusr_alejandro_01',
+                    site_key: 'vox_site_official',
+                    event_type: 'section_view',
+                    page_path: '/',
+                    section_id: 'servicios',
+                    element_text: 'Vio sección #servicios (Soluciones Integrales VOX)'
+                },
+                {
+                    id: 'ev_103',
+                    created_at: new Date(now - 165 * 1000).toISOString(),
+                    session_id: 'vsess_demo_live_1',
+                    visitor_id: 'vusr_alejandro_01',
+                    site_key: 'vox_site_official',
+                    event_type: 'scroll_milestone',
+                    page_path: '/',
+                    scroll_pct: 50,
+                    element_text: 'Alcanzó el 50% de scroll en /'
+                },
+                {
+                    id: 'ev_104',
+                    created_at: new Date(now - 140 * 1000).toISOString(),
+                    session_id: 'vsess_demo_live_1',
+                    visitor_id: 'vusr_alejandro_01',
+                    site_key: 'vox_site_official',
+                    event_type: 'click',
+                    page_path: '/',
+                    section_id: 'servicios',
+                    element_tag: 'a',
+                    element_text: 'Branding y Desarrollo de Marca',
+                    element_href: '/servicios/branding.html',
+                    click_x_pct: 62.4,
+                    click_y_pct: 38.5
+                },
+                {
+                    id: 'ev_105',
+                    created_at: new Date(now - 135 * 1000).toISOString(),
+                    session_id: 'vsess_demo_live_1',
+                    visitor_id: 'vusr_alejandro_01',
+                    site_key: 'vox_site_official',
+                    event_type: 'pageview',
+                    page_path: '/servicios/branding.html',
+                    page_title: 'Branding Corporativo | VOX',
+                    element_text: 'Navegó a /servicios/branding.html'
+                },
+                {
+                    id: 'ev_106',
+                    created_at: new Date(now - 80 * 1000).toISOString(),
+                    session_id: 'vsess_demo_live_1',
+                    visitor_id: 'vusr_alejandro_01',
+                    site_key: 'vox_site_official',
+                    event_type: 'form_start',
+                    page_path: '/',
+                    section_id: 'contacto',
+                    element_tag: 'form',
+                    element_text: 'Inició llenado de formulario (campo: nombre)',
+                    click_x_pct: 48.2,
+                    click_y_pct: 84.1
+                },
+                {
+                    id: 'ev_107',
+                    created_at: new Date(now - 35 * 1000).toISOString(),
+                    session_id: 'vsess_demo_live_1',
+                    visitor_id: 'vusr_alejandro_01',
+                    site_key: 'vox_site_official',
+                    event_type: 'form_submit',
+                    page_path: '/',
+                    section_id: 'contacto',
+                    element_tag: 'form',
+                    element_text: 'Lead Convertido: Alejandro Morales (Branding)',
+                    click_x_pct: 51.0,
+                    click_y_pct: 88.6
+                },
+                {
+                    id: 'ev_108',
+                    created_at: new Date(now - 25 * 1000).toISOString(),
+                    session_id: 'vsess_demo_live_1',
+                    visitor_id: 'vusr_alejandro_01',
+                    site_key: 'vox_site_official',
+                    event_type: 'cta_whatsapp',
+                    page_path: '/',
+                    section_id: 'contacto',
+                    element_tag: 'a',
+                    element_text: 'Botón Flotante WhatsApp Directo',
+                    click_x_pct: 92.5,
+                    click_y_pct: 91.2
+                },
+                // Eventos de Visitante #2 (Arquitectura)
+                {
+                    id: 'ev_201',
+                    created_at: new Date(now - 95 * 1000).toISOString(),
+                    session_id: 'vsess_demo_live_2',
+                    visitor_id: 'vusr_arquitectura_89',
+                    site_key: 'vox_site_official',
+                    event_type: 'pageview',
+                    page_path: '/servicios/arquitectura.html',
+                    page_title: 'Arquitectura y Visualización 3D | VOX',
+                    element_text: 'Entró a /servicios/arquitectura.html desde Google Search'
+                },
+                {
+                    id: 'ev_202',
+                    created_at: new Date(now - 60 * 1000).toISOString(),
+                    session_id: 'vsess_demo_live_2',
+                    visitor_id: 'vusr_arquitectura_89',
+                    site_key: 'vox_site_official',
+                    event_type: 'scroll_milestone',
+                    page_path: '/servicios/arquitectura.html',
+                    scroll_pct: 75,
+                    element_text: 'Alcanzó el 75% de la página'
+                },
+                {
+                    id: 'ev_203',
+                    created_at: new Date(now - 35 * 1000).toISOString(),
+                    session_id: 'vsess_demo_live_2',
+                    visitor_id: 'vusr_arquitectura_89',
+                    site_key: 'vox_site_official',
+                    event_type: 'click',
+                    page_path: '/servicios/arquitectura.html',
+                    section_id: 'gallery',
+                    element_tag: 'button',
+                    element_text: 'Ver Portafolio de Renders 3D',
+                    click_x_pct: 34.8,
+                    click_y_pct: 54.2
+                },
+                {
+                    id: 'ev_204',
+                    created_at: new Date(now - 12 * 1000).toISOString(),
+                    session_id: 'vsess_demo_live_2',
+                    visitor_id: 'vusr_arquitectura_89',
+                    site_key: 'vox_site_official',
+                    event_type: 'cta_whatsapp',
+                    page_path: '/servicios/arquitectura.html',
+                    section_id: 'cta',
+                    element_tag: 'a',
+                    element_text: 'Cotizar por WhatsApp',
+                    click_x_pct: 58.1,
+                    click_y_pct: 82.4
+                },
+                // Eventos Sitio Externo: Clínica Dental
+                {
+                    id: 'ev_301',
+                    created_at: new Date(now - 1800 * 1000).toISOString(),
+                    session_id: 'vsess_demo_ext_3',
+                    visitor_id: 'vusr_dental_44',
+                    site_key: 'vox_site_9f8a2b3c4d5e6f7a',
+                    event_type: 'pageview',
+                    page_path: '/',
+                    page_title: 'Clínica Dental Dra. Sofía Mendoza',
+                    element_text: 'Entró a dentalmendoza.com desde Facebook'
+                },
+                {
+                    id: 'ev_302',
+                    created_at: new Date(now - 1650 * 1000).toISOString(),
+                    session_id: 'vsess_demo_ext_3',
+                    visitor_id: 'vusr_dental_44',
+                    site_key: 'vox_site_9f8a2b3c4d5e6f7a',
+                    event_type: 'cta_whatsapp',
+                    page_path: '/',
+                    section_id: 'citas',
+                    element_tag: 'a',
+                    element_text: 'Agendar Cita Dental por WhatsApp',
+                    click_x_pct: 50.2,
+                    click_y_pct: 76.0
+                },
+                // Eventos Sitio Monitoreo: Torre Aura
+                {
+                    id: 'ev_401',
+                    created_at: new Date(now - 3400 * 1000).toISOString(),
+                    session_id: 'vsess_demo_ext_4',
+                    visitor_id: 'vusr_aura_12',
+                    site_key: 'vox_mon_torreaura2026',
+                    event_type: 'pageview',
+                    page_path: '/',
+                    page_title: 'Torre Aura Residencial | Preventa',
+                    element_text: 'Entró a torreaura.mx desde Google Search'
+                },
+                {
+                    id: 'ev_402',
+                    created_at: new Date(now - 3190 * 1000).toISOString(),
+                    session_id: 'vsess_demo_ext_4',
+                    visitor_id: 'vusr_aura_12',
+                    site_key: 'vox_mon_torreaura2026',
+                    event_type: 'form_abandon',
+                    page_path: '/',
+                    section_id: 'contacto',
+                    element_tag: 'form',
+                    element_text: 'Abandonó formulario de cotización sin enviar',
+                    click_x_pct: 44.5,
+                    click_y_pct: 80.3
+                }
+            ];
+
+            localStorage.setItem(LOCAL_SESSIONS_CACHE, JSON.stringify(demoSessions));
+            localStorage.setItem(LOCAL_EVENTS_CACHE, JSON.stringify(demoEvents));
+        } catch (e) {}
+    }
+
+    async function fetchRadarData() {
+        seedDemoRadarIfNeeded();
+
+        const localSitios = JSON.parse(localStorage.getItem(LOCAL_SITIOS_CACHE) || '[]');
+        const localSessions = JSON.parse(localStorage.getItem(LOCAL_SESSIONS_CACHE) || '[]');
+        const localEvents = JSON.parse(localStorage.getItem(LOCAL_EVENTS_CACHE) || '[]');
+
+        let cloudSitios = [];
+        let cloudSessions = [];
+        let cloudEvents = [];
+
+        const isConfigured = window.VOX_SUPABASE && window.VOX_SUPABASE.isConfigured();
+        if (isConfigured) {
+            try {
+                const [sitiosRes, sessRes, evRes] = await Promise.all([
+                    window.VOX_SUPABASE.client.from('telemetria_sitios').select('*').order('created_at', { ascending: false }),
+                    window.VOX_SUPABASE.client.from('telemetria_sesiones').select('*').order('last_seen_at', { ascending: false }).limit(200),
+                    window.VOX_SUPABASE.client.from('telemetria_eventos').select('*').order('created_at', { ascending: false }).limit(1000)
+                ]);
+
+                if (!sitiosRes.error && sitiosRes.data) cloudSitios = sitiosRes.data;
+                if (!sessRes.error && sessRes.data) cloudSessions = sessRes.data;
+                if (!evRes.error && evRes.data) cloudEvents = evRes.data;
+            } catch (err) {
+                // Si las tablas de telemetría aún no se han ejecutado en SQL Editor, usar espejo local de forma transparente
+            }
+        }
+
+        // Combinar sin duplicados por site_key / session_id / id
+        const sitiosMap = new Map();
+        [...localSitios, ...cloudSitios].forEach(s => {
+            if (s && s.site_key && s.site_key !== 'vox_site_official') {
+                sitiosMap.set(s.site_key, s);
+            }
+        });
+        state.radar.sitios = Array.from(sitiosMap.values());
+
+        const sessionsMap = new Map();
+        [...cloudSessions, ...localSessions].forEach(s => {
+            if (!s || !s.session_id) return;
+            const prev = sessionsMap.get(s.session_id);
+            if (!prev || new Date(s.last_seen_at || 0) >= new Date(prev.last_seen_at || 0)) {
+                sessionsMap.set(s.session_id, { ...(prev || {}), ...s });
+            }
+        });
+        state.radar.sesiones = Array.from(sessionsMap.values()).sort(
+            (a, b) => new Date(b.last_seen_at || 0).getTime() - new Date(a.last_seen_at || 0).getTime()
+        );
+
+        const eventsMap = new Map();
+        [...cloudEvents, ...localEvents].forEach(ev => {
+            if (!ev) return;
+            const key = ev.id || `${ev.session_id}_${ev.event_type}_${ev.created_at}`;
+            if (!eventsMap.has(key)) {
+                eventsMap.set(key, ev);
+            }
+        });
+        state.radar.eventos = Array.from(eventsMap.values()).sort(
+            (a, b) => new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime()
+        );
+
+        populateRadarSiteSelector();
+        applyRadarFilters();
+    }
+
+    function populateRadarSiteSelector() {
+        if (!radarSiteSelect) return;
+        const currentVal = state.radar.siteFilter || 'all';
+
+        let html = `
+            <option value="all">🌐 Todos los Sitios Conectados</option>
+            <option value="vox_site_official">⚡ VOX Business Developer (Sitio Oficial)</option>
+        `;
+
+        if (state.creditos && state.creditos.length > 0) {
+            html += `<optgroup label="Sitios en Créditos & Cobranza">`;
+            state.creditos.forEach(c => {
+                html += `<option value="${escapeHtml(c.site_key)}">💳 ${escapeHtml(c.cliente_nombre)} (${escapeHtml(c.dominio_url)})</option>`;
+            });
+            html += `</optgroup>`;
+        }
+
+        if (state.radar.sitios && state.radar.sitios.length > 0) {
+            html += `<optgroup label="Sitios Externos de Solo Monitoreo">`;
+            state.radar.sitios.forEach(s => {
+                html += `<option value="${escapeHtml(s.site_key)}">📡 ${escapeHtml(s.nombre_sitio)} (${escapeHtml(s.dominio_url)})</option>`;
+            });
+            html += `</optgroup>`;
+        }
+
+        radarSiteSelect.innerHTML = html;
+        if ([...radarSiteSelect.options].some(o => o.value === currentVal)) {
+            radarSiteSelect.value = currentVal;
+        } else {
+            state.radar.siteFilter = 'all';
+            radarSiteSelect.value = 'all';
+        }
+    }
+
+    function applyRadarFilters() {
+        const now = Date.now();
+        let list = [...state.radar.sesiones];
+
+        // 1. Filtro por Sitio
+        if (state.radar.siteFilter !== 'all') {
+            list = list.filter(s => s.site_key === state.radar.siteFilter);
+        }
+
+        // 2. Filtro por Periodo
+        if (state.radar.periodFilter === 'today') {
+            list = list.filter(s => (now - new Date(s.last_seen_at || s.started_at).getTime()) <= 24 * 3600 * 1000);
+        } else if (state.radar.periodFilter === '7d') {
+            list = list.filter(s => (now - new Date(s.last_seen_at || s.started_at).getTime()) <= 7 * 24 * 3600 * 1000);
+        } else if (state.radar.periodFilter === '30d') {
+            list = list.filter(s => (now - new Date(s.last_seen_at || s.started_at).getTime()) <= 30 * 24 * 3600 * 1000);
+        }
+
+        // 3. Filtro por Tipo de Visitante
+        if (state.radar.visitorFilter === 'online') {
+            list = list.filter(s => isSessionOnline(s));
+        } else if (state.radar.visitorFilter === 'lead') {
+            list = list.filter(s => s.converted_to_lead);
+        } else if (state.radar.visitorFilter === 'whatsapp') {
+            list = list.filter(s => (s.whatsapp_clicks || 0) > 0);
+        } else if (state.radar.visitorFilter === 'form') {
+            list = list.filter(s => s.form_interacted);
+        }
+
+        // 4. Filtro por caja de búsqueda superior
+        if (state.searchTerm) {
+            const term = state.searchTerm.toLowerCase();
+            list = list.filter(s =>
+                (s.lead_nombre && s.lead_nombre.toLowerCase().includes(term)) ||
+                (s.lead_correo && s.lead_correo.toLowerCase().includes(term)) ||
+                (s.visitor_id && s.visitor_id.toLowerCase().includes(term)) ||
+                (s.dominio && s.dominio.toLowerCase().includes(term)) ||
+                (s.referrer && s.referrer.toLowerCase().includes(term)) ||
+                (s.current_url && s.current_url.toLowerCase().includes(term)) ||
+                (s.os && s.os.toLowerCase().includes(term))
+            );
+        }
+
+        state.radar.filteredSesiones = list;
+
+        // Seleccionar por defecto la primera sesión si no hay una activa en la lista
+        if (!state.radar.activeSessionId || !list.some(s => s.session_id === state.radar.activeSessionId)) {
+            state.radar.activeSessionId = list.length > 0 ? list[0].session_id : null;
+        }
+
+        updateRadarKPIs();
+        if (state.currentView === 'radar') {
+            renderRadar();
+        }
+    }
+
+    function updateRadarKPIs() {
+        const allOnlineCount = state.radar.sesiones.filter(s => isSessionOnline(s)).length;
+        if (badgeOnlineNow) {
+            badgeOnlineNow.textContent = allOnlineCount;
+        }
+
+        const list = state.radar.filteredSesiones;
+        const onlineFiltered = list.filter(s => isSessionOnline(s)).length;
+        const totalSessions = list.length;
+        const uniqueVisitors = new Set(list.map(s => s.visitor_id)).size;
+
+        const totalWaClicks = list.reduce((acc, s) => acc + (parseInt(s.whatsapp_clicks || 0, 10)), 0);
+        const totalConverted = list.filter(s => s.converted_to_lead).length;
+        const totalForm = list.filter(s => s.form_interacted).length;
+        const totalIntent = totalWaClicks + totalConverted + totalForm;
+
+        const avgDuration = totalSessions > 0
+            ? Math.round(list.reduce((acc, s) => acc + (parseInt(s.duration_seconds || 0, 10)), 0) / totalSessions)
+            : 0;
+        const avgScroll = totalSessions > 0
+            ? Math.round(list.reduce((acc, s) => acc + (parseInt(s.max_scroll_pct || 0, 10)), 0) / totalSessions)
+            : 0;
+
+        const elOnline = document.getElementById('kpiRadarOnline');
+        const elOnlineSub = document.getElementById('kpiRadarOnlineSub');
+        const elSessions = document.getElementById('kpiRadarSessions');
+        const elVisitorsSub = document.getElementById('kpiRadarVisitorsSub');
+        const elIntent = document.getElementById('kpiRadarIntent');
+        const elIntentSub = document.getElementById('kpiRadarIntentSub');
+        const elEngagement = document.getElementById('kpiRadarEngagement');
+        const elScrollSub = document.getElementById('kpiRadarScrollSub');
+
+        if (elOnline) elOnline.textContent = onlineFiltered;
+        if (elOnlineSub) elOnlineSub.textContent = onlineFiltered === 1 ? '1 persona navegando ahora' : `${onlineFiltered} personas activas (últ. 2 min)`;
+        if (elSessions) elSessions.textContent = totalSessions;
+        if (elVisitorsSub) elVisitorsSub.textContent = `${uniqueVisitors} visitante${uniqueVisitors === 1 ? '' : 's'} único${uniqueVisitors === 1 ? '' : 's'}`;
+        if (elIntent) elIntent.textContent = totalIntent;
+        if (elIntentSub) elIntentSub.textContent = `${totalWaClicks} WhatsApp · ${totalForm} Form · ${totalConverted} Leads`;
+        if (elEngagement) elEngagement.textContent = formatDuration(avgDuration);
+        if (elScrollSub) elScrollSub.textContent = `${avgScroll}% profundidad media de scroll`;
+    }
+
+    function formatDuration(seconds) {
+        const sec = Math.max(0, parseInt(seconds || 0, 10));
+        if (sec < 60) return `${sec}s`;
+        const m = Math.floor(sec / 60);
+        const r = sec % 60;
+        return `${m}m ${r}s`;
+    }
+
+    function formatRelativeTime(isoDate) {
+        if (!isoDate) return 'Hace instantes';
+        const diffSec = Math.max(0, Math.round((Date.now() - new Date(isoDate).getTime()) / 1000));
+        if (diffSec < 45) return 'En vivo ahora';
+        if (diffSec < 3600) return `Hace ${Math.floor(diffSec / 60)} min`;
+        if (diffSec < 86400) return `Hace ${Math.floor(diffSec / 3600)} h`;
+        return new Date(isoDate).toLocaleDateString('es-MX', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+    }
+
+    function renderRadar() {
+        if (state.radar.activeTab === 'heatmap') {
+            if (radarSessionsTab) radarSessionsTab.style.display = 'none';
+            if (radarHeatmapTab) radarHeatmapTab.style.display = 'grid';
+            renderRadarHeatmapAndRankings();
+        } else {
+            if (radarSessionsTab) radarSessionsTab.style.display = 'grid';
+            if (radarHeatmapTab) radarHeatmapTab.style.display = 'none';
+            renderRadarSessionsAndTimeline();
+        }
+        if (window.lucide) window.lucide.createIcons();
+    }
+
+    function renderRadarSessionsAndTimeline() {
+        if (!radarSessionsList) return;
+        radarSessionsList.innerHTML = '';
+
+        const list = state.radar.filteredSesiones;
+        if (radarSessionsCountLabel) {
+            radarSessionsCountLabel.textContent = `${list.length} sesión${list.length === 1 ? '' : 'es'} encontrada${list.length === 1 ? '' : 's'}`;
+        }
+
+        if (list.length === 0) {
+            if (emptyRadarSessions) emptyRadarSessions.style.display = 'flex';
+            if (radarVisitorDetailHeader) {
+                radarVisitorDetailHeader.innerHTML = `<div class="empty-state" style="padding:24px 0;"><p>Selecciona o espera una sesión para inspeccionar su recorrido.</p></div>`;
+            }
+            if (radarVisitorTimelineBody) radarVisitorTimelineBody.innerHTML = '';
+            return;
+        }
+
+        if (emptyRadarSessions) emptyRadarSessions.style.display = 'none';
+
+        list.forEach(sess => {
+            const online = isSessionOnline(sess);
+            const isSelected = sess.session_id === state.radar.activeSessionId;
+            const shortVid = (sess.visitor_id || 'anon').slice(-6).toUpperCase();
+            const displayName = sess.lead_nombre
+                ? `${sess.lead_nombre}`
+                : `Visitante #${shortVid}`;
+
+            const deviceIcon = sess.device_type === 'mobile' ? 'smartphone' : (sess.device_type === 'tablet' ? 'tablet' : 'monitor');
+            const card = document.createElement('div');
+            card.className = `radar-session-card ${isSelected ? 'active' : ''}`;
+
+            card.innerHTML = `
+                <div class="radar-session-top">
+                    <div class="radar-visitor-identity">
+                        <span class="${online ? 'status-dot-live' : 'status-dot-offline'}" title="${online ? 'Conectado ahora' : 'Sesión finalizada'}"></span>
+                        <span>${escapeHtml(displayName)}</span>
+                    </div>
+                    <span class="radar-session-time">${formatRelativeTime(sess.last_seen_at)}</span>
+                </div>
+
+                <div class="radar-session-meta">
+                    <span class="radar-meta-pill"><i data-lucide="${deviceIcon}" style="width:12px;height:12px;"></i> ${escapeHtml(sess.os || sess.device_type || 'Web')}</span>
+                    <span class="radar-meta-pill"><i data-lucide="compass" style="width:12px;height:12px;"></i> ${escapeHtml(sess.referrer || 'Directo')}</span>
+                    <span class="radar-meta-pill"><i data-lucide="clock" style="width:12px;height:12px;"></i> ${formatDuration(sess.duration_seconds)}</span>
+                    <span class="radar-meta-pill"><i data-lucide="arrow-down-circle" style="width:12px;height:12px;"></i> ${sess.max_scroll_pct || 0}%</span>
+                </div>
+
+                <div class="radar-session-badges">
+                    <span class="radar-mini-tag tag-site">${escapeHtml(sess.dominio || getSiteDisplayName(sess.site_key))}</span>
+                    ${sess.converted_to_lead ? `<span class="radar-mini-tag tag-lead">🔥 Lead CRM</span>` : ''}
+                    ${(sess.whatsapp_clicks || 0) > 0 ? `<span class="radar-mini-tag tag-wa">💬 WhatsApp (${sess.whatsapp_clicks})</span>` : ''}
+                    ${sess.form_interacted && !sess.converted_to_lead ? `<span class="radar-mini-tag tag-form">📝 Tocó Formulario</span>` : ''}
+                </div>
+            `;
+
+            card.addEventListener('click', () => {
+                state.radar.activeSessionId = sess.session_id;
+                renderRadarSessionsAndTimeline();
+                if (window.lucide) window.lucide.createIcons();
+            });
+
+            radarSessionsList.appendChild(card);
+        });
+
+        const activeSession = list.find(s => s.session_id === state.radar.activeSessionId) || list[0];
+        renderVisitorDetailAndTimeline(activeSession);
+    }
+
+    function getEventLabelAndIcon(ev) {
+        switch (ev.event_type) {
+            case 'pageview':
+                return { icon: 'eye', label: 'Vista de Página', color: '#58a6ff' };
+            case 'section_view':
+                return { icon: 'layout', label: 'Lectura de Sección', color: '#c9a86a' };
+            case 'scroll_milestone':
+                return { icon: 'arrow-down', label: `Profundidad de Scroll (${ev.scroll_pct || 0}%)`, color: '#a371f7' };
+            case 'cta_whatsapp':
+                return { icon: 'message-circle', label: 'Clic en WhatsApp Directo', color: '#25D366' };
+            case 'cta_phone':
+                return { icon: 'phone-call', label: 'Clic en Llamada Telefónica', color: '#2ecc71' };
+            case 'cta_email':
+                return { icon: 'mail', label: 'Clic en Correo Electrónico', color: '#388bfd' };
+            case 'form_start':
+                return { icon: 'edit-3', label: 'Inicio de Formulario', color: '#4c82f7' };
+            case 'form_submit':
+                return { icon: 'check-circle-2', label: 'Formulario Enviado / Conversión Lead', color: '#ff6a00' };
+            case 'form_abandon':
+                return { icon: 'alert-triangle', label: 'Abandono de Formulario', color: '#ff6b6b' };
+            default:
+                return { icon: 'mouse-pointer-click', label: 'Clic de Usuario', color: '#e0c588' };
+        }
+    }
+
+    function renderVisitorDetailAndTimeline(sess) {
+        if (!sess || !radarVisitorDetailHeader || !radarVisitorTimelineBody) return;
+
+        const online = isSessionOnline(sess);
+        const shortVid = (sess.visitor_id || 'anon').slice(-6).toUpperCase();
+        const titleName = sess.lead_nombre
+            ? `${sess.lead_nombre} (${sess.lead_correo || 'Lead Identificado'})`
+            : `Visitante Anónimo #${shortVid}`;
+
+        // Buscar si existe en state.leads para botón directo al CRM
+        const matchedLead = state.leads.find(l =>
+            (sess.lead_correo && l.correo && l.correo.toLowerCase() === sess.lead_correo.toLowerCase()) ||
+            (l.notas && l.notas.includes(sess.session_id))
+        );
+
+        radarVisitorDetailHeader.innerHTML = `
+            <div class="visitor-summary-top">
+                <div class="visitor-summary-title">
+                    <h3>
+                        <span class="${online ? 'status-dot-live' : 'status-dot-offline'}"></span>
+                        <span>${escapeHtml(titleName)}</span>
+                        ${online ? `<span class="badge badge-success" style="font-size:0.68rem;">ONLINE AHORA</span>` : ''}
+                    </h3>
+                    <div class="visitor-summary-sub">
+                        Sitio: <strong style="color:var(--gold-primary);">${escapeHtml(getSiteDisplayName(sess.site_key))}</strong>
+                        · Sesión ID: <code>${escapeHtml(sess.session_id)}</code>
+                    </div>
+                </div>
+                <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                    ${matchedLead ? `
+                        <button type="button" class="btn btn-primary btn-sm" id="btnOpenMatchedLeadFromRadar">
+                            <i data-lucide="user-check"></i>
+                            <span>Abrir Ficha Lead CRM</span>
+                        </button>
+                    ` : ''}
+                </div>
+            </div>
+
+            <div class="visitor-specs-grid">
+                <div class="visitor-spec-item">
+                    <span class="visitor-spec-lbl">Origen / Referrer</span>
+                    <span class="visitor-spec-val">${escapeHtml(sess.referrer || 'Directo')}${sess.utm_campaign ? ` (${escapeHtml(sess.utm_campaign)})` : ''}</span>
+                </div>
+                <div class="visitor-spec-item">
+                    <span class="visitor-spec-lbl">Dispositivo & SO</span>
+                    <span class="visitor-spec-val">${escapeHtml((sess.device_type || 'PC').toUpperCase())} · ${escapeHtml(sess.os || 'Web')} (${escapeHtml(sess.browser || '')})</span>
+                </div>
+                <div class="visitor-spec-item">
+                    <span class="visitor-spec-lbl">Tiempo Activo</span>
+                    <span class="visitor-spec-val">${formatDuration(sess.duration_seconds)} (${sess.page_views_count || 1} pág.)</span>
+                </div>
+                <div class="visitor-spec-item">
+                    <span class="visitor-spec-lbl">Scroll Máximo</span>
+                    <span class="visitor-spec-val" style="color:var(--gold-primary);">${sess.max_scroll_pct || 0}% leído</span>
+                </div>
+                <div class="visitor-spec-item">
+                    <span class="visitor-spec-lbl">Zona Horaria / Pantalla</span>
+                    <span class="visitor-spec-val" title="${escapeHtml(sess.timezone || '')}">${escapeHtml((sess.timezone || 'Local').split('/').pop())} · ${escapeHtml(sess.screen_res || '-')}</span>
+                </div>
+            </div>
+        `;
+
+        if (matchedLead) {
+            document.getElementById('btnOpenMatchedLeadFromRadar')?.addEventListener('click', () => {
+                openLeadModal(matchedLead.id);
+            });
+        }
+
+        // Filtrar los eventos cronológicos de esta sesión
+        const sessionEvents = state.radar.eventos.filter(ev => ev.session_id === sess.session_id);
+
+        if (sessionEvents.length === 0) {
+            radarVisitorTimelineBody.innerHTML = `
+                <div class="vox-journey-timeline">
+                    <div class="journey-step">
+                        <span class="journey-step-dot"></span>
+                        <div class="journey-step-top">
+                            <span class="journey-step-type"><i data-lucide="eye" style="width:13px;height:13px;"></i> Entrada al Sitio</span>
+                            <span class="journey-step-time">${new Date(sess.started_at).toLocaleTimeString('es-MX')}</span>
+                        </div>
+                        <div class="journey-step-desc">Ingresó a <strong>${escapeHtml(sess.entry_url || '/')}</strong> desde ${escapeHtml(sess.referrer || 'Directo')}</div>
+                    </div>
+                </div>
+            `;
+            return;
+        }
+
+        let timelineHtml = `<div class="vox-journey-timeline">`;
+        sessionEvents.forEach(ev => {
+            const meta = getEventLabelAndIcon(ev);
+            const timeStr = ev.created_at ? new Date(ev.created_at).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '';
+            const coordsBadge = (typeof ev.click_x_pct === 'number' && typeof ev.click_y_pct === 'number')
+                ? `<span class="radar-meta-pill" title="Coordenada exacta del clic en la página"><i data-lucide="crosshair" style="width:11px;height:11px;"></i> X: ${ev.click_x_pct}% · Y: ${ev.click_y_pct}%</span>`
+                : '';
+
+            timelineHtml += `
+                <div class="journey-step step-${escapeHtml(ev.event_type)}">
+                    <span class="journey-step-dot"></span>
+                    <div class="journey-step-top">
+                        <span class="journey-step-type" style="color:${meta.color};">
+                            <i data-lucide="${meta.icon}" style="width:13px;height:13px;"></i>
+                            ${escapeHtml(meta.label)}
+                        </span>
+                        <span class="journey-step-time">${timeStr}</span>
+                    </div>
+                    <div class="journey-step-desc">${escapeHtml(ev.element_text || ev.page_title || ev.page_path || 'Interacción registrada')}</div>
+                    <div class="journey-step-sub">
+                        <span>📄 Página: <strong>${escapeHtml(ev.page_path || '/')}</strong></span>
+                        ${ev.section_id ? `<span>📌 Sección: <strong>#${escapeHtml(ev.section_id)}</strong></span>` : ''}
+                        ${coordsBadge}
+                    </div>
+                </div>
+            `;
+        });
+        timelineHtml += `</div>`;
+
+        radarVisitorTimelineBody.innerHTML = timelineHtml;
+    }
+
+    function renderRadarHeatmapAndRankings() {
+        const allowedSessionIds = new Set(state.radar.filteredSesiones.map(s => s.session_id));
+        const sessionDeviceMap = new Map(state.radar.filteredSesiones.map(s => [s.session_id, s.device_type || 'desktop']));
+
+        const siteEvents = state.radar.eventos.filter(ev => allowedSessionIds.has(ev.session_id));
+
+        // Poblar selector de páginas en el Heatmap
+        if (heatmapPageSelect) {
+            const currentPage = state.radar.heatmapPage || 'all';
+            const pages = Array.from(new Set(siteEvents.map(ev => ev.page_path || '/'))).filter(Boolean);
+            let pageOpts = `<option value="all">Todas las Páginas (${pages.length})</option>`;
+            pages.forEach(p => {
+                pageOpts += `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`;
+            });
+            heatmapPageSelect.innerHTML = pageOpts;
+            if (pages.includes(currentPage)) {
+                heatmapPageSelect.value = currentPage;
+            } else {
+                state.radar.heatmapPage = 'all';
+                heatmapPageSelect.value = 'all';
+            }
+        }
+
+        // Filtrar clics con coordenadas para el lienzo (X%, Y%)
+        const clickEvents = siteEvents.filter(ev => {
+            if (typeof ev.click_x_pct !== 'number' && isNaN(parseFloat(ev.click_x_pct))) return false;
+            if (state.radar.heatmapPage !== 'all' && (ev.page_path || '/') !== state.radar.heatmapPage) return false;
+            if (state.radar.heatmapDevice !== 'all') {
+                const dev = sessionDeviceMap.get(ev.session_id) || 'desktop';
+                if (dev !== state.radar.heatmapDevice) return false;
+            }
+            return true;
+        });
+
+        if (heatmapDotsContainer) {
+            heatmapDotsContainer.innerHTML = '';
+            clickEvents.forEach(ev => {
+                const x = Math.min(98, Math.max(2, parseFloat(ev.click_x_pct)));
+                const y = Math.min(98, Math.max(2, parseFloat(ev.click_y_pct)));
+                let pointClass = 'point-click';
+                if (ev.event_type === 'cta_whatsapp' || ev.event_type === 'cta_phone') pointClass = 'point-whatsapp';
+                else if (ev.event_type && ev.event_type.startsWith('form_')) pointClass = 'point-form';
+
+                const dot = document.createElement('div');
+                dot.className = `heatmap-click-point ${pointClass}`;
+                dot.style.left = `${x}%`;
+                dot.style.top = `${y}%`;
+                dot.title = `${ev.element_text || 'Clic'} | Pág: ${ev.page_path || '/'} (X: ${x}%, Y: ${y}%)`;
+                heatmapDotsContainer.appendChild(dot);
+            });
+        }
+
+        // Ranking 1: Páginas & Secciones más vistas
+        if (radarTopPagesBody) {
+            const pageCounts = {};
+            siteEvents.forEach(ev => {
+                if (ev.event_type === 'pageview' || ev.event_type === 'section_view') {
+                    const key = ev.event_type === 'section_view' && ev.section_id
+                        ? `${ev.page_path || '/'}#${ev.section_id}`
+                        : (ev.page_path || '/');
+                    pageCounts[key] = (pageCounts[key] || 0) + 1;
+                }
+            });
+
+            const sortedPages = Object.entries(pageCounts).sort((a, b) => b[1] - a[1]).slice(0, 8);
+            const totalViews = sortedPages.reduce((acc, item) => acc + item[1], 0) || 1;
+
+            if (sortedPages.length === 0) {
+                radarTopPagesBody.innerHTML = `<tr><td colspan="3" style="text-align:center;color:var(--text-tertiary);">Sin registros aún</td></tr>`;
+            } else {
+                radarTopPagesBody.innerHTML = sortedPages.map(([pathName, count]) => {
+                    const pct = Math.round((count / totalViews) * 100);
+                    return `
+                        <tr>
+                            <td><strong>${escapeHtml(pathName)}</strong></td>
+                            <td>${count}</td>
+                            <td><span class="badge badge-accent">${pct}%</span></td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+        }
+
+        // Ranking 2: Botones & Elementos más clicados
+        if (radarTopElementsBody) {
+            const elCounts = {};
+            siteEvents.forEach(ev => {
+                if (['click', 'cta_whatsapp', 'cta_phone', 'cta_email', 'form_submit'].includes(ev.event_type)) {
+                    const label = (ev.element_text || ev.page_path || 'Elemento').slice(0, 50);
+                    const key = `${label}|||${ev.event_type}`;
+                    elCounts[key] = (elCounts[key] || 0) + 1;
+                }
+            });
+
+            const sortedEls = Object.entries(elCounts).sort((a, b) => b[1] - a[1]).slice(0, 8);
+            if (sortedEls.length === 0) {
+                radarTopElementsBody.innerHTML = `<tr><td colspan="3" style="text-align:center;color:var(--text-tertiary);">Sin clics registrados aún</td></tr>`;
+            } else {
+                radarTopElementsBody.innerHTML = sortedEls.map(([composite, count]) => {
+                    const [label, type] = composite.split('|||');
+                    const badgeLabel = type === 'cta_whatsapp' ? 'WhatsApp' : (type === 'form_submit' ? 'Lead Form' : 'Clic');
+                    return `
+                        <tr>
+                            <td>${escapeHtml(label)}</td>
+                            <td><span class="badge">${badgeLabel}</span></td>
+                            <td><strong>${count}</strong></td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+        }
+    }
+
+    // Renderizar el recorrido web dentro del modal de detalle de Lead (CRM)
+    function renderLeadRadarJourney(lead) {
+        const box = document.getElementById('modalLeadRadarBox');
+        if (!box || !lead) return;
+
+        // Buscar sesión vinculada por session_id, notas o correo
+        const matchedSession = state.radar.sesiones.find(s =>
+            (lead.session_id && s.session_id === lead.session_id) ||
+            (lead.notas && lead.notas.includes(s.session_id)) ||
+            (lead.correo && s.lead_correo && s.lead_correo.toLowerCase() === lead.correo.toLowerCase()) ||
+            (lead.nombre && s.lead_nombre && s.lead_nombre.toLowerCase() === lead.nombre.toLowerCase())
+        );
+
+        if (!matchedSession) {
+            box.innerHTML = `<small class="muted">Este prospecto no tiene una sesión de navegación previa vinculada o fue registrado manualmente.</small>`;
+            return;
+        }
+
+        const evs = state.radar.eventos.filter(e => e.session_id === matchedSession.session_id);
+        let html = `
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; margin-bottom:4px;">
+                <span style="font-size:0.76rem; color:var(--text-secondary);">
+                    🌐 Origen: <strong style="color:var(--gold-primary);">${escapeHtml(matchedSession.referrer || 'Directo')}</strong>
+                    · ⏱️ ${formatDuration(matchedSession.duration_seconds)}
+                    · 📜 Scroll: ${matchedSession.max_scroll_pct || 0}%
+                </span>
+                <button type="button" class="btn btn-outline btn-sm" id="btnJumpToLeadRadarSession" style="padding:3px 9px; font-size:0.72rem;">
+                    <i data-lucide="activity" style="width:12px;height:12px;"></i>
+                    <span>Ver en Radar</span>
+                </button>
+            </div>
+        `;
+
+        evs.slice(0, 6).forEach(ev => {
+            const meta = getEventLabelAndIcon(ev);
+            const timeStr = ev.created_at ? new Date(ev.created_at).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' }) : '';
+            html += `
+                <div class="lead-radar-step-mini">
+                    <span><strong>${escapeHtml(meta.label)}:</strong> ${escapeHtml(ev.element_text || ev.page_path || '/')}</span>
+                    <small class="muted">${timeStr}</small>
+                </div>
+            `;
+        });
+
+        box.innerHTML = html;
+        document.getElementById('btnJumpToLeadRadarSession')?.addEventListener('click', () => {
+            closeLeadModal();
+            state.radar.siteFilter = 'all';
+            state.radar.visitorFilter = 'all';
+            state.radar.activeSessionId = matchedSession.session_id;
+            state.radar.activeTab = 'sessions';
+            applyRadarFilters();
+            switchView('radar');
+        });
+    }
+
+    // Eventos de controles del Radar
+    if (radarSiteSelect) {
+        radarSiteSelect.addEventListener('change', (e) => {
+            state.radar.siteFilter = e.target.value;
+            applyRadarFilters();
+        });
+    }
+
+    if (radarPeriodSelect) {
+        radarPeriodSelect.addEventListener('change', (e) => {
+            state.radar.periodFilter = e.target.value;
+            applyRadarFilters();
+        });
+    }
+
+    if (radarVisitorFilterSelect) {
+        radarVisitorFilterSelect.addEventListener('change', (e) => {
+            state.radar.visitorFilter = e.target.value;
+            applyRadarFilters();
+        });
+    }
+
+    [btnRadarTabSessions, btnRadarTabHeatmap].forEach(btn => {
+        if (!btn) return;
+        btn.addEventListener('click', () => {
+            [btnRadarTabSessions, btnRadarTabHeatmap].forEach(b => b?.classList.remove('active'));
+            btn.classList.add('active');
+            state.radar.activeTab = btn.getAttribute('data-radar-tab') || 'sessions';
+            renderRadar();
+        });
+    });
+
+    if (heatmapPageSelect) {
+        heatmapPageSelect.addEventListener('change', (e) => {
+            state.radar.heatmapPage = e.target.value;
+            renderRadarHeatmapAndRankings();
+        });
+    }
+
+    if (heatmapDeviceSelect) {
+        heatmapDeviceSelect.addEventListener('change', (e) => {
+            state.radar.heatmapDevice = e.target.value;
+            renderRadarHeatmapAndRankings();
+        });
+    }
+
+    // Botón para ver el <script> del sitio seleccionado en Radar
+    if (btnRadarViewScript) {
+        btnRadarViewScript.addEventListener('click', () => {
+            const selectedKey = (state.radar.siteFilter && state.radar.siteFilter !== 'all')
+                ? state.radar.siteFilter
+                : 'vox_site_official';
+
+            const displayLabel = getSiteDisplayName(selectedKey);
+            abrirModalSnippet({
+                site_key: selectedKey,
+                cliente_nombre: displayLabel,
+                dominio_url: selectedKey
+            });
+        });
+    }
+
+    // Modal: Agregar Sitio Externo de Solo Monitoreo
+    function closeNuevoSitioMonitoreoModal() {
+        if (nuevoSitioMonitoreoModal) nuevoSitioMonitoreoModal.style.display = 'none';
+    }
+
+    if (btnOpenNuevoSitioMonitoreoModal) {
+        btnOpenNuevoSitioMonitoreoModal.addEventListener('click', () => {
+            if (nuevoSitioMonitoreoForm) nuevoSitioMonitoreoForm.reset();
+            if (nuevoSitioMonitoreoModal) nuevoSitioMonitoreoModal.style.display = 'flex';
+            if (window.lucide) window.lucide.createIcons();
+        });
+    }
+
+    if (closeNuevoSitioMonitoreoBtn) closeNuevoSitioMonitoreoBtn.addEventListener('click', closeNuevoSitioMonitoreoModal);
+    if (cancelNuevoSitioMonitoreoBtn) cancelNuevoSitioMonitoreoBtn.addEventListener('click', closeNuevoSitioMonitoreoModal);
+
+    if (nuevoSitioMonitoreoForm) {
+        nuevoSitioMonitoreoForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const nombre_sitio = document.getElementById('monNombreSitio')?.value.trim() || 'Sitio Externo';
+            const dominio_url = document.getElementById('monDominioUrl')?.value.trim() || 'https://ejemplo.com';
+            const cliente_nombre = document.getElementById('monClienteNombre')?.value.trim() || 'Cliente Directo';
+            const notas = document.getElementById('monNotas')?.value.trim() || '';
+            const site_key = 'vox_mon_' + Math.random().toString(36).substring(2, 10) + Math.random().toString(36).substring(2, 8);
+
+            const nuevoSitio = {
+                id: 'mon_' + Date.now(),
+                created_at: new Date().toISOString(),
+                site_key,
+                nombre_sitio,
+                dominio_url,
+                cliente_nombre,
+                activo: true,
+                notas
+            };
+
+            const isConfigured = window.VOX_SUPABASE && window.VOX_SUPABASE.isConfigured();
+            if (isConfigured) {
+                try {
+                    const { data, error } = await window.VOX_SUPABASE.client
+                        .from('telemetria_sitios')
+                        .insert([{
+                            site_key,
+                            nombre_sitio,
+                            dominio_url,
+                            cliente_nombre,
+                            activo: true,
+                            notas
+                        }])
+                        .select();
+                    if (!error && data && data[0]) {
+                        nuevoSitio.id = data[0].id;
+                    }
+                } catch (err) {
+                    // Respaldo local transparente
+                }
+            }
+
+            state.radar.sitios.unshift(nuevoSitio);
+            localStorage.setItem(LOCAL_SITIOS_CACHE, JSON.stringify(state.radar.sitios));
+
+            state.radar.siteFilter = site_key;
+            populateRadarSiteSelector();
+            applyRadarFilters();
+            closeNuevoSitioMonitoreoModal();
+
+            showToast(`Sitio "${nombre_sitio}" agregado al Radar de Monitoreo.`, 'success', 'Sitio Registrado');
+            abrirModalSnippet({
+                site_key,
+                cliente_nombre: `${nombre_sitio} (${cliente_nombre})`,
+                dominio_url
+            });
+        });
+    }
+
+    // Sincronización automática cuando otra pestaña del mismo navegador navega por el sitio
+    window.addEventListener('storage', (e) => {
+        if (e.key === LOCAL_SESSIONS_CACHE || e.key === LOCAL_EVENTS_CACHE) {
+            fetchRadarData();
+        }
+    });
+
+    // Refresco automático ligero del indicador Online cada 15 segundos
+    setInterval(() => {
+        if (state.user && document.visibilityState === 'visible') {
+            fetchRadarData();
+        }
+    }, 15000);
 
     // Helpers
     function escapeHtml(str) {

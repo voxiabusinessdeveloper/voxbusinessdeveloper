@@ -40,6 +40,12 @@ const LeadService = {
      */
     async submitLead(leadData) {
         const captchaToken = leadData.token || leadData.botIdToken || this.getCaptchaToken();
+        const telemetrySessionId = (window.VOX_TELEMETRY && typeof window.VOX_TELEMETRY.getSessionId === 'function')
+            ? window.VOX_TELEMETRY.getSessionId()
+            : '';
+        const telemetryVisitorId = (window.VOX_TELEMETRY && typeof window.VOX_TELEMETRY.getVisitorId === 'function')
+            ? window.VOX_TELEMETRY.getVisitorId()
+            : '';
 
         const payload = {
             nombre: leadData.nombre?.trim() || '',
@@ -50,6 +56,8 @@ const LeadService = {
             tipo_financiamiento: leadData.tipo_financiamiento || 'recurso_propio',
             mensaje: leadData.mensaje?.trim() || '',
             origen_url: window.location.href,
+            session_id: telemetrySessionId,
+            visitor_id: telemetryVisitorId,
             token: captchaToken,
             _hp: document.getElementById('voxHoneypot')?.value || ''
         };
@@ -75,6 +83,18 @@ const LeadService = {
             }
 
             console.log('✅ Lead procesado exitosamente por /api/leads:', result);
+
+            // Vincular la sesión de telemetría con el Lead recién creado
+            if (window.VOX_TELEMETRY && typeof window.VOX_TELEMETRY.identifyLead === 'function') {
+                try {
+                    window.VOX_TELEMETRY.identifyLead({
+                        nombre: payload.nombre,
+                        correo: payload.correo,
+                        servicio: payload.servicio,
+                        leadId: result.leadId
+                    });
+                } catch (e) {}
+            }
 
             // Guardar en caché local para histórico de usuario
             this.saveLocalLead(payload, result.leadId);

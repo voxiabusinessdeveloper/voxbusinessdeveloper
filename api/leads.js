@@ -244,6 +244,8 @@ module.exports = async function handler(req, res) {
             tipo_financiamiento,
             mensaje,
             origen_url,
+            session_id,
+            visitor_id,
             token,
             botIdToken,
             _hp // honeypot
@@ -270,6 +272,8 @@ module.exports = async function handler(req, res) {
         const cleanFinanciamiento = sanitizeText(tipo_financiamiento, 50) || 'recurso_propio';
         const cleanMensaje = sanitizeText(mensaje, 2000);
         const cleanOrigenUrl = sanitizeText(origen_url, 255) || 'https://voxbusinessdeveloper.com';
+        const cleanSessionId = sanitizeText(session_id, 80);
+        const cleanVisitorId = sanitizeText(visitor_id, 80);
 
         if (!cleanNombre || cleanNombre.length < 2) {
             return res.status(400).json({
@@ -307,7 +311,7 @@ module.exports = async function handler(req, res) {
             origen_url: cleanOrigenUrl,
             created_at: new Date().toISOString(),
             estado: 'nuevo',
-            notas: `IP: ${clientIp} | Verificado (${botCheck.provider || 'seguro'})`
+            notas: `IP: ${clientIp} | Verificado (${botCheck.provider || 'seguro'})${cleanSessionId ? ` | RadarSession: ${cleanSessionId}` : ''}${cleanVisitorId ? ` | Visitor: ${cleanVisitorId}` : ''}`
         };
 
         // 3. Inserción Obligatoria en Supabase (Backend Server-Side)
